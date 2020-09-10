@@ -129,7 +129,7 @@ See: [Kubernetes controllers configuration](https://docs.projectcalico.org/refer
 
 *Do not upgrade Rook and Ceph at the same time!*
 
-Read [this document](https://github.com/rook/rook/blob/master/Documentation/ceph-upgrade.md) before.
+Read [this document](https://github.com/rook/rook/blob/master/Documentation/ceph-upgrade.md) before. Note that you should choose the appropriate release version.
 
 Get upstream helm chart:
 
@@ -139,7 +139,8 @@ $ git clone https://github.com/rook/rook
 $ cd rook
 $ git remote add fork git@github.com:cybozu-go/rook.git
 $ git fetch fork
-$ git checkout neco-release
+$ ROOK_VERSION=X.Y.Z
+$ git checkout v$ROOK_VERSION
 $ ls $GOPATH/src/github.com/cybozu-go/neco-apps/rook/base/upstream/chart
 $ rm -rf $GOPATH/src/github.com/cybozu-go/neco-apps/rook/base/upstream/chart
 $ cp -a cluster/charts/rook-ceph $GOPATH/src/github.com/cybozu-go/neco-apps/rook/base/upstream/chart
@@ -156,8 +157,8 @@ $ curl -sSLf https://get.helm.sh/helm-v$HELM_VERSION-linux-amd64.tar.gz | sudo t
 
 Update rook/base/values*.yaml if necessary.
 
-Regenerate base resource yaml  
-note: check number of yaml files.
+Regenerate base resource yaml.  
+Note: Check the number of yaml files.
 
 ```console
 $ cd $GOPATH/src/github.com/cybozu-go/neco-apps/rook/base
@@ -175,7 +176,7 @@ $ for t in hdd ssd; do
 Then check the diffs by `git diff`.
 
 TODO:  
-After https://github.com/rook/rook/pull/5240 is merged, we have to revise above mentioned process.
+After https://github.com/rook/rook/pull/5240 is merged, we have to revise the above-mentioned process.
 
 Update manifest for Ceph toolbox.
 Assume `cybozu-go/rook` is updated in the above procedure.
