@@ -137,8 +137,6 @@ Get upstream helm chart:
 $ cd $GOPATH/src/github.com/rook
 $ git clone https://github.com/rook/rook
 $ cd rook
-$ git remote add fork git@github.com:cybozu-go/rook.git
-$ git fetch fork
 $ ROOK_VERSION=X.Y.Z
 $ git checkout v$ROOK_VERSION
 $ ls $GOPATH/src/github.com/cybozu-go/neco-apps/rook/base/upstream/chart
@@ -179,11 +177,11 @@ TODO:
 After https://github.com/rook/rook/pull/5240 is merged, we have to revise the above-mentioned process.
 
 Update manifest for Ceph toolbox.
-Assume `cybozu-go/rook` is updated in the above procedure.
+Assume `rook/rook` is updated in the above procedure.
 
 ```console
 $ cd $GOPATH/src/github.com/cybozu-go/neco-apps/
-$ cp $GOPATH/src/github.com/cybozu-go/rook/cluster/examples/kubernetes/ceph/toolbox.yaml rook/base/upstream/
+$ cp $GOPATH/src/github.com/rook/rook/cluster/examples/kubernetes/ceph/toolbox.yaml rook/base/upstream/
 ```
 
 ## ceph
