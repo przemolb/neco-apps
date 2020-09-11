@@ -311,9 +311,6 @@ func applyAndWaitForApplications(commitID string) {
 	fmt.Printf("application list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
-	// TODO: this variable should be deleted after https://github.com/cybozu-go/neco-apps/pull/678 is deployed on prod
-	needRestart := true
-
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 	OUTER:
@@ -333,13 +330,6 @@ func applyAndWaitForApplications(commitID string) {
 			if app.Status.Sync.Status == argocd.SyncStatusCodeSynced &&
 				app.Status.Health.Status == argocd.HealthStatusHealthy &&
 				app.Operation == nil {
-
-				// TODO: this block should be deleted after https://github.com/cybozu-go/neco-apps/pull/678 is deployed on prod
-				if doUpgrade && appName == "argocd" && needRestart {
-					By("restarting argocd-application-controller")
-					ExecSafeAt(boot0, "kubectl", "delete", "pod", "-n", "argocd", "-l", "app.kubernetes.io/name=argocd-application-controller")
-					needRestart = false
-				}
 
 				continue
 			}
