@@ -189,7 +189,7 @@ func testSetup() {
 	if doUpgrade {
 		It("should delete CephCluster ceph-ssd if it isn't raw-mode", func() {
 			By("checking neco-apps.cybozu.com/raw-mode annotation")
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nceph-ssd", "get", "cephcluster", "ceph-ssd", "-lneco-apps.cybozu.com/raw-mode=true")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nceph-ssd", "get", "cephcluster", "-lneco-apps.cybozu.com/raw-mode=true")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 			if strings.Contains(string(stdout), "No resources found") {
 				By("deleting ceph-ssd cluster because it was created with lv mode")
