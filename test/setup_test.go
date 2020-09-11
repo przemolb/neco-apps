@@ -183,6 +183,23 @@ func testSetup() {
 		})
 	}
 
+	// This block is to delete lv mode Ceph cluster
+	// TODO: Once raw mode Ceph cluster is constructed, this block should be deleted
+	// Also the label neco-apps.cybozu.com/raw-mode in manifest should be deleted
+	if doUpgrade {
+		It("should delete CephCluster ceph-ssd if it isn't raw-mode", func() {
+			By("checking neco-apps.cybozu.com/raw-mode annotation")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nceph-ssd", "get", "cephcluster", "ceph-ssd", "-lneco-apps.cybozu.com/raw-mode=true")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			if strings.Contains(string(stdout), "No resources found") {
+				By("deleting ceph-ssd cluster because it was created with lv mode")
+				ExecSafeAt(boot0, "argocd", "app", "set", "rook", "--sync-policy=none")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "cephcluster", "ceph-ssd")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "pvc", "--all")
+			}
+		})
+	}
+
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 

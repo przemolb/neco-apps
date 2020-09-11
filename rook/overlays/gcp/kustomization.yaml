@@ -2,6 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base
+patches:
+  - ceph-ssd/cluster.yaml
 patchesJSON6902:
 - target:
     group: ceph.rook.io

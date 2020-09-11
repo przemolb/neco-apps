@@ -1,0 +1,7 @@
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: ceph-ssd
+  namespace: ceph-ssd
+  labels:
+    neco-apps.cybozu.com/raw-mode: true
