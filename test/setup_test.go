@@ -194,6 +194,9 @@ func testSetup() {
 			if strings.Contains(string(stderr), "No resources found") {
 				By("deleting ceph-ssd cluster because it was created with lv mode")
 				ExecSafeAt(boot0, "argocd", "app", "set", "rook", "--sync-policy=none")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "annotate", "cephblockpool", "ceph-ssd-block-pool", "i-am-sure-to-delete=ceph-ssd-block-pool")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "annotate", "cephcluster", "ceph-ssd", "i-am-sure-to-delete=ceph-ssd")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "cephblockpool", "ceph-ssd-block-pool")
 				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "cephcluster", "ceph-ssd")
 				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "pvc", "--all")
 			}
