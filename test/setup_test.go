@@ -335,6 +335,7 @@ func applyAndWaitForApplications(commitID string) {
 	checkAllAppsSynced := func() error {
 	OUTER:
 		for _, appName := range appList {
+			fmt.Printf("Checking app synced: app=%s\n", appName)
 			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", appName)
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
@@ -350,7 +351,6 @@ func applyAndWaitForApplications(commitID string) {
 			if app.Status.Sync.Status == argocd.SyncStatusCodeSynced &&
 				app.Status.Health.Status == argocd.HealthStatusHealthy &&
 				app.Operation == nil {
-
 				continue
 			}
 
@@ -375,9 +375,10 @@ func applyAndWaitForApplications(commitID string) {
 	// want to do "Eventually( Consistently(checkAllAppsSynced, 30sec, 1sec) )"
 	Eventually(func() error {
 		for i := 0; i < 30; i++ {
+			fmt.Printf("Checking all app synced: count=%d\n", i)
 			err := checkAllAppsSynced()
 			if err != nil {
-				fmt.Printf("cheking status %#v", err)
+				fmt.Printf("cheking status %#v\n", err)
 				return err
 			}
 			time.Sleep(1 * time.Second)
