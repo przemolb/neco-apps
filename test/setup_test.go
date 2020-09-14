@@ -374,6 +374,7 @@ func applyAndWaitForApplications(commitID string) {
 		for i := 0; i < 30; i++ {
 			err := checkAllAppsSynced()
 			if err != nil {
+				fmt.Printf("cheking status %#v", err)
 				return err
 			}
 			time.Sleep(1 * time.Second)
