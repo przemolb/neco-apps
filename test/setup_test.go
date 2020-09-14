@@ -378,7 +378,7 @@ func applyAndWaitForApplications(commitID string) {
 	}
 	// want to do "Eventually( Consistently(checkAllAppsSynced, 30sec, 1sec) )"
 	Eventually(func() error {
-		for i := 0; i < 30; i++ {
+		for i := 0; i < 15; i++ {
 			fmt.Printf("Checking all app synced: count=%d\n", i)
 			err := checkAllAppsSynced()
 			if err != nil {
@@ -388,7 +388,7 @@ func applyAndWaitForApplications(commitID string) {
 			time.Sleep(1 * time.Second)
 		}
 		return nil
-	}, 30*time.Minute).Should(Succeed())
+	}, 20*time.Minute).Should(Succeed())
 }
 
 func setupArgoCD() {
