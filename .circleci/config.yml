@@ -63,7 +63,7 @@ commands:
                 command: |
                   cd neco
                   ./bin/run-dctest.sh bootstrap release "" menu-ss.yml
-                no_output_timeout: 35m
+                no_output_timeout: 40m
       - unless:
           condition: <<parameters.neco-release-branch>>
           steps:
@@ -72,7 +72,7 @@ commands:
                 command: |
                   cd neco
                   ./bin/run-dctest.sh bootstrap "" "" menu-ss.yml
-                no_output_timeout: 35m
+                no_output_timeout: 40m
 
   delete-instance:
     description: remove GCP instance for this test
@@ -171,7 +171,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             ./bin/run-test.sh
-          no_output_timeout: 35m
+          no_output_timeout: 40m
       - store_test_results:
           path: ~/test-results
       - store_artifacts:
@@ -194,7 +194,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-reboot ./bin/run-test.sh
-          no_output_timeout: 35m
+          no_output_timeout: 40m
       - delete-instance
 
   ceph:
@@ -213,7 +213,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-ceph ./bin/run-test.sh
-          no_output_timeout: 35m
+          no_output_timeout: 40m
       - delete-instance
 
   upgrade-stage:
@@ -227,7 +227,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=stage ./bin/run-test.sh
-          no_output_timeout: 35m
+          no_output_timeout: 40m
       - store_test_results:
           path: ~/test-results
       - store_artifacts:
@@ -245,7 +245,7 @@ jobs:
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=release ./bin/run-test.sh
-          no_output_timeout: 35m
+          no_output_timeout: 40m
       - store_test_results:
           path: ~/test-results
       - store_artifacts:
