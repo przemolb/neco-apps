@@ -224,7 +224,7 @@ func testSetup() {
 	})
 
 	// This block is for workaround to avoid tls handshake error due to deletion ceph-ssd-block-pool
-	// Please delete this block after Rook 1.4 is applied
+	// TODO: Delete this block after Rook 1.4 is applied
 	It("should restart teleport-proxy Pod", func() {
 		ExecSafeAt(boot0, "kubectl", "-nteleport", "delete", "pod", "-lapp.kubernetes.io/component=proxy")
 	})

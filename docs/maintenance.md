@@ -188,7 +188,7 @@ $ cp $GOPATH/src/github.com/rook/rook/cluster/examples/kubernetes/ceph/toolbox.y
 
 *Do not upgrade Rook and Ceph at the same time!*
 
-Read [this document](https://github.com/rook/rook/blob/master/Documentation/ceph-upgrade.md) before.
+Read [this document](https://github.com/rook/rook/blob/master/Documentation/ceph-upgrade.md) first.
 
 Update `spec.cephVersion.image` field in CephCluster CR.
 
