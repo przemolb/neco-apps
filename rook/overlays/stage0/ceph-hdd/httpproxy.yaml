@@ -1,0 +1,19 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: radosgateway-forest
+  namespace: ceph-hdd
+  annotations:
+    kubernetes.io/ingress.class: forest
+spec:
+  virtualhost:
+    fqdn: radosgateway-forest.ceph-hdd.stage0.cybozu-ne.co
+  routes:
+    - conditions:
+        - prefix: /
+      timeoutPolicy:
+        response: 2m
+        idle: 5m
+      services:
+        - name: rook-ceph-rgw-ceph-hdd-object-store
+          port: 80
