@@ -77,13 +77,13 @@ func testApplicationResources(t *testing.T) {
 		"monitoring":           "7",
 		"sandbox":              "7",
 		"teleport":             "7",
-		"network-policy":       "8",
+		"network-policy":       "10",
 		"argocd-ingress":       "9",
 		"bmc-reverse-proxy":    "9",
 		"metrics-server":       "9",
 		"neco-admission":       "9",
 		"team-management":      "9",
-		"maneki-apps":          "10",
+		"maneki-apps":          "11",
 	}
 
 	// Getting overlays list
