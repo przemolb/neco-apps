@@ -28,6 +28,13 @@ func existTargetLocalPV(localPVs []corev1.PersistentVolume, nodename, path strin
 	return false
 }
 
+func getNodeIPFromPV(pv *corev1.PersistentVolume) (string, error) {
+	Expect(pv.Spec.NodeAffinity.Required.NodeSelectorTerms).To(HaveLen(1))
+	Expect(pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions).To(HaveLen(1))
+	Expect(pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Key).Should(Equal("kubernetes.io/hostname"))
+	return pv.Spec.NodeAffinity.Required.NodeSelectorTerms[0].MatchExpressions[0].Values[0], nil
+}
+
 func prepareLocalPVProvisioner() {
 	ns := "test-local-pv-provisioner"
 	It("should create test-local-pv-provisioner namespace", func() {
@@ -196,8 +203,8 @@ func testLocalPVProvisioner() {
 
 		By("deleting test resources")
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns)
-		ExecSafeAt(boot0, "kubectl", "delete", "pv", usedPVName)
 
+		var pv corev1.PersistentVolume
 		By("waiting used local PV will be recreated")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pv", usedPVName, "-o", "json")
@@ -205,7 +212,6 @@ func testLocalPVProvisioner() {
 				return fmt.Errorf("failed to get PVs. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 
-			var pv corev1.PersistentVolume
 			err = json.Unmarshal(stdout, &pv)
 			if err != nil {
 				return fmt.Errorf("failed to unmarshal JSON. err: %v", err)
@@ -217,5 +223,13 @@ func testLocalPVProvisioner() {
 
 			return nil
 		}).Should(Succeed())
+
+		By("confirming that the recreated volume was wiped out")
+		ssNodeIP, err := getNodeIPFromPV(&pv)
+		Expect(err).ShouldNot(HaveOccurred())
+		// read ext4 super block. ref: https://ext4.wiki.kernel.org/index.php/Ext4_Disk_Layout#Layout
+		stdout, stderr, err := ExecAt(boot0, "ckecli", "ssh", "cybozu@"+ssNodeIP, "sudo", "dd", "if="+pv.Spec.Local.Path, "bs=1024", "skip=1", "count=4")
+		Expect(err).NotTo(HaveOccurred(), "stderr=%s", stderr)
+		Expect(stdout).Should(Equal(make([]byte, 4096)))
 	})
 }
