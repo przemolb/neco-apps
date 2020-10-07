@@ -8,6 +8,7 @@ resources:
   - app-misc.yaml
   - app-monitoring.yaml
   - app-oauth-redirector.yaml
+  - app-octodns.yaml
   - elastic-serviceaccount.yaml
   - maneki.yaml
   - project.yaml
