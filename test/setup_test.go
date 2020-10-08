@@ -336,6 +336,11 @@ func applyAndWaitForApplications(commitID string) {
 			continue
 		}
 
+		// TODO: skip rook app until the app is stabilized
+		if !doCeph && app.Name == "rook" {
+			continue
+		}
+
 		appList = append(appList, app.Name)
 	}
 	fmt.Printf("application list: %v\n", appList)
