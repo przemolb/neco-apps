@@ -21,6 +21,8 @@ spec:
     server: '*'
   - namespace: app-oauth-redirector
     server: '*'
+  - namespace: app-octodns
+    server: '*'
   - namespace: maneki
     server: '*'
   - namespace: sandbox
