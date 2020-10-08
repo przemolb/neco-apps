@@ -369,6 +369,15 @@ func applyAndWaitForApplications(commitID string) {
 			if doUpgrade {
 				for _, cond := range app.Status.Conditions {
 					if cond.Type == argocd.ApplicationConditionSyncError {
+						// TODO: this block should be deleted after https://github.com/cybozu-go/neco-apps/pull/765 is deployed on prod
+						if appName == "teleport" {
+							stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", appName, "--force")
+							if err != nil {
+								return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+							}
+							continue
+						}
+
 						stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", appName)
 						if err != nil {
 							return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
