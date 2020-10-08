@@ -2,6 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../base
+patches:
+  - ceph-ssd/cluster.yaml
 patchesJSON6902:
 - target:
     group: ceph.rook.io
@@ -28,7 +30,7 @@ patchesJSON6902:
       value: 3Gi
     - op: replace
       path: /spec/storage/storageClassDeviceSets/0/count
-      value: 3
+      value: 5
     - op: replace
       path: /spec/storage/storageClassDeviceSets/0/volumeClaimTemplates/0/spec/resources/requests/storage
       value: 5Gi
