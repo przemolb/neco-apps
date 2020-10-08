@@ -142,7 +142,6 @@ spec:
                 storageClassDeviceSets: {}
             driveGroups:
               type: array
-              nullable: true
               items:
                 properties:
                   name:
@@ -171,6 +170,17 @@ spec:
                 confirmation:
                   type: string
                   pattern: ^$|^yes-really-destroy-data$
+                sanitizeDisks:
+                  properties:
+                    method:
+                      type: string
+                      pattern: ^(complete|quick)$
+                    dataSource:
+                      type: string
+                      pattern: ^(zero|random)$
+                    iteration:
+                      type: integer
+                      format: int32
   additionalPrinterColumns:
     - name: DataDirHostPath
       type: string
@@ -195,6 +205,8 @@ spec:
       type: string
       description: Ceph Health
       JSONPath: .status.ceph.health
+  subresources:
+    status: {}
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
@@ -229,6 +241,8 @@ spec:
               properties:
                 failureDomain:
                   type: string
+                crushRoot:
+                  type: string
                 replicated:
                   properties:
                     size:
@@ -262,6 +276,8 @@ spec:
               items:
                 properties:
                   failureDomain:
+                    type: string
+                  crushRoot:
                     type: string
                   replicated:
                     properties:
@@ -379,6 +395,8 @@ spec:
               properties:
                 failureDomain:
                   type: string
+                crushRoot:
+                  type: string
                 replicated:
                   properties:
                     size:
@@ -404,6 +422,8 @@ spec:
             dataPool:
               properties:
                 failureDomain:
+                  type: string
+                crushRoot:
                   type: string
                 replicated:
                   properties:
@@ -437,6 +457,7 @@ spec:
                       type: boolean
                     interval:
                       type: string
+  subresources:
   subresources:
     status: {}
 ---
@@ -530,6 +551,8 @@ spec:
           properties:
             failureDomain:
                 type: string
+            crushRoot:
+                type: string
             replicated:
               properties:
                 size:
@@ -558,6 +581,10 @@ spec:
               - passive
               - aggressive
               - force
+            enableRBDStats:
+              description: EnableRBDStats is used to enable gathering of statistics
+                for all RBD images in the pool
+              type: boolean
             parameters:
               type: object
   subresources:
