@@ -92,4 +92,5 @@ var _ = Describe("Test applications", func() {
 	Context("bmc-reverse-proxy", testBMCReverseProxy)
 	Context("local-pv-provisioner", testLocalPVProvisioner)
 	Context("teleport", testTeleport)
+	Context("team-management", testTeamManagement)
 })
