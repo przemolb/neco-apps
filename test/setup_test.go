@@ -183,30 +183,6 @@ func testSetup() {
 		})
 	}
 
-	// This block is to delete lv mode Ceph cluster
-	// TODO: Once raw mode Ceph cluster is constructed, this block should be deleted
-	// Also the label neco-apps.cybozu.com/raw-mode in manifest should be deleted
-	if doUpgrade {
-		It("should delete CephCluster ceph-ssd if it isn't raw-mode", func() {
-			By("checking neco-apps.cybozu.com/raw-mode annotation")
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nceph-ssd", "get", "cephcluster", "-lneco-apps.cybozu.com/raw-mode=true")
-			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-			if strings.Contains(string(stderr), "No resources found") {
-				By("deleting ceph-ssd cluster because it was created with lv mode")
-				ExecSafeAt(boot0, "argocd", "app", "set", "rook", "--sync-policy=none")
-				ExecSafeAt(boot0, "argocd", "app", "set", "teleport", "--sync-policy=none")
-				ExecSafeAt(boot0, "kubectl", "-nteleport", "delete", "sts", "teleport-auth")
-				ExecSafeAt(boot0, "kubectl", "-nteleport", "delete", "pvc", "teleport-storage-teleport-auth-0")
-				ExecSafeAt(boot0, "kubectl", "delete", "storageclasses", "ceph-ssd-block")
-				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "annotate", "cephblockpool", "ceph-ssd-block-pool", "i-am-sure-to-delete=ceph-ssd-block-pool")
-				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "annotate", "cephcluster", "ceph-ssd", "i-am-sure-to-delete=ceph-ssd")
-				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "cephblockpool", "ceph-ssd-block-pool")
-				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "cephcluster", "ceph-ssd")
-				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "pvc", "--all")
-			}
-		})
-	}
-
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 
@@ -221,12 +197,6 @@ func testSetup() {
 		}
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications(commitID)
-	})
-
-	// This block is for workaround to avoid tls handshake error due to deletion ceph-ssd-block-pool
-	// TODO: Delete this block after Rook 1.4 is applied
-	It("should restart teleport-proxy Pod", func() {
-		ExecSafeAt(boot0, "kubectl", "-nteleport", "delete", "pod", "-lapp.kubernetes.io/component=proxy")
 	})
 
 	It("should set DNS", func() {
