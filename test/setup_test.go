@@ -183,6 +183,30 @@ func testSetup() {
 		})
 	}
 
+	// This block is to delete lv mode Ceph cluster
+	// TODO: Once raw mode Ceph cluster is constructed, this block should be deleted
+	// Also the label neco-apps.cybozu.com/raw-mode in manifest should be deleted
+	if doUpgrade {
+		It("should delete CephCluster ceph-ssd if it isn't raw-mode", func() {
+			By("checking neco-apps.cybozu.com/raw-mode annotation")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nceph-ssd", "get", "cephcluster", "-lneco-apps.cybozu.com/raw-mode=true")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			if strings.Contains(string(stderr), "No resources found") {
+				By("deleting ceph-ssd cluster because it was created with lv mode")
+				ExecSafeAt(boot0, "argocd", "app", "set", "rook", "--sync-policy=none")
+				ExecSafeAt(boot0, "argocd", "app", "set", "teleport", "--sync-policy=none")
+				ExecSafeAt(boot0, "kubectl", "-nteleport", "delete", "sts", "teleport-auth")
+				ExecSafeAt(boot0, "kubectl", "-nteleport", "delete", "pvc", "teleport-storage-teleport-auth-0")
+				ExecSafeAt(boot0, "kubectl", "delete", "storageclasses", "ceph-ssd-block")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "annotate", "cephblockpool", "ceph-ssd-block-pool", "i-am-sure-to-delete=ceph-ssd-block-pool")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "annotate", "cephcluster", "ceph-ssd", "i-am-sure-to-delete=ceph-ssd")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "cephblockpool", "ceph-ssd-block-pool")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "cephcluster", "ceph-ssd")
+				ExecSafeAt(boot0, "kubectl", "-nceph-ssd", "delete", "pvc", "--all")
+			}
+		})
+	}
+
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 
@@ -197,6 +221,12 @@ func testSetup() {
 		}
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		applyAndWaitForApplications(commitID)
+	})
+
+	// This block is for workaround to avoid tls handshake error due to deletion ceph-ssd-block-pool
+	// TODO: Delete this block after Rook 1.4 is applied
+	It("should restart teleport-proxy Pod", func() {
+		ExecSafeAt(boot0, "kubectl", "-nteleport", "delete", "pod", "-lapp.kubernetes.io/component=proxy")
 	})
 
 	It("should set DNS", func() {
@@ -311,9 +341,6 @@ func applyAndWaitForApplications(commitID string) {
 	fmt.Printf("application list: %v\n", appList)
 	Expect(appList).ShouldNot(HaveLen(0))
 
-	// TODO: this variable should be deleted after https://github.com/cybozu-go/neco-apps/pull/678 is deployed on prod
-	needRestart := true
-
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 	OUTER:
@@ -333,14 +360,6 @@ func applyAndWaitForApplications(commitID string) {
 			if app.Status.Sync.Status == argocd.SyncStatusCodeSynced &&
 				app.Status.Health.Status == argocd.HealthStatusHealthy &&
 				app.Operation == nil {
-
-				// TODO: this block should be deleted after https://github.com/cybozu-go/neco-apps/pull/678 is deployed on prod
-				if doUpgrade && appName == "argocd" && needRestart {
-					By("restarting argocd-application-controller")
-					ExecSafeAt(boot0, "kubectl", "delete", "pod", "-n", "argocd", "-l", "app.kubernetes.io/name=argocd-application-controller")
-					needRestart = false
-				}
-
 				continue
 			}
 
@@ -364,7 +383,10 @@ func applyAndWaitForApplications(commitID string) {
 	}
 	// want to do "Eventually( Consistently(checkAllAppsSynced, 30sec, 1sec) )"
 	Eventually(func() error {
-		for i := 0; i < 30; i++ {
+		for i := 0; i < 15; i++ {
+			if i%5 == 1 {
+				fmt.Printf("Checking all app synced: count=%d\n", i)
+			}
 			err := checkAllAppsSynced()
 			if err != nil {
 				return err
