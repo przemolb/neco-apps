@@ -133,7 +133,7 @@ spec:
         - --interval=10s
         command:
         - /pvc-autoresizer
-        image: quay.io/topolvm/pvc-autoresizer:0.1.1
+        image: quay.io/topolvm/pvc-autoresizer:0.1.2
         livenessProbe:
           httpGet:
             path: /healthz
@@ -154,4 +154,5 @@ spec:
           requests:
             cpu: 100m
             memory: 20Mi
+      serviceAccountName: pvc-autoresizer-controller
       terminationGracePeriodSeconds: 10
