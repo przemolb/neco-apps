@@ -65,6 +65,7 @@ func testApplicationResources(t *testing.T) {
 		"namespaces":           "1",
 		"argocd":               "2",
 		"local-pv-provisioner": "3",
+		"pvc-autoresizer":      "3",
 		"secrets":              "3",
 		"cert-manager":         "4",
 		"external-dns":         "4",
