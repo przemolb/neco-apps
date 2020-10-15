@@ -64,6 +64,7 @@ func testApplicationResources(t *testing.T) {
 	syncWaves := map[string]string{
 		"namespaces":           "1",
 		"argocd":               "2",
+		"coil":                 "3",
 		"local-pv-provisioner": "3",
 		"pvc-autoresizer":      "3",
 		"secrets":              "3",
