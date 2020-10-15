@@ -73,7 +73,6 @@ func testApplicationResources(t *testing.T) {
 		"topolvm":              "5",
 		"unbound":              "5",
 		"elastic":              "6",
-		"rook":                 "6",
 		"monitoring":           "7",
 		"sandbox":              "7",
 		"teleport":             "7",
@@ -83,7 +82,8 @@ func testApplicationResources(t *testing.T) {
 		"neco-admission":       "9",
 		"team-management":      "9",
 		"network-policy":       "10",
-		"maneki-apps":          "11",
+		"rook":                 "11",
+		"maneki-apps":          "12",
 	}
 
 	// Getting overlays list
