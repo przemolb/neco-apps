@@ -214,6 +214,8 @@ $ cd $GOPATH/src/github.com/cybozu-go/neco-apps/
 $ cp $GOPATH/src/github.com/rook/rook/cluster/examples/kubernetes/ceph/toolbox.yaml rook/base/upstream/
 ```
 
+Update rook/**/kustomization.yaml if necessary.
+
 ### ceph
 
 *Do not upgrade Rook and Ceph at the same time!*
