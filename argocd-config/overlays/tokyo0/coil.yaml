@@ -1,8 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: maneki-apps
+  name: coil
   namespace: argocd
 spec:
   source:
-    path: argocd-config/overlays/gcp
+    path: coil/overlays/tokyo0

@@ -55,6 +55,7 @@ func kustomizeBuild(dir string) ([]byte, []byte, error) {
 func testApplicationResources(t *testing.T) {
 	targetRevisions := map[string]string{
 		"gcp":      "release",
+		"gcp-rook": "release",
 		"neco-dev": "release",
 		"osaka0":   "release",
 		"stage0":   "stage",
@@ -64,6 +65,7 @@ func testApplicationResources(t *testing.T) {
 	syncWaves := map[string]string{
 		"namespaces":           "1",
 		"argocd":               "2",
+		"coil":                 "3",
 		"local-pv-provisioner": "3",
 		"pvc-autoresizer":      "3",
 		"secrets":              "3",
