@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math"
 	"regexp"
 	"strings"
@@ -205,7 +206,7 @@ func testDeploymentsVersion() {
 			imageString := deploy.Spec.Template.Spec.Containers[0].Image
 			re := regexp.MustCompile(`:(.+)\.[\d]+$`)
 			group := re.FindSubmatch([]byte(imageString))
-			rookVersion := string(group[1])
+			expectRookVersion := string(group[1])
 
 			Eventually(func() error {
 				// Show pod status and ceph cluster health status.
@@ -223,7 +224,7 @@ func testDeploymentsVersion() {
 
 				for _, pod := range pods.Items {
 					if pod.Status.Phase != corev1.PodRunning {
-						fmt.Fprintf(GinkgoWriter, "pod status is not Runnning: %s %s %s", pod.Namespace, pod.Name, time.Now())
+						log.Printf("pod status is not Runnning: ns=%s name=%s time=%s", pod.Namespace, pod.Name, time.Now())
 					}
 				}
 
@@ -234,7 +235,7 @@ func testDeploymentsVersion() {
 				}
 				health := strings.TrimSpace(string(stdout))
 				if health != "HEALTH_OK" {
-					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: %s %s", ns, time.Now())
+					log.Printf("cluster status is not HEALTH_OK: %s %s", ns, time.Now())
 				}
 
 				// Confirm deployment version and pod available counts.
@@ -251,8 +252,9 @@ func testDeploymentsVersion() {
 				}
 
 				for _, deployment := range deployments.Items {
-					if !strings.HasPrefix(deployment.Labels["rook-version"], rookVersion) {
-						return fmt.Errorf("missing rook version: %s", deployment.Labels["rook-version"])
+					rookVersion, ok := deployment.Labels["rook-version"]
+					if ok && !strings.HasPrefix(rookVersion, expectRookVersion) {
+						return fmt.Errorf("missing deployment rook version: version=%s name=%s ns=%s", rookVersion, deployment.Name, deployment.Namespace)
 					}
 
 					if deployment.Spec.Replicas == nil || deploy.Status.AvailableReplicas != *deployment.Spec.Replicas {
@@ -261,7 +263,7 @@ func testDeploymentsVersion() {
 				}
 
 				return nil
-			}, time.Second).Should(Succeed())
+			}).Should(Succeed())
 		})
 	}
 }
