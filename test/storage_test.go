@@ -3,7 +3,6 @@ package test
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"math"
 	"regexp"
 	"strings"
@@ -224,7 +223,7 @@ func testDeploymentsVersion() {
 
 				for _, pod := range pods.Items {
 					if pod.Status.Phase != corev1.PodRunning {
-						log.Printf("pod status is not Runnning: ns=%s name=%s time=%s", pod.Namespace, pod.Name, time.Now())
+						fmt.Fprintf(GinkgoWriter, "pod status is not Runnning: ns=%s name=%s time=%s", pod.Namespace, pod.Name, time.Now())
 					}
 				}
 
@@ -235,7 +234,7 @@ func testDeploymentsVersion() {
 				}
 				health := strings.TrimSpace(string(stdout))
 				if health != "HEALTH_OK" {
-					log.Printf("cluster status is not HEALTH_OK: %s %s", ns, time.Now())
+					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: %s %s", ns, time.Now())
 				}
 
 				// Confirm deployment version and pod available counts.
