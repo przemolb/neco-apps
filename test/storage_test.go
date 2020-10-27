@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"regexp"
 	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -184,6 +186,82 @@ func testRookOperator() {
 				}
 				return nil
 			}).Should(Succeed())
+		})
+	}
+}
+
+func testDeploymentsVersion() {
+	nss := []string{"ceph-hdd", "ceph-ssd"}
+	for _, ns := range nss {
+		It("should rook's Deployments version of "+ns+" is equal to operators version", func() {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
+				"get", "deployment/rook-ceph-operator", "-o=json")
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+
+			deploy := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deploy)
+			Expect(err).ShouldNot(HaveOccurred(), "json=%s", stdout)
+
+			imageString := deploy.Spec.Template.Spec.Containers[0].Image
+			re := regexp.MustCompile(`:(.+)\.[\d]+$`)
+			group := re.FindSubmatch([]byte(imageString))
+			rookVersion := string(group[1])
+
+			Eventually(func() error {
+				// Show pod status and ceph cluster health status.
+				stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "pod", "-o=json")
+				if err != nil {
+					return err
+				}
+
+				pods := new(corev1.PodList)
+				err = json.Unmarshal(stdout, pods)
+				if err != nil {
+					return err
+				}
+
+				for _, pod := range pods.Items {
+					if pod.Status.Phase != corev1.PodRunning {
+						fmt.Fprintf(GinkgoWriter, "pod status is not Runnning: %s %s %s", pod.Namespace, pod.Name, time.Now())
+					}
+				}
+
+				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "cephcluster", ns, "-o", "jsonpath='{.status.ceph.health}'")
+				if err != nil {
+					return err
+				}
+				health := strings.TrimSpace(string(stdout))
+				if health != "HEALTH_OK" {
+					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: %s %s", ns, time.Now())
+				}
+
+				// Confirm deployment version and pod available counts.
+				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "deployment", "-o=json")
+				if err != nil {
+					return err
+				}
+
+				deployments := new(appsv1.DeploymentList)
+				err = json.Unmarshal(stdout, deployments)
+				if err != nil {
+					return err
+				}
+
+				for _, deployment := range deployments.Items {
+					if !strings.HasPrefix(deployment.Labels["rook-version"], rookVersion) {
+						return fmt.Errorf("missing rook version: %s", deployment.Labels["rook-version"])
+					}
+
+					if deployment.Spec.Replicas == nil || deploy.Status.AvailableReplicas != *deployment.Spec.Replicas {
+						return fmt.Errorf("rook's deployment's AvailableReplicas is not expected: %s %d/%d", deployment.Name, int(deploy.Status.ReadyReplicas), int(*deployment.Spec.Replicas))
+					}
+				}
+
+				return nil
+			}, time.Second).Should(Succeed())
 		})
 	}
 }

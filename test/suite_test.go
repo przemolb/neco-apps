@@ -51,8 +51,9 @@ var _ = Describe("Test applications", func() {
 	}
 
 	if doCeph {
-		Context("OSDPodsSpread", testOSDPodsSpreadAll)
 		Context("rookOperator", testRookOperator)
+		Context("deploymentsVersion", testDeploymentsVersion)
+		Context("OSDPodsSpread", testOSDPodsSpreadAll)
 		Context("MONPodsSpread", testMONPodsSpreadAll)
 		Context("rookRGW", testRookRGW)
 		Context("rookRBD", testRookRBDAll)
