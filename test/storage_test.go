@@ -222,8 +222,8 @@ func testDeploymentsVersion() {
 				}
 
 				for _, pod := range pods.Items {
-					if pod.Status.Phase != corev1.PodRunning {
-						fmt.Fprintf(GinkgoWriter, "pod status is not Runnning: ns=%s name=%s time=%s", pod.Namespace, pod.Name, time.Now())
+					if pod.Status.Phase != corev1.PodRunning && pod.Status.Phase != corev1.PodSucceeded {
+						fmt.Fprintf(GinkgoWriter, "pod status is not Runnning: ns=%s name=%s time=%s\n", pod.Namespace, pod.Name, time.Now())
 					}
 				}
 
@@ -234,7 +234,7 @@ func testDeploymentsVersion() {
 				}
 				health := strings.TrimSpace(string(stdout))
 				if health != "HEALTH_OK" {
-					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: %s %s", ns, time.Now())
+					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: ns=%s time=%s\n", ns, time.Now())
 				}
 
 				// Confirm deployment version and pod available counts.
@@ -256,8 +256,11 @@ func testDeploymentsVersion() {
 						return fmt.Errorf("missing deployment rook version: version=%s name=%s ns=%s", rookVersion, deployment.Name, deployment.Namespace)
 					}
 
-					if deployment.Spec.Replicas == nil || deploy.Status.AvailableReplicas != *deployment.Spec.Replicas {
-						return fmt.Errorf("rook's deployment's AvailableReplicas is not expected: %s %d/%d", deployment.Name, int(deploy.Status.ReadyReplicas), int(*deployment.Spec.Replicas))
+					if deployment.Spec.Replicas == nil || deployment.Status.AvailableReplicas != *deployment.Spec.Replicas {
+						message := fmt.Sprintf("rook's deployment's AvailableReplicas is not expected: name=%s nm=%s %d/%d",
+							deployment.Name, deployment.Namespace, int(deployment.Status.ReadyReplicas), deployment.Spec.Replicas)
+						fmt.Fprintln(GinkgoWriter, message)
+						return fmt.Errorf(message)
 					}
 				}
 
