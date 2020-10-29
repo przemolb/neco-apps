@@ -9,11 +9,34 @@ spec:
   virtualhost:
     fqdn: radosgateway-forest.ceph-hdd.stage0.cybozu-ne.co
   routes:
-    - conditions:
-        - prefix: /
-      timeoutPolicy:
-        response: 2m
-        idle: 5m
-      services:
-        - name: rook-ceph-rgw-ceph-hdd-object-store
-          port: 80
+  - conditions:
+    - prefix: /
+    services:
+    - name: rook-ceph-rgw-ceph-hdd-object-store
+      port: 80
+    timeoutPolicy:
+      idle: 5m
+      response: 2m
+---
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: radosgateway-bastion
+  namespace: ceph-hdd
+  annotations:
+    kubernetes.io/ingress.class: bastion
+    kubernetes.io/tls-acme: "true"
+spec:
+  virtualhost:
+    fqdn: radosgateway-bastion.ceph-hdd.stage0.cybozu-ne.co
+    tls:
+      secretName: radosgateway-bastion-certs
+  routes:
+  - conditions:
+    - prefix: /
+    services:
+    - name: rook-ceph-rgw-ceph-hdd-object-store
+      port: 80
+    timeoutPolicy:
+      idle: 5m
+      response: 2m
