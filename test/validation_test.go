@@ -365,6 +365,10 @@ func testGeneratedSecretName(t *testing.T) {
 				t.Error("secret:", es.Name, "was not found in any manifests")
 			}
 
+			if es.Name == "mackerel-agent" {
+				continue
+			}
+
 			for _, cs := range dummySecrets {
 				if cs.Name == es.Name && cs.Namespace == es.Namespace {
 					continue OUTER
