@@ -21,10 +21,12 @@ commands:
       - when:
           condition: <<parameters.neco-release-branch>>
           steps:
-          - run:
-              name: Checkout Neco (release)
-              command: |
-                git clone --depth 1 https://github.com/cybozu-go/neco -b release
+            - run:
+                name: Checkout Neco (release)
+                command: |
+                  git clone --depth 1 https://github.com/cybozu-go/neco -b release
+                  REV=$(cd neco; git rev-parse HEAD)
+                  echo "revision: $REV"
       - unless:
           condition: <<parameters.neco-release-branch>>
           steps:
@@ -36,6 +38,8 @@ commands:
                   # If there is not NECO_BRANCH branch in the cybozu-go/neco repository, git clone will fail.
                   echo "checkout $NECO_BRANCH"
                   git clone --depth 1 https://github.com/cybozu-go/neco -b $NECO_BRANCH
+                  REV=$(cd neco; git rev-parse HEAD)
+                  echo "revision: $REV"
       - run:
           name: Store Service Account
           command: |

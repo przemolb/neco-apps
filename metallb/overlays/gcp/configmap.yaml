@@ -22,5 +22,5 @@ data:
     - name: internet
       protocol: bgp
       addresses:
-      - 172.17.0.16/28
+      - 172.19.0.16/28
       auto-assign: false
