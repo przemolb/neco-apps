@@ -205,7 +205,7 @@ func testDeploymentsVersion() {
 			imageString := deploy.Spec.Template.Spec.Containers[0].Image
 			re := regexp.MustCompile(`:(.+)\.[\d]+$`)
 			group := re.FindSubmatch([]byte(imageString))
-			expectRookVersion := string(group[1])
+			expectRookVersion := "v" + string(group[1])
 
 			Eventually(func() error {
 				// Show pod status and ceph cluster health status.
