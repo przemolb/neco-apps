@@ -190,10 +190,10 @@ func testRookOperator() {
 	}
 }
 
-func testDeploymentsVersion() {
+func testClusterStable() {
 	nss := []string{"ceph-hdd", "ceph-ssd"}
 	for _, ns := range nss {
-		It("should rook's Deployments version of "+ns+" is equal to operators version", func() {
+		It("should be rook/ceph cluster("+ns+") stable", func() {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
 				"get", "deployment/rook-ceph-operator", "-o=json")
 			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
@@ -207,26 +207,9 @@ func testDeploymentsVersion() {
 			group := re.FindSubmatch([]byte(imageString))
 			expectRookVersion := "v" + string(group[1])
 
+			By("checking deployments versions are equal to the requiring")
 			Eventually(func() error {
-				// Show pod status and ceph cluster health status.
-				stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
-					"get", "pod", "-o=json")
-				if err != nil {
-					return err
-				}
-
-				pods := new(corev1.PodList)
-				err = json.Unmarshal(stdout, pods)
-				if err != nil {
-					return err
-				}
-
-				for _, pod := range pods.Items {
-					if pod.Status.Phase != corev1.PodRunning && pod.Status.Phase != corev1.PodSucceeded {
-						fmt.Fprintf(GinkgoWriter, "pod status is not Runnning: ns=%s name=%s time=%s\n", pod.Namespace, pod.Name, time.Now())
-					}
-				}
-
+				// Show cluster health status.
 				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
 					"get", "cephcluster", ns, "-o", "jsonpath='{.status.ceph.health}'")
 				if err != nil {
@@ -261,6 +244,41 @@ func testDeploymentsVersion() {
 							deployment.Name, deployment.Namespace, int(deployment.Status.ReadyReplicas), deployment.Spec.Replicas)
 						fmt.Fprintln(GinkgoWriter, message)
 						return fmt.Errorf(message)
+					}
+				}
+
+				return nil
+			}).Should(Succeed())
+
+			By("checking pods statuses are equal to running or job statuses are equal to succeeded")
+			Eventually(func() error {
+				// Show cluster health status.
+				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "cephcluster", ns, "-o", "jsonpath='{.status.ceph.health}'")
+				if err != nil {
+					return err
+				}
+				health := strings.TrimSpace(string(stdout))
+				if health != "HEALTH_OK" {
+					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: ns=%s time=%s\n", ns, time.Now())
+				}
+
+				// Show pod status.
+				stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "pod", "-o=json")
+				if err != nil {
+					return err
+				}
+
+				pods := new(corev1.PodList)
+				err = json.Unmarshal(stdout, pods)
+				if err != nil {
+					return err
+				}
+
+				for _, pod := range pods.Items {
+					if pod.Status.Phase != corev1.PodRunning && pod.Status.Phase != corev1.PodSucceeded {
+						return fmt.Errorf("pod status is not running: ns=%s name=%s time=%s", pod.Namespace, pod.Name, time.Now())
 					}
 				}
 

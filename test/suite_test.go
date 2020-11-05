@@ -52,7 +52,7 @@ var _ = Describe("Test applications", func() {
 
 	if doCeph {
 		Context("rookOperator", testRookOperator)
-		Context("deploymentsVersion", testDeploymentsVersion)
+		Context("clusterStable", testClusterStable)
 		Context("OSDPodsSpread", testOSDPodsSpreadAll)
 		Context("MONPodsSpread", testMONPodsSpreadAll)
 		Context("rookRGW", testRookRGW)
