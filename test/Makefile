@@ -1,3 +1,4 @@
+CEPH ?= 0
 OVERLAY ?= gcp
 BOOT0 = 10.72.48.0
 BOOT1 = 10.72.48.1
@@ -58,13 +59,10 @@ code-check: test-tools
 test: code-check install.yaml test-alert-rules kustomize-check validation
 
 dctest: install.yaml
-	OVERLAY=$(OVERLAY) ./test.sh
-
-dctest-ceph: install.yaml
-	OVERLAY=$(OVERLAY) CEPH=1 ./test.sh
+	CEPH=$(CEPH) OVERLAY=$(OVERLAY) ./test.sh
 
 dctest-reboot: install.yaml
-	OVERLAY=$(OVERLAY) REBOOT=1 ./test.sh
+	CEPH=$(CEPH) OVERLAY=$(OVERLAY) REBOOT=1 ./test.sh
 
 dctest-upgrade:
 	-git worktree remove /tmp/neco-apps
@@ -77,7 +75,7 @@ dctest-upgrade:
 			$(MAKE) dctest BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH); \
 		fi
 	cp /tmp/neco-apps/test/argocd-password.txt ./
-	OVERLAY=$(OVERLAY) UPGRADE=1 ./test.sh
+	CEPH=$(CEPH) OVERLAY=$(OVERLAY) UPGRADE=1 ./test.sh
 
 setup-download:
 	if [ -z "$$(which wget)" ]; then \

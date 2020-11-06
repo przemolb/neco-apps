@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"regexp"
 	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -182,6 +184,104 @@ func testRookOperator() {
 				if err != nil {
 					return err
 				}
+				return nil
+			}).Should(Succeed())
+		})
+	}
+}
+
+func testClusterStable() {
+	nss := []string{"ceph-hdd", "ceph-ssd"}
+	for _, ns := range nss {
+		It("should be rook/ceph cluster("+ns+") stable", func() {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
+				"get", "deployment/rook-ceph-operator", "-o=json")
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+
+			deploy := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deploy)
+			Expect(err).ShouldNot(HaveOccurred(), "json=%s", stdout)
+
+			imageString := deploy.Spec.Template.Spec.Containers[0].Image
+			re := regexp.MustCompile(`:(.+)\.[\d]+$`)
+			group := re.FindSubmatch([]byte(imageString))
+			expectRookVersion := "v" + string(group[1])
+
+			By("checking deployments versions are equal to the requiring")
+			Eventually(func() error {
+				// Show cluster health status.
+				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "cephcluster", ns, "-o", "jsonpath='{.status.ceph.health}'")
+				if err != nil {
+					return err
+				}
+				health := strings.TrimSpace(string(stdout))
+				if health != "HEALTH_OK" {
+					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: ns=%s time=%s\n", ns, time.Now())
+				}
+
+				// Confirm deployment version and pod available counts.
+				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "deployment", "-o=json")
+				if err != nil {
+					return err
+				}
+
+				deployments := new(appsv1.DeploymentList)
+				err = json.Unmarshal(stdout, deployments)
+				if err != nil {
+					return err
+				}
+
+				for _, deployment := range deployments.Items {
+					rookVersion, ok := deployment.Labels["rook-version"]
+					if ok && !strings.HasPrefix(rookVersion, expectRookVersion) {
+						return fmt.Errorf("missing deployment rook version: version=%s name=%s ns=%s", rookVersion, deployment.Name, deployment.Namespace)
+					}
+
+					if deployment.Spec.Replicas == nil || deployment.Status.AvailableReplicas != *deployment.Spec.Replicas {
+						message := fmt.Sprintf("rook's deployment's AvailableReplicas is not expected: name=%s nm=%s %d/%d",
+							deployment.Name, deployment.Namespace, int(deployment.Status.ReadyReplicas), deployment.Spec.Replicas)
+						fmt.Fprintln(GinkgoWriter, message)
+						return fmt.Errorf(message)
+					}
+				}
+
+				return nil
+			}).Should(Succeed())
+
+			By("checking pods statuses are equal to running or job statuses are equal to succeeded")
+			Eventually(func() error {
+				// Show cluster health status.
+				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "cephcluster", ns, "-o", "jsonpath='{.status.ceph.health}'")
+				if err != nil {
+					return err
+				}
+				health := strings.TrimSpace(string(stdout))
+				if health != "HEALTH_OK" {
+					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: ns=%s time=%s\n", ns, time.Now())
+				}
+
+				// Show pod status.
+				stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "pod", "-o=json")
+				if err != nil {
+					return err
+				}
+
+				pods := new(corev1.PodList)
+				err = json.Unmarshal(stdout, pods)
+				if err != nil {
+					return err
+				}
+
+				for _, pod := range pods.Items {
+					if pod.Status.Phase != corev1.PodRunning && pod.Status.Phase != corev1.PodSucceeded {
+						return fmt.Errorf("pod status is not running: ns=%s name=%s time=%s", pod.Namespace, pod.Name, time.Now())
+					}
+				}
+
 				return nil
 			}).Should(Succeed())
 		})
