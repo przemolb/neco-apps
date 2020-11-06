@@ -38,25 +38,26 @@ var _ = BeforeSuite(func() {
 // This must be the only top-level test container.
 // Other tests and test containers must be listed in this.
 var _ = Describe("Test applications", func() {
-	if doCeph {
-		Context("prepareNodes", prepareNodes)
-		Context("prepareLoadPods", prepareLoadPods)
-		Context("setup", testSetup)
-		Context("OSDPodsSpread", testOSDPodsSpreadAll)
-		Context("rookOperator", testRookOperator)
-		Context("MONPodsSpread", testMONPodsSpreadAll)
-		Context("rookRGW", testRookRGW)
-		Context("rookRBD", testRookRBDAll)
-		return
-	}
-
 	Context("prepareNodes", prepareNodes)
+	if doCeph {
+		Context("prepareLoadPods", prepareLoadPods)
+	}
 	Context("setup", testSetup)
 	if doBootstrap {
 		return
 	}
 	if doReboot {
 		Context("reboot", testRebootAllNodes)
+	}
+
+	if doCeph {
+		Context("rookOperator", testRookOperator)
+		Context("clusterStable", testClusterStable)
+		Context("OSDPodsSpread", testOSDPodsSpreadAll)
+		Context("MONPodsSpread", testMONPodsSpreadAll)
+		Context("rookRGW", testRookRGW)
+		Context("rookRBD", testRookRBDAll)
+		return
 	}
 
 	// preparing resources before test to make things faster
