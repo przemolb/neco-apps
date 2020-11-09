@@ -19,6 +19,7 @@ How to maintain neco-apps
   - [ceph](#ceph)
 - [teleport](#teleport)
 - [topolvm](#topolvm)
+- [moco](#moco)
 
 ## argocd
 
@@ -244,6 +245,23 @@ $ git clone https://github.com/topolvm/topolvm
 $ cd topolvm
 $ git checkout vX.Y.Z
 $ cp -r deploy/manifests/* $GOPATH/src/github.com/cybozu-go/neco-apps/topolvm/base/upstream
+```
+
+Update `images.newTag` in `kustomization.yaml`.
+
+
+## moco
+
+Check [releases](https://github.com/cybozu-go/moco/releases) for changes.
+
+Download the upstream manifest as follows:
+
+```console
+$ cd $GOPATH/src/github.com/moco
+$ git clone https://github.com/moco/moco
+$ cd moco
+$ git checkout vX.Y.Z
+$ cp -r config/* $GOPATH/src/github.com/cybozu-go/neco-apps/moco/base/upstream
 ```
 
 Update `images.newTag` in `kustomization.yaml`.
