@@ -1,19 +1,19 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: network-policy
+  name: moco
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "9"
+    argocd.argoproj.io/sync-wave: "6"
 spec:
   project: default
   source:
     repoURL: https://github.com/cybozu-go/neco-apps.git
     targetRevision: release
-    path: network-policy/base
+    path: moco/base
   destination:
     server: https://kubernetes.default.svc
-    namespace: kube-system
+    namespace: moco-system
   syncPolicy:
     automated:
       prune: true
