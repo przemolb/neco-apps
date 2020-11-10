@@ -395,15 +395,26 @@ workflows:
 
   ceph:
     jobs:
+      - hold:
+          type: approval
+          filters:
+            branches:
+              ignore: ["stage", "release", /^op-(stage|release)-.*/]
       - ceph-bootstrap:
+          requires:
+            - hold
           filters:
             branches:
               ignore: ["stage", "release", /^op-(stage|release)-.*/]
       - ceph-upgrade-stage:
+          requires:
+            - hold
           filters:
             branches:
               ignore: ["stage", "release", /^op-(stage|release)-.*/]
       - ceph-upgrade-release:
+          requires:
+            - hold
           filters:
             branches:
               ignore: ["stage", "release", /^op-(stage|release)-.*/]
