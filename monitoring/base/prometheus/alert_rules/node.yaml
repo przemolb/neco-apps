@@ -30,3 +30,12 @@ groups:
         annotations:
           summary: Conntrack entries will be reach limit at `{{ $labels.instance }}`.
           runbook: Please re-configure the limit or plan some solutions.
+      - alert: AvailableMemoryTooLow
+        expr: |
+          (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100 < 5
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Available memory is too low at `{{ $labels.instance }}`.
+          runbook: Please check memory leak of processes.

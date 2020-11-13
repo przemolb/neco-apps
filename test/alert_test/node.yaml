@@ -155,3 +155,31 @@ tests:
       - eval_time: 60m
         alertname: ConntrackEntriesReachLimit
         exp_alerts: []
+
+  - interval: 1m
+    input_series:
+      - series: 'node_memory_MemTotal_bytes{instance="192.168.0.1"}'
+        values: '100000000000+0x10'
+      - series: 'node_memory_MemAvailable_bytes{instance="192.168.0.1"}'
+        values: '3000000000+0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: AvailableMemoryTooLow
+        exp_alerts:
+          - exp_labels:
+              instance: "192.168.0.1"
+              severity: warning
+            exp_annotations:
+              runbook: Please check memory leak of processes.
+              summary: Available memory is too low at `192.168.0.1`.
+
+  - interval: 1m
+    input_series:
+      - series: 'node_memory_MemTotal_bytes{instance="192.168.0.1"}'
+        values: '100000000000+0x10'
+      - series: 'node_memory_MemAvailable_bytes{instance="192.168.0.1"}'
+        values: '3000000000+0x5 15000000000+0x5'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: AvailableMemoryTooLow
+        exp_alerts: []
