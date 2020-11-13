@@ -375,16 +375,6 @@ workflows:
           filters:
             branches:
               ignore: ["stage", "release", /^op-(stage|release)-.*/]
-      - upgrade-stage:
-          requires: ["test"]
-          filters:
-            branches:
-              ignore: ["stage", "release", /^op-(stage|release)-.*/]
-      - upgrade-release:
-          requires: ["test"]
-          filters:
-            branches:
-              ignore: ["release", /^op-(stage|release)-.*/]
       - create-pull-request-stage:
           filters:
             branches:
@@ -392,8 +382,6 @@ workflows:
                 - master
           requires:
             - bootstrap
-            - upgrade-stage
-            - upgrade-release
 
   ceph:
     jobs:
