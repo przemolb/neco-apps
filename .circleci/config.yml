@@ -448,7 +448,10 @@ workflows:
                 - master
     jobs:
       - clean-dns
-      - reboot
+      - reboot:
+          requires:
+            - clean-dns
+
   release-tag:
     jobs:
       - push-release-tag:
