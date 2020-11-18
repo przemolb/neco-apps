@@ -345,7 +345,6 @@ spec:
     app.kubernetes.io/name: squid
   ports:
     - protocol: TCP
-      nodePort: 30128
       port: 3128
       targetPort: 3128
 ---
