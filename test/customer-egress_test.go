@@ -38,11 +38,16 @@ func testCustomerEgress() {
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 
 		By("executing curl to web page on the Internet")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "-nsandbox", "exec", podName, "--", "curl", "-sf", "--proxy", "http://squid.customer-egress.svc:3128", "cybozu.com")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nsandbox", "exec", podName, "--", "curl", "-sf", "--proxy", "http://squid.customer-egress.svc:3128", "cybozu.com")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 
 		By("deleting ubuntu pod on sandbox ns")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "-nsandbox", "delete", podName)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "-nsandbox", "delete", "pod", podName)
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 	})
 }
