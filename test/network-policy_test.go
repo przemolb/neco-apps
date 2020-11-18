@@ -107,6 +107,28 @@ spec:
 		}).Should(Succeed())
 
 		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=customer-egress", "get", "deployment/squid", "-o=json")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			deployment := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deployment)
+			if err != nil {
+				return err
+			}
+
+			if deployment.Status.ReadyReplicas != 2 {
+				return fmt.Errorf("squid deployment's ReadyReplicas is not 2: %d", int(deployment.Status.ReadyReplicas))
+			}
+			if deployment.Status.UpdatedReplicas != 2 {
+				return fmt.Errorf("squid deployment's UpdatedReplicas is not 2: %d", int(deployment.Status.UpdatedReplicas))
+			}
+
+			return nil
+		}).Should(Succeed())
+
+		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=internet-egress", "get", "deployment/unbound", "-o=json")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
