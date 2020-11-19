@@ -9,9 +9,10 @@ How to maintain neco-apps
 - [metallb](#metallb)
 - [metrics-server](#metrics-server)
 - [monitoring](#monitoring)
-  - [prometheus, alertmanager, grafana](#prometheus-alertmanager-grafana)
+  - [prometheus, alertmanager, pushgateway](#prometheus-alertmanager-pushgateway)
   - [machines-endpoints](#machines-endpoints)
   - [kube-state-metrics](#kube-state-metrics)
+  - [grafana-operator](#grafana-operator)
 - [neco-admission](#neco-admission)
 - [network-policy (Calico)](#network-policy-calico)
 - [pvc-autoresizer](#pvc-autoresizer)
@@ -40,17 +41,19 @@ Check [the upgrading section](https://cert-manager.io/docs/installation/upgradin
 Download manifests and remove `Namespace` resource from it as follows:
 
 ```console
-$ curl -sLf -o  cert-manager/base/upstream/cert-manager.yaml https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
+$ curl -sLf -o cert-manager/base/upstream/cert-manager.yaml https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
 $ vi cert-manager/base/upstream/cert-manager.yaml
   (Remove Namespace resources)
 ```
 
 ## elastic (ECK)
 
-To check diffs between versions, download and compare manifests as follows:
+Check the [Upgrade ECK](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-upgrading-eck.html) in the official website.
+
+Download manifests and remove `Namespace` resource from it as follows:
 
 ```console
-$ wget https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml
+$ curl -sLf -o elastic/base/upstream/all-in-one.yaml https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml
 $ vi elastic/base/upstream/all-in-one.yaml
   (Remove Namespace resources)
 ```
@@ -61,7 +64,16 @@ Read the following document and fix manifests as necessary.
 
 https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md
 
+Download CRD manifest as follows:
+
+```console
+$ curl -sLf -o external-dns/base/common.yaml https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/contributing/crd-source/crd-manifest.yaml
+```
+Then check the diffs by `git diff`.
+
 ## ingress (Contour & Envoy)
+
+Check the [upgrading guide](https://projectcontour.io/resources/upgrading/) in the official website.
 
 Check diffs of projectcontour/contour files as follows:
 
@@ -75,6 +87,7 @@ Then, import YAML manifests as follows:
 
 ```console
 $ git checkout vX.Y.Z
+$ rm $GOPATH/src/github.com/cybozu-go/neco-apps/ingress/base/contour/*
 $ cp examples/contour/*.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/ingress/base/contour/
 ```
 
@@ -113,12 +126,22 @@ $ git checkout vX.Y.Z
 $ cp deploy/1.8+/*.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/metrics-server/base/upstream
 ```
 
+Note: The name of `deploy` directory will be changed.
+
 ## monitoring
 
-### prometheus, alertmanager, grafana
+### prometheus, alertmanager, pushgateway
 
 There is no official kubernetes manifests for prometheus, alertmanager, and grafana.
-So, check changes in release notes on github and take necessary actions.
+So, check changes in release notes on github and helm charts like bellow.
+
+```
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm search repo -l prometheus-community
+helm template prom prometheus-community/prometheus --version=11.5.0 > prom-2.18.1.yaml
+helm template prom prometheus-community/prometheus --version=11.16.7 > prom-2.21.0.yaml
+diff prom-2.18.1.yaml prom-2.21.0.yaml
+```
 
 ### machines-endpoints
 
@@ -127,6 +150,19 @@ Update version following [this link](https://github.com/cybozu/neco-containers/b
 ### kube-state-metrics
 
 Check [examples/standard](https://github.com/kubernetes/kube-state-metrics/tree/master/examples/standard)
+
+### grafana-operator
+
+Check [releases](https://github.com/integr8ly/grafana-operator/releases)
+
+Download the upstream manifest as follows:
+
+```console
+$ git clone https://github.com/integr8ly/grafana-operator
+$ cd grafana-operator
+$ git checkout vX.Y.Z
+$ cp -r deploy/* $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
+```
 
 ## neco-admission
 
@@ -231,7 +267,8 @@ Update `spec.cephVersion.image` field in CephCluster CR.
 ## teleport
 
 There is no official kubernetes manifests actively maintained for teleport.
-So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/blob/master/CHANGELOG.md) on github.
+So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/blob/master/CHANGELOG.md) on github,
+and [Helm chart](https://github.com/gravitational/teleport/tree/master/examples/chart/teleport).
 
 ## topolvm
 
