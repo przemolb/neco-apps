@@ -348,8 +348,28 @@ func testNetworkPolicy() {
 }
 
 func testFiltersForInternetEgress(namespace string, localPodIP, nodeIP string, includeUnbound bool) {
+	By("adding an ubuntu-debug container as an ephemeral container to squid")
+	stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "pods", "-n="+namespace, "-l=app.kubernetes.io/name=squid", "-o", "json")
+	Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+	squidPodList := new(corev1.PodList)
+	err = json.Unmarshal(stdout, squidPodList)
+	Expect(err).NotTo(HaveOccurred())
+
+	for _, pod := range squidPodList.Items {
+		stdout, stderr, err := ExecAt(boot0,
+			"kubectl", "alpha", "debug", pod.Name,
+			"-n="+namespace,
+			"--container=ubuntu",
+			"--image=quay.io/cybozu/ubuntu-debug:18.04",
+			"--target=squid",
+			"--", "pause",
+		)
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+	}
+
 	By("accessing to local IP")
-	stdout, stderr, err := ExecAt(boot0, "kubectl", "-n="+namespace, "get", "pods", "-o=json")
+	stdout, stderr, err = ExecAt(boot0, "kubectl", "-n="+namespace, "get", "pods", "-o=json")
 	Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 	podList := new(corev1.PodList)
 	err = json.Unmarshal(stdout, podList)
@@ -407,6 +427,26 @@ func testFiltersForInternetEgress(namespace string, localPodIP, nodeIP string, i
 
 	if !includeUnbound {
 		return
+	}
+
+	By("adding an ubuntu-debug container as an ephemeral container to unbound")
+	stdout, stderr, err = ExecAt(boot0, "kubectl", "get", "pods", "-n="+namespace, "-l=app.kubernetes.io/name=unbound", "-o", "json")
+	Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+	unboundPodList := new(corev1.PodList)
+	err = json.Unmarshal(stdout, unboundPodList)
+	Expect(err).NotTo(HaveOccurred())
+
+	for _, pod := range unboundPodList.Items {
+		stdout, stderr, err := ExecAt(boot0,
+			"kubectl", "alpha", "debug", pod.Name,
+			"-n="+namespace,
+			"--container=ubuntu",
+			"--image=quay.io/cybozu/ubuntu-debug:18.04",
+			"--target=unbound",
+			"--", "pause",
+		)
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 	}
 
 	By("getting unbound pod name")
