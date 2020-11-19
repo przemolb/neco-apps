@@ -2,13 +2,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: squid
-  namespace: internet-egress
+  namespace: customer-egress
 automountServiceAccountToken: false
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: internet-egress
+  namespace: customer-egress
   name: psp:squid
 rules:
   - apiGroups: ["policy"]
@@ -19,7 +19,7 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: internet-egress
+  namespace: customer-egress
   name: squid:psp:squid
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -28,13 +28,13 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: squid
-  namespace: internet-egress
+  namespace: customer-egress
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
   name: squid
-  namespace: internet-egress
+  namespace: customer-egress
 data:
   squid.conf: |-
     acl neco_network src 10.64.0.0/12
@@ -60,7 +60,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: local-unbound
-  namespace: internet-egress
+  namespace: customer-egress
 data:
   unbound.conf: |
     server:
@@ -189,7 +189,7 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: squid
-  namespace: internet-egress
+  namespace: customer-egress
 spec:
   replicas: 2
   strategy:
@@ -232,7 +232,7 @@ spec:
       serviceAccountName: squid
       containers:
         - name: squid
-          image: {{ .squid }}
+          image: quay.io/cybozu/squid
           imagePullPolicy: IfNotPresent
           lifecycle:
             preStop:
@@ -268,7 +268,7 @@ spec:
             initialDelaySeconds: 10
             failureThreshold: 6
         - name: unbound
-          image: {{ index . "cke-unbound" }}
+          image: quay.io/cybozu/unbound
           imagePullPolicy: IfNotPresent
           args:
             - -c
@@ -338,14 +338,13 @@ kind: Service
 apiVersion: v1
 metadata:
   name: squid
-  namespace: internet-egress
+  namespace: customer-egress
 spec:
   type: LoadBalancer
   selector:
     app.kubernetes.io/name: squid
   ports:
     - protocol: TCP
-      nodePort: 30128
       port: 3128
       targetPort: 3128
 ---
@@ -353,7 +352,7 @@ apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
   name: squid-pdb
-  namespace: internet-egress
+  namespace: customer-egress
 spec:
   maxUnavailable: 1
   selector:
