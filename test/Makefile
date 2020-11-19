@@ -65,6 +65,9 @@ dctest-upgrade:
 	-git worktree remove /tmp/neco-apps
 	git worktree add /tmp/neco-apps $(BASE_BRANCH)
 	cp account.json /tmp/neco-apps/test
+	# workaround for fixing BINDIR evaluation timing
+	# please remove the below line after this code is released
+	mkdir -p /tmp/neco-apps/test/bin && cp $(BINDIR)/* /tmp/neco-apps/test/bin/
 	$(MAKE) -C /tmp/neco-apps/test setup dctest BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH)
 	cp /tmp/neco-apps/test/argocd-password.txt ./
 	PATH=$(BINDIR):$$PATH CEPH=$(CEPH) OVERLAY=$(OVERLAY) UPGRADE=1 ./test.sh
