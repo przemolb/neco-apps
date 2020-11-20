@@ -365,11 +365,6 @@ func applyAndWaitForApplications(commitID string) {
 	}
 	Expect(appList).ShouldNot(HaveLen(0))
 
-	// TODO: Remove this block after MOCO v0.3.1 is released to prod.
-	if doUpgrade {
-		ExecSafeAt(boot0, "argocd", "app", "sync", "moco", "--force")
-	}
-
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 	OUTER:
