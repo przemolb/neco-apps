@@ -4,6 +4,7 @@ resources:
   - upstream
 patchesStrategicMerge:
   - crd.yaml
+  - namespace.yaml
 images:
   - name: ghcr.io/cybozu-go/moco
     newTag: 0.3.1
