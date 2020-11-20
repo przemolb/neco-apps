@@ -4,6 +4,10 @@ resources:
   - upstream/cert-manager.yaml
   - rbac.yaml
 patches:
+  - crd.yaml
   - deployment.yaml
   - mutatingwebhookconfiguration.yaml
   - validatingwebhookconfiguration.yaml
+images:
+  - name: quay.io/cybozu/cert-manager
+    newTag: 1.0.4.1
