@@ -67,6 +67,7 @@ stringData:
       kubernetes:
         enabled: true
         listen_addr: 0.0.0.0:3026
+        public_addr: [ "teleport.gcp0.dev-ne.co:3026" ]
       listen_addr: 0.0.0.0:3023
       public_addr: [ "teleport.gcp0.dev-ne.co:443" ]
       web_listen_addr: 0.0.0.0:3080
@@ -184,6 +185,41 @@ func testSetup() {
 		})
 	}
 
+	// TODO: remove this block after this code is released.
+	if doUpgrade {
+		It("should recreate teleport secrets", func() {
+			stdout, stderr, err := ExecAt(boot0, "env", "ETCDCTL_API=3", "etcdctl", "--cert=/etc/etcd/backup.crt", "--key=/etc/etcd/backup.key",
+				"get", "--print-value-only", "/neco/teleport/auth-token")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			teleportToken := strings.TrimSpace(string(stdout))
+			teleportTmpl := template.Must(template.New("").Parse(teleportSecret))
+			buf := bytes.NewBuffer(nil)
+			err = teleportTmpl.Execute(buf, struct {
+				Token string
+			}{
+				Token: teleportToken,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+
+			stdout, stderr, err = ExecAt(boot0,
+				"kubectl", "get", "po",
+				"-n=teleport",
+				"--selector app.kubernetes.io/component=proxy,app.kubernetes.io/name=teleport",
+				"-o", "json",
+			)
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			var podList corev1.PodList
+			err = json.Unmarshal(stdout, &podList)
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s", stdout)
+			Expect(podList.Items).To(HaveLen(1))
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "pod", "-n", "teleport", podList.Items[0].Name)
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		})
+	}
+
 	It("should checkout neco-apps repository@"+commitID, func() {
 		ExecSafeAt(boot0, "rm", "-rf", "neco-apps")
 
@@ -200,34 +236,6 @@ func testSetup() {
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/overlays/"+overlayName+"/*.yaml")
 		applyAndWaitForApplications(commitID)
 	})
-
-	// Todo: Remove this block after the following PR is released to prod.
-	// https://github.com/cybozu-go/neco-apps/pull/783
-	if doUpgrade {
-		It("should delete IngressRoute CRD", func() {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "crd", "ingressroutes.contour.heptio.com")
-			if err != nil {
-				if strings.Contains(string(stderr), "NotFound") {
-					return
-				}
-				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-			}
-			ExecSafeAt(boot0, "kubectl", "annotate", "crd", "ingressroutes.contour.heptio.com", "i-am-sure-to-delete=ingressroutes.contour.heptio.com")
-			ExecSafeAt(boot0, "kubectl", "delete", "crd", "ingressroutes.contour.heptio.com")
-		})
-
-		It("should delete TLSCertificateDelegation CRD", func() {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "crd", "tlscertificatedelegations.contour.heptio.com")
-			if err != nil {
-				if strings.Contains(string(stderr), "NotFound") {
-					return
-				}
-				Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-			}
-			ExecSafeAt(boot0, "kubectl", "annotate", "crd", "tlscertificatedelegations.contour.heptio.com", "i-am-sure-to-delete=tlscertificatedelegations.contour.heptio.com")
-			ExecSafeAt(boot0, "kubectl", "delete", "crd", "tlscertificatedelegations.contour.heptio.com")
-		})
-	}
 
 	It("should set DNS", func() {
 		var ip string
@@ -367,7 +375,6 @@ func applyAndWaitForApplications(commitID string) {
 
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
-	OUTER:
 		for _, target := range appList {
 			appStdout, stderr, err := ExecAt(boot0, "argocd", "app", "get", "-o", "json", target.name)
 			if err != nil {
@@ -387,23 +394,10 @@ func applyAndWaitForApplications(commitID string) {
 				continue
 			}
 
-			// In upgrade test, sync without --force may cause temporal network disruption.
-			// It leads to sync-error of other applications,
-			// so sync manually sync-error apps in upgrade test.
-			if doUpgrade {
-				for _, cond := range app.Status.Conditions {
-					if cond.Type == argocd.ApplicationConditionSyncError {
-						fmt.Printf("%s sync manually: app=%s\n", time.Now().Format(time.RFC3339), target.name)
-						stdout, stderr, err := ExecAt(boot0, "argocd", "app", "sync", target.name)
-						if err != nil {
-							return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-						}
-						continue OUTER
-					}
-				}
-			}
-
-			// Workaround for ArgoCD's improper behavior. When this issue (T.B.D.) is closed, delete this block.
+			// In upgrade test, syncing network-policy app may cause temporal network disruption.
+			// It leads to ArgoCD's improper behavior. In spite of the network-policy app becomes Synced/Healthy, the operation does not end.
+			// So terminate the unexpected operation manually in upgrade test.
+			// TODO: This is workaround for ArgoCD's improper behavior. When this issue (T.B.D.) is closed, delete this block.
 			if app.Status.Sync.Status == argocd.SyncStatusCodeSynced &&
 				app.Status.Health.Status == argocd.HealthStatusHealthy &&
 				app.Operation != nil &&
