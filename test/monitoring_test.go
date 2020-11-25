@@ -789,6 +789,28 @@ func testPrometheusMetrics() {
 
 }
 
+func testVictoriaMetricsOperator() {
+	It("should be deployed successfully", func() {
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
+				"get", "deployment/victoriametrics-operator", "-o=json")
+			if err != nil {
+				return err
+			}
+			deployment := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deployment)
+			if err != nil {
+				return err
+			}
+
+			if int(deployment.Status.AvailableReplicas) != 1 {
+				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
+			}
+			return nil
+		}).Should(Succeed())
+	})
+}
+
 func findTarget(job string, targets []promv1.ActiveTarget) *promv1.ActiveTarget {
 	for _, t := range targets {
 		if string(t.Labels["job"]) == job {
