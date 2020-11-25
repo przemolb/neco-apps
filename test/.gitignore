@@ -4,6 +4,7 @@ account.json
 /grafana.yaml
 /lets.crt
 /squid.yml
+/bin
 /build
 /neco-apps
 /neco-apps-secret
