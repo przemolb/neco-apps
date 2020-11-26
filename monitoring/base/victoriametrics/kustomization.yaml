@@ -5,5 +5,12 @@ resources:
   - upstream/crd
   - rbac
   - operator.yaml
+  - alertmanager.yaml
 patchesStrategicMerge:
   - remove_crd_status.yaml
+configMapGenerator:
+  - name: vmalertmanager
+    files:
+      - neco.template
+configurations:
+- kustomizeconfig.yaml

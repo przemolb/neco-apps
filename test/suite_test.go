@@ -94,6 +94,7 @@ var _ = Describe("Test applications", func() {
 	Context("prometheus-metrics", testPrometheusMetrics)
 	Context("metrics-server", testMetricsServer)
 	Context("victoriametrics-operator", testVictoriaMetricsOperator)
+	Context("vmalertmanager", testVMAlertmanager)
 	Context("topolvm", testTopoLVM)
 	Context("elastic", testElastic)
 	Context("argocd-ingress", testArgoCDIngress)

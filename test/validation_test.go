@@ -366,14 +366,16 @@ func testGeneratedSecretName(t *testing.T) {
 					return err
 				}
 
-				// These lines test all secrets to be used.
 				// grafana-admin-credentials is skipped because it is used internally in Grafana Operator.
 				if es.Name == "grafana-admin-credentials" {
 					appeared = true
 				}
+
+				// These lines test all secrets to be used.
 				if strings.Contains(string(str), "secretName: "+es.Name) {
 					appeared = true
 				}
+
 				// These lines test secrets to be used as references, such like:
 				// - secretRef:
 				//     name: <key>
@@ -381,6 +383,12 @@ func testGeneratedSecretName(t *testing.T) {
 				if strings.Contains(strCondensed, "secretRef:name:"+es.Name) {
 					appeared = true
 				}
+
+				// This line tests VMAlertmanager.spec.configSecret
+				if strings.Contains(string(str), "configSecret: "+es.Name) {
+					appeared = true
+				}
+
 				return nil
 			})
 			if err != nil {

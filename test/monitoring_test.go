@@ -811,6 +811,54 @@ func testVictoriaMetricsOperator() {
 	})
 }
 
+func testVMAlertmanager() {
+	It("should be deployed successfully", func() {
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
+				"get", "statefulset/vmalertmanager-vmalertmanager", "-o=json")
+			if err != nil {
+				return err
+			}
+			sts := new(appsv1.StatefulSet)
+			err = json.Unmarshal(stdout, sts)
+			if err != nil {
+				return err
+			}
+
+			if int(sts.Status.ReadyReplicas) != 1 {
+				return fmt.Errorf("ReadyReplicas is not 1: %d", int(sts.Status.ReadyReplicas))
+			}
+			return nil
+		}).Should(Succeed())
+	})
+
+	It("should reply successfully", func() {
+		Eventually(func() error {
+			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
+				"get", "pods", "--selector=app.kubernetes.io/name=vmalertmanager", "-o=json")
+			if err != nil {
+				return err
+			}
+			podList := new(corev1.PodList)
+			err = json.Unmarshal(stdout, podList)
+			if err != nil {
+				return err
+			}
+			if len(podList.Items) != 1 {
+				return errors.New("vmalertmanager pod doesn't exist")
+			}
+			podName := podList.Items[0].Name
+
+			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+				podName, "curl", "http://localhost:9093/-/healthy")
+			if err != nil {
+				return fmt.Errorf("unable to curl :9090/-/halthy, stderr: %s, err: %v", stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+	})
+}
+
 func findTarget(job string, targets []promv1.ActiveTarget) *promv1.ActiveTarget {
 	for _, t := range targets {
 		if string(t.Labels["job"]) == job {
