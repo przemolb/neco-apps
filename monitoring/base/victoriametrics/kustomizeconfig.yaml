@@ -5,3 +5,7 @@ nameReference:
         path: spec/configMaps
       - kind: VMAlertmanager
         path: spec/volumes/configMap/name
+  - kind: Secret
+    fieldSpecs:
+      - kind: VMAgent
+        path: spec/additionalScrapeConfigs/name
