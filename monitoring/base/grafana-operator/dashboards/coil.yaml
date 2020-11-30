@@ -4,6 +4,9 @@ metadata:
   name: coil
 spec:
   name: coil.json
+  datasources:
+    - inputName: "DS_PROMETHEUS"
+      datasourceName: "prometheus"
   json: >
     {
       "__inputs": [
