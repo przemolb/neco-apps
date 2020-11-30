@@ -102,6 +102,12 @@ spec:
           initialDelaySeconds: 3
           periodSeconds: 3
           failureThreshold: 6
+        startupProbe:
+          httpGet:
+            path: /
+            port: 8502
+          failureThreshold: 30
+          periodSeconds: 10
         lifecycle:
           preStop:
             httpGet:
