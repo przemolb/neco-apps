@@ -8,9 +8,10 @@ spec:
   issuerRef:
     kind: ClusterIssuer
     name: clouddns
-  commonName: teleport.stage0.cybozu-ne.co
+  commonName: "*.teleport.stage0.cybozu-ne.co"
   dnsNames:
     - teleport.stage0.cybozu-ne.co
+    - "*.teleport.stage0.cybozu-ne.co"
   usages:
     - digital signature
     - key encipherment
