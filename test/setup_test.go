@@ -43,6 +43,7 @@ stringData:
       public_addr: teleport-auth:3025
       tokens:
         - "proxy,node:{{ .Token }}"
+        - "app:teleport-app-token"
     teleport:
       data_dir: /var/lib/teleport
       auth_token: {{ .Token }}
