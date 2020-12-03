@@ -50,9 +50,10 @@ spec:
   duration: 8760h0m0s # 1y
   issuerRef:
     name: teleport-proxy-ca
-  commonName: teleport.gcp0.dev-ne.co
+  commonName: "*.teleport.gcp0.dev-ne.co"
   dnsNames:
     - teleport.gcp0.dev-ne.co
+    - "*.teleport.gcp0.dev-ne.co"
   usages:
     - digital signature
     - key encipherment
