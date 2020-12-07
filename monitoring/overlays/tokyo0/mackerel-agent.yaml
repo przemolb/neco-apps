@@ -54,5 +54,12 @@ spec:
           secretName: mackerel-agent
       - name: run
         emptyDir: {}
-      - name: var-lib-mackerel-agent
-        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: var-lib-mackerel-agent
+    spec:
+      storageClassName: ceph-ssd-block
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 100Mi
