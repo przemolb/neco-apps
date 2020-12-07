@@ -208,6 +208,7 @@ func testTeleport() {
 		}).Should(Succeed())
 	})
 
+	// This test requires CNAME record "teleport.gcp0.dev-ne.co : teleport-proxy.teleport.svc.cluster.local".
 	It("should all applications are registered to teleport-auth", func() {
 		By("getting the application names")
 		stdout, _, err := kustomizeBuild("../teleport/base/apps")
