@@ -7,6 +7,37 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   dataDirHostPath: /var/lib/rook
+  resources:
+    mgr:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+    mon:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+    ## send bug report https://github.com/rook/rook/issues/6789
+    # osd:
+    #   requests:
+    #     cpu: "500m"
+    #     memory: "2Gi"
+    prepareosd:
+      requests:
+        cpu: "500m"
+        memory: "50Mi"
+    crashcollector:
+      requests:
+        cpu: "500m"
+        memory: "60Mi"
+    ## please set `requests` parameters on the following modules after enabling it.
+    # logcollector:
+    #   requests:
+    #     cpu: "500m"
+    #     memory: "1Gi"
+    # cleanup:
+    #   requests:
+    #     cpu: "500m"
+    #     memory: "1Gi"
   mon:
     count: 3
     volumeClaimTemplate:
@@ -37,10 +68,11 @@ spec:
     storageClassDeviceSets:
       - name: set1
         count: 20
+        ## send bug report https://github.com/rook/rook/issues/6789
         resources:
           requests:
             cpu: "500m"
-            memory: "4Gi"
+            memory: "2Gi"
         volumeClaimTemplates:
           - metadata:
               name: data
