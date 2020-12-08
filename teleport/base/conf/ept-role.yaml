@@ -4,6 +4,8 @@ metadata:
   name: ept
 spec:
   allow:
+    app_labels:
+      'team': 'ept'
     kubernetes_groups:
     - ept
     logins:

@@ -7,7 +7,9 @@ MAX_LINES=500
 
 # this script cannot handle mutiple value RRset (e.g. multiple address to same host name)
 
-${GCLOUD_DNS} list --zone=$ZONE --filter="NOT TYPE=(SOA NS)" | tail -n +2 > zone.txt
+# CNAME record "teleport.gcp0.dev-ne.co" is registered for testing teleport
+# Therefore, CNAME must be excluded from clean-dns
+${GCLOUD_DNS} list --zone=$ZONE --filter="NOT TYPE=(SOA NS CNAME)" | tail -n +2 > zone.txt
 lines=$(cat zone.txt | wc -l)
 if [ $lines -eq 0 ]; then
   exit

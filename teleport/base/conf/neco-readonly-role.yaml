@@ -12,6 +12,8 @@ spec:
       '*': '*'
     rules: []
   deny:
+    app_labels:
+      '*': '*'
     logins: null
   options:
     cert_format: standard
