@@ -18,6 +18,7 @@ import (
 	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/yaml"
 )
@@ -54,6 +55,59 @@ func kustomizeBuild(dir string) ([]byte, []byte, error) {
 	cmd.Stderr = errBuf
 	err = cmd.Run()
 	return outBuf.Bytes(), errBuf.Bytes(), err
+}
+
+func testNamespaceResources(t *testing.T) {
+	// All namespaces defined in neco-apps should have the `team` label.
+	// Exceptionally, `sandbox` ns should not have the `team` label.
+	targetDirs := map[string]string{
+		"namespaces":      filepath.Join(manifestDir, "namespaces", "base"),
+		"team-management": filepath.Join(manifestDir, "team-management", "base"),
+	}
+
+	for testcase, targetDir := range targetDirs {
+		t.Run(testcase, func(t *testing.T) {
+			stdout, stderr, err := kustomizeBuild(targetDir)
+			if err != nil {
+				t.Error(fmt.Errorf("kustomize build faled. path: %s, stderr: %s, err: %v", targetDir, stderr, err))
+			}
+
+			y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
+			for {
+				data, err := y.Read()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					t.Error(err)
+				}
+
+				var meta struct {
+					metav1.TypeMeta   `json:",inline"`
+					metav1.ObjectMeta `json:"metadata,omitempty"`
+				}
+				err = yaml.Unmarshal(data, &meta)
+				if err != nil {
+					t.Error(err)
+				}
+				if meta.Kind != "Namespace" {
+					continue
+				}
+
+				// `sandbox` namespace should not have a team label.
+				if meta.Name == "sandbox" {
+					if meta.Labels["team"] != "" {
+						t.Error(fmt.Errorf("sandbox ns have team label: value=%s", meta.Labels["team"]))
+					}
+					continue
+				}
+
+				// other namespace should have a team label.
+				if meta.Labels["team"] == "" {
+					t.Error(fmt.Errorf("%s ns doesn't have team label", meta.Name))
+				}
+			}
+		})
+	}
 }
 
 func testApplicationResources(t *testing.T) {
@@ -488,4 +542,5 @@ func TestValidation(t *testing.T) {
 	t.Run("CertificateUsages", testCertificateUsages)
 	t.Run("GeneratedSecretName", testGeneratedSecretName)
 	t.Run("AlertRules", testAlertRules)
+	t.Run("NamespaceLabels", testNamespaceResources)
 }
