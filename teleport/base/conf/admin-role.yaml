@@ -4,6 +4,8 @@ metadata:
   name: admin
 spec:
   allow:
+    app_labels:
+      'team': 'neco'
     kubernetes_groups:
     - system:masters
     logins:

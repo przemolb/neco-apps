@@ -4,6 +4,8 @@ metadata:
   name: garoon
 spec:
   allow:
+    app_labels:
+      'team': 'garoon'
     kubernetes_groups:
     - garoon
     logins:
