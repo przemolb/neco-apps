@@ -70,7 +70,7 @@ func testNamespaceResources(t *testing.T) {
 		t.Run(testcase, func(t *testing.T) {
 			stdout, stderr, err := kustomizeBuild(targetDir)
 			if err != nil {
-				t.Error(fmt.Errorf("kustomize build faled. path: %s, stderr: %s, err: %v", targetDir, stderr, err))
+				t.Fatalf("kustomize build failed. path: %s, stderr: %s, err: %v", targetDir, stderr, err)
 			}
 
 			y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
@@ -79,7 +79,7 @@ func testNamespaceResources(t *testing.T) {
 				if err == io.EOF {
 					break
 				} else if err != nil {
-					t.Error(err)
+					t.Fatal(err)
 				}
 
 				var meta struct {
@@ -88,7 +88,7 @@ func testNamespaceResources(t *testing.T) {
 				}
 				err = yaml.Unmarshal(data, &meta)
 				if err != nil {
-					t.Error(err)
+					t.Fatal(err)
 				}
 				if meta.Kind != "Namespace" {
 					continue
@@ -97,14 +97,14 @@ func testNamespaceResources(t *testing.T) {
 				// `sandbox` namespace should not have a team label.
 				if meta.Name == "sandbox" {
 					if meta.Labels["team"] != "" {
-						t.Error(fmt.Errorf("sandbox ns have team label: value=%s", meta.Labels["team"]))
+						t.Errorf("sandbox ns have team label: value=%s", meta.Labels["team"])
 					}
 					continue
 				}
 
 				// other namespace should have a team label.
 				if meta.Labels["team"] == "" {
-					t.Error(fmt.Errorf("%s ns doesn't have team label", meta.Name))
+					t.Errorf("%s ns doesn't have team label", meta.Name)
 				}
 			}
 		})
@@ -120,7 +120,7 @@ func testAppProjectResources(t *testing.T) {
 
 	stdout, stderr, err := kustomizeBuild(targetDir)
 	if err != nil {
-		t.Error(fmt.Errorf("kustomize build faled. path: %s, stderr: %s, err: %v", targetDir, stderr, err))
+		t.Fatalf("kustomize build faled. path: %s, stderr: %s, err: %v", targetDir, stderr, err)
 	}
 	y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
 	for {
@@ -128,7 +128,7 @@ func testAppProjectResources(t *testing.T) {
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		var meta struct {
@@ -137,7 +137,7 @@ func testAppProjectResources(t *testing.T) {
 		}
 		err = yaml.Unmarshal(data, &meta)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		// Make lists from namespaces.
@@ -164,7 +164,7 @@ func testAppProjectResources(t *testing.T) {
 		var proj argocd.AppProject
 		err = yaml.Unmarshal(data, &proj)
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 
 		var namespaces []string
@@ -182,7 +182,7 @@ func testAppProjectResources(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(namespacesByTeam, namespacesInAppProject) {
-		t.Error(fmt.Errorf("namespaces in AppProjects are not listed correctly\nnamespacesByTeam: %s\nnamespacesInAppProject: %s", namespacesByTeam, namespacesInAppProject))
+		t.Errorf("namespaces in AppProjects are not listed correctly\nnamespacesByTeam: %s\nnamespacesInAppProject: %s", namespacesByTeam, namespacesInAppProject)
 	}
 }
 
