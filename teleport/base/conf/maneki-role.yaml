@@ -4,6 +4,8 @@ metadata:
   name: maneki
 spec:
   allow:
+    app_labels:
+      'team': 'maneki'
     kubernetes_groups:
     - maneki
     logins:
