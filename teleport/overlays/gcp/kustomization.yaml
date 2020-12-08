@@ -6,6 +6,7 @@ resources:
 patchesStrategicMerge:
   - deployment.yaml
   - statefulset.yaml
+  - apps/alertmanager.yaml
 images:
   - name: quay.io/gravitational/teleport-ent
     newName: quay.io/gravitational/teleport
