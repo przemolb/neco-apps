@@ -10,10 +10,12 @@ import (
 )
 
 func testTeamManagement() {
-	It("should deploy pod with maneki role", func() {
+	It("should give authority of ephemeral containers to unprivileged team", func() {
+		By("creating test pod")
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "run", "-n", "maneki", "neco-ephemeral-test", "--image=quay.io/cybozu/ubuntu-debug:18.04", "pause")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 
+		By("waiting the pod become ready")
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "get", "-n", "maneki", "pod/neco-ephemeral-test", "-o=json")
 			if err != nil {
@@ -31,10 +33,9 @@ func testTeamManagement() {
 
 			return nil
 		}).Should(Succeed())
-	})
 
-	It("should deploy ephemeral containers with maneki role", func() {
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "alpha", "debug", "-i", "-n", "maneki", "neco-ephemeral-test", "--image=quay.io/cybozu/ubuntu-debug:18.04", "--target=neco-ephemeral-test", "--as test", "--as-group sys:authenticated", "--as-group maneki", "--", "echo a")
+		By("adding a ephemeral container by unprivileged team")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "alpha", "debug", "-i", "-n", "maneki", "neco-ephemeral-test", "--image=quay.io/cybozu/ubuntu-debug:18.04", "--target=neco-ephemeral-test", "--as=test", "--as-group=maneki", "--as-group=system:authenticated", "--", "echo a")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 	})
 }
