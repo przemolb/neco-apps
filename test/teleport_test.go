@@ -17,6 +17,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	appsv1 "k8s.io/api/apps/v1"
 	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/yaml"
 )
@@ -205,6 +206,46 @@ func testTeleport() {
 			}
 			return nil
 		}).Should(Succeed())
+	})
+
+	// This test requires CNAME record "teleport.gcp0.dev-ne.co : teleport-proxy.teleport.svc.cluster.local".
+	It("should all applications are registered to teleport-auth", func() {
+		By("getting the application names")
+		stdout, _, err := kustomizeBuild("../teleport/base/apps")
+		Expect(err).ShouldNot(HaveOccurred())
+		var appNames []string
+		y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
+		for {
+			data, err := y.Read()
+			if err == io.EOF {
+				break
+			}
+			Expect(err).ShouldNot(HaveOccurred())
+
+			var deploy appsv1.Deployment
+			err = yaml.Unmarshal(data, &deploy)
+			if err != nil {
+				continue
+			}
+
+			var name string
+			for _, a := range deploy.Spec.Template.Spec.Containers[0].Args {
+				if !strings.HasPrefix(a, "--app-name=") {
+					continue
+				}
+				name = strings.Split(a, "=")[1]
+			}
+			Expect(name).ShouldNot(BeEmpty())
+			appNames = append(appNames, name)
+		}
+		fmt.Printf("Found applications in manifests: %+v\n", appNames)
+
+		for _, n := range appNames {
+			query := fmt.Sprintf("'.[].spec.apps[].name | select(. == \"%s\")'", n)
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "teleport", "exec", "-it", "teleport-auth-0", "--", "tctl", "apps", "ls", "--format=json", "--", "|", "jq", "-r", query)
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			Expect(string(stdout)).Should(Equal(n + "\n"))
+		}
 	})
 }
 

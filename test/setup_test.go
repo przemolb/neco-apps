@@ -43,6 +43,7 @@ stringData:
       public_addr: teleport-auth:3025
       tokens:
         - "proxy,node:{{ .Token }}"
+        - "app:teleport-app-token"
     teleport:
       data_dir: /var/lib/teleport
       auth_token: {{ .Token }}
@@ -181,6 +182,30 @@ func testSetup() {
 			Expect(err).NotTo(HaveOccurred())
 			createNamespaceIfNotExists("teleport")
 			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+		})
+	}
+
+	// This block is for enabling Teleport Application feature
+	// After neco-apps#883 is merged, please delete this block
+	if doUpgrade {
+		It("should prepare secrets", func() {
+			By("creating upgraded secrets for teleport and reboot teleport-auth")
+			stdout, stderr, err := ExecAt(boot0, "env", "ETCDCTL_API=3", "etcdctl", "--cert=/etc/etcd/backup.crt", "--key=/etc/etcd/backup.key",
+				"get", "--print-value-only", "/neco/teleport/auth-token")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			teleportToken := strings.TrimSpace(string(stdout))
+			teleportTmpl := template.Must(template.New("").Parse(teleportSecret))
+			buf := bytes.NewBuffer(nil)
+			err = teleportTmpl.Execute(buf, struct {
+				Token string
+			}{
+				Token: teleportToken,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
+			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
+			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "delete", "-n", "teleport", "pod", "teleport-auth-0")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		})
 	}
