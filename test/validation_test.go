@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 	"testing"
 	"text/template"
@@ -107,6 +108,81 @@ func testNamespaceResources(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func testAppProjectResources(t *testing.T) {
+	// Verify the destination namespaces in the AppPorject for unprivileged team are listed correctly.
+	targetDir := filepath.Join(manifestDir, "team-management", "base")
+
+	namespacesByTeam := map[string][]string{}
+	namespacesInAppProject := map[string][]string{}
+
+	stdout, stderr, err := kustomizeBuild(targetDir)
+	if err != nil {
+		t.Error(fmt.Errorf("kustomize build faled. path: %s, stderr: %s, err: %v", targetDir, stderr, err))
+	}
+	y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
+	for {
+		data, err := y.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			t.Error(err)
+		}
+
+		var meta struct {
+			metav1.TypeMeta   `json:",inline"`
+			metav1.ObjectMeta `json:"metadata,omitempty"`
+		}
+		err = yaml.Unmarshal(data, &meta)
+		if err != nil {
+			t.Error(err)
+		}
+
+		// Make lists from namespaces.
+		if meta.Kind == "Namespace" {
+			if meta.Name == "sandbox" {
+				// Skip. sandbox ns does not have team label.
+				continue
+			}
+
+			team := meta.Labels["team"]
+			namespacesByTeam[team] = append(namespacesByTeam[team], meta.Name)
+			continue
+		}
+
+		if meta.Kind != "AppProject" {
+			continue
+		}
+		if meta.Name == "default" || meta.Name == "tenant-app-of-apps" {
+			// Skip. default app and tenant-app-of-apps app are privileged.
+			continue
+		}
+
+		// Make lists from AppProjects for unprivileged team.
+		var proj argocd.AppProject
+		err = yaml.Unmarshal(data, &proj)
+		if err != nil {
+			t.Error(err)
+		}
+
+		var namespaces []string
+		for _, dest := range proj.Spec.Destinations {
+			namespaces = append(namespaces, dest.Namespace)
+		}
+		sort.Strings(namespaces)
+		namespacesInAppProject[proj.Name] = namespaces
+	}
+
+	for team, namespaces := range namespacesByTeam {
+		namespaces = append(namespaces, "sandbox")
+		sort.Strings(namespaces)
+		namespacesByTeam[team] = namespaces
+	}
+
+	if !reflect.DeepEqual(namespacesByTeam, namespacesInAppProject) {
+		t.Error(fmt.Errorf("namespaces in AppProjects are not listed correctly\nnamespacesByTeam: %s\nnamespacesInAppProject: %s", namespacesByTeam, namespacesInAppProject))
 	}
 }
 
@@ -537,6 +613,7 @@ func TestValidation(t *testing.T) {
 		t.Skip("SSH_PRIVKEY envvar is defined as running e2e test")
 	}
 
+	t.Run("AppProjectNamespaces", testAppProjectResources)
 	t.Run("ApplicationTargetRevision", testApplicationResources)
 	t.Run("CRDStatus", testCRDStatus)
 	t.Run("CertificateUsages", testCertificateUsages)
