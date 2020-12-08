@@ -59,56 +59,36 @@ func kustomizeBuild(dir string) ([]byte, []byte, error) {
 }
 
 func testNamespaceResources(t *testing.T) {
+	t.Parallel()
+
 	// All namespaces defined in neco-apps should have the `team` label.
 	// Exceptionally, `sandbox` ns should not have the `team` label.
-	targetDirs := map[string]string{
-		"namespaces":      filepath.Join(manifestDir, "namespaces", "base"),
-		"team-management": filepath.Join(manifestDir, "team-management", "base"),
-	}
+	doCheckKustomizedYaml(t, func(t *testing.T, data []byte) {
+		var meta struct {
+			metav1.TypeMeta   `json:",inline"`
+			metav1.ObjectMeta `json:"metadata,omitempty"`
+		}
+		err := yaml.Unmarshal(data, &meta)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if meta.Kind != "Namespace" {
+			return
+		}
 
-	for testcase, targetDir := range targetDirs {
-		t.Run(testcase, func(t *testing.T) {
-			stdout, stderr, err := kustomizeBuild(targetDir)
-			if err != nil {
-				t.Fatalf("kustomize build failed. path: %s, stderr: %s, err: %v", targetDir, stderr, err)
+		// `sandbox` namespace should not have a team label.
+		if meta.Name == "sandbox" {
+			if meta.Labels["team"] != "" {
+				t.Errorf("sandbox ns have team label: value=%s", meta.Labels["team"])
 			}
+			return
+		}
 
-			y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
-			for {
-				data, err := y.Read()
-				if err == io.EOF {
-					break
-				} else if err != nil {
-					t.Fatal(err)
-				}
-
-				var meta struct {
-					metav1.TypeMeta   `json:",inline"`
-					metav1.ObjectMeta `json:"metadata,omitempty"`
-				}
-				err = yaml.Unmarshal(data, &meta)
-				if err != nil {
-					t.Fatal(err)
-				}
-				if meta.Kind != "Namespace" {
-					continue
-				}
-
-				// `sandbox` namespace should not have a team label.
-				if meta.Name == "sandbox" {
-					if meta.Labels["team"] != "" {
-						t.Errorf("sandbox ns have team label: value=%s", meta.Labels["team"])
-					}
-					continue
-				}
-
-				// other namespace should have a team label.
-				if meta.Labels["team"] == "" {
-					t.Errorf("%s ns doesn't have team label", meta.Name)
-				}
-			}
-		})
-	}
+		// other namespace should have a team label.
+		if meta.Labels["team"] == "" {
+			t.Errorf("%s ns doesn't have team label", meta.Name)
+		}
+	})
 }
 
 func testAppProjectResources(t *testing.T) {
