@@ -3,20 +3,19 @@ package test
 import (
 	"bufio"
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"reflect"
 	"sort"
 	"strings"
 	"testing"
 	"text/template"
 
 	argocd "github.com/argoproj/argo-cd/pkg/apis/application/v1alpha1"
+	"github.com/google/go-cmp/cmp"
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -78,8 +77,8 @@ func testNamespaceResources(t *testing.T) {
 
 		// `sandbox` namespace should not have a team label.
 		if meta.Name == "sandbox" {
-			if meta.Labels["team"] != "" {
-				t.Errorf("sandbox ns have team label: value=%s", meta.Labels["team"])
+			if _, ok := meta.Labels["team"]; ok {
+				t.Errorf("sandbox ns has team label: value=%s", meta.Labels["team"])
 			}
 			return
 		}
@@ -100,7 +99,7 @@ func testAppProjectResources(t *testing.T) {
 
 	stdout, stderr, err := kustomizeBuild(targetDir)
 	if err != nil {
-		t.Fatalf("kustomize build faled. path: %s, stderr: %s, err: %v", targetDir, stderr, err)
+		t.Fatalf("kustomize build failed. path: %s, stderr: %s, err: %v", targetDir, stderr, err)
 	}
 	y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
 	for {
@@ -120,8 +119,9 @@ func testAppProjectResources(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		// Make lists from namespaces.
-		if meta.Kind == "Namespace" {
+		// Make lists from each resources.
+		switch meta.Kind {
+		case "Namespace":
 			if meta.Name == "sandbox" {
 				// Skip. sandbox ns does not have team label.
 				continue
@@ -129,30 +129,26 @@ func testAppProjectResources(t *testing.T) {
 
 			team := meta.Labels["team"]
 			namespacesByTeam[team] = append(namespacesByTeam[team], meta.Name)
-			continue
-		}
 
-		if meta.Kind != "AppProject" {
-			continue
-		}
-		if meta.Name == "default" || meta.Name == "tenant-app-of-apps" {
-			// Skip. default app and tenant-app-of-apps app are privileged.
-			continue
-		}
+		case "AppProject":
+			if meta.Name == "default" || meta.Name == "tenant-app-of-apps" {
+				// Skip. default app and tenant-app-of-apps app are privileged.
+				continue
+			}
 
-		// Make lists from AppProjects for unprivileged team.
-		var proj argocd.AppProject
-		err = yaml.Unmarshal(data, &proj)
-		if err != nil {
-			t.Fatal(err)
-		}
+			var proj argocd.AppProject
+			err = yaml.Unmarshal(data, &proj)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		var namespaces []string
-		for _, dest := range proj.Spec.Destinations {
-			namespaces = append(namespaces, dest.Namespace)
+			var namespaces []string
+			for _, dest := range proj.Spec.Destinations {
+				namespaces = append(namespaces, dest.Namespace)
+			}
+			sort.Strings(namespaces)
+			namespacesInAppProject[proj.Name] = namespaces
 		}
-		sort.Strings(namespaces)
-		namespacesInAppProject[proj.Name] = namespaces
 	}
 
 	for team, namespaces := range namespacesByTeam {
@@ -161,8 +157,8 @@ func testAppProjectResources(t *testing.T) {
 		namespacesByTeam[team] = namespaces
 	}
 
-	if !reflect.DeepEqual(namespacesByTeam, namespacesInAppProject) {
-		t.Errorf("namespaces in AppProjects are not listed correctly\nnamespacesByTeam: %s\nnamespacesInAppProject: %s", namespacesByTeam, namespacesInAppProject)
+	if !cmp.Equal(namespacesByTeam, namespacesInAppProject) {
+		t.Errorf("namespaces in AppProjects are not listed correctly: %s", cmp.Diff(namespacesByTeam, namespacesInAppProject))
 	}
 }
 
@@ -236,7 +232,7 @@ func testApplicationResources(t *testing.T) {
 		t.Run(overlay, func(t *testing.T) {
 			stdout, stderr, err := kustomizeBuild(targetDir)
 			if err != nil {
-				t.Error(fmt.Errorf("kustomize build faled. path: %s, stderr: %s, err: %v", targetDir, stderr, err))
+				t.Errorf("kustomize build failed. path: %s, stderr: %s, err: %v", targetDir, stderr, err)
 			}
 
 			y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
@@ -256,10 +252,10 @@ func testApplicationResources(t *testing.T) {
 
 				// Check the sync wave
 				if syncWaves[app.Name] == "" {
-					t.Error(fmt.Errorf("expected sync-wave should be defined. application: %s", app.Name))
+					t.Errorf("expected sync-wave should be defined. application: %s", app.Name)
 				}
 				if app.GetAnnotations()["argocd.argoproj.io/sync-wave"] != syncWaves[app.Name] {
-					t.Error(fmt.Errorf("invalid sync-wave. application: %s, sync-wave: %s (should be %s)", app.Name, app.GetAnnotations()["argocd.argoproj.io/sync-wave"], syncWaves[app.Name]))
+					t.Errorf("invalid sync-wave. application: %s, sync-wave: %s (should be %s)", app.Name, app.GetAnnotations()["argocd.argoproj.io/sync-wave"], syncWaves[app.Name])
 				}
 
 				// Check the tergetRevision
@@ -271,10 +267,10 @@ func testApplicationResources(t *testing.T) {
 				}
 
 				if expectedTargetRevision == "" {
-					t.Error(fmt.Errorf("expected targetRevision should be defined. application: %s, overlay: %s", app.Name, overlay))
+					t.Errorf("expected targetRevision should be defined. application: %s, overlay: %s", app.Name, overlay)
 				}
 				if app.Spec.Source.TargetRevision != expectedTargetRevision {
-					t.Error(fmt.Errorf("invalid targetRevision. application: %s, targetRevision: %s (should be %s)", app.Name, app.Spec.Source.TargetRevision, expectedTargetRevision))
+					t.Errorf("invalid targetRevision. application: %s, targetRevision: %s (should be %s)", app.Name, app.Spec.Source.TargetRevision, expectedTargetRevision)
 				}
 
 			}
@@ -308,7 +304,7 @@ func testCRDStatus(t *testing.T) {
 			return
 		}
 		if crd.Status != nil {
-			t.Error(errors.New(".status(Status) exists in " + crd.Metadata.Name + ", remove it to prevent occurring OutOfSync by Argo CD"))
+			t.Errorf(".status(Status) exists in %s, remove it to prevent occurring OutOfSync by Argo CD", crd.Metadata.Name)
 		}
 	})
 }
@@ -346,8 +342,8 @@ func testCertificateUsages(t *testing.T) {
 		} else {
 			expected = []string{"digital signature", "key encipherment", "server auth", "client auth"}
 		}
-		if !reflect.DeepEqual(cert.Spec.Usages, expected) {
-			t.Error(errors.New(".spec.usages has incorrect list in " + cert.Metadata.Name))
+		if !cmp.Equal(cert.Spec.Usages, expected) {
+			t.Errorf(".spec.usages has incorrect list in %s: %s", cert.Metadata.Name, cmp.Diff(cert.Spec.Usages, expected))
 		}
 	})
 }
@@ -382,7 +378,7 @@ func doCheckKustomizedYaml(t *testing.T, checkFunc func(*testing.T, []byte)) {
 		t.Run(path, func(t *testing.T) {
 			stdout, stderr, err := kustomizeBuild(path)
 			if err != nil {
-				t.Error(fmt.Errorf("kustomize build faled. path: %s, stderr: %s, err: %v", path, stderr, err))
+				t.Errorf("kustomize build failed. path: %s, stderr: %s, err: %v", path, stderr, err)
 			}
 
 			y := k8sYaml.NewYAMLReader(bufio.NewReader(bytes.NewReader(stdout)))
