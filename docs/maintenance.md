@@ -13,6 +13,7 @@ How to maintain neco-apps
   - [machines-endpoints](#machines-endpoints)
   - [kube-state-metrics](#kube-state-metrics)
   - [grafana-operator](#grafana-operator)
+  - [victoriametrics (operator)](#victoriametrics-operator)
 - [neco-admission](#neco-admission)
 - [network-policy (Calico)](#network-policy-calico)
 - [pvc-autoresizer](#pvc-autoresizer)
@@ -173,9 +174,33 @@ $ git checkout vX.Y.Z
 $ cp -r deploy/* $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
 ```
 
+### victoriametrics (operator)
+
+Check [releases](https://github.com/VictoriaMetrics/operator/releases)
+
+And then, update upstream-derived manifests.
+
+```console
+$ git clone https://github.com/VictoriaMetrics/operator
+$ git checkout vX.Y.Z
+$ UPSTREAM_DIR=$GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/victoriametrics/upstream/
+$ rm -r $UPSTREAM_DIR/*
+$ cp -r config/{crd,rbac} $UPSTREAM_DIR/
+```
+
+Note that the tag (version) of VictoriaMetrics itself is written in each component CRs.
+
 ## neco-admission
 
 Update version following [this link](https://github.com/cybozu/neco-containers/blob/master/admission/TAG)
+
+Download the upstream manifest as follows:
+
+```console
+$ git clone https://github.com/cybozu/neco-containers
+$ cd neco-containers
+$ cp admission/config/webhook/manifests.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/neco-admission/base/upstream
+```
 
 ## network-policy (Calico)
 
