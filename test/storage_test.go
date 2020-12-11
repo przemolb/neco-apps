@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -207,19 +208,20 @@ func testClusterStable() {
 			group := re.FindSubmatch([]byte(imageString))
 			expectRookVersion := "v" + string(group[1])
 
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+				"get", "cephcluster", ns, "-o", "jsonpath='{.spec.mon.count}'")
+			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+			num_mon_expected, err := strconv.Atoi(strings.TrimSpace(string(stdout)))
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", stdout)
+
+			stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+				"get", "cephcluster", ns, "-o", "jsonpath='{.spec.storage.storageClassDeviceSets[0].count}'")
+			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+			num_osd_expected, err := strconv.Atoi(strings.TrimSpace(string(stdout)))
+			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", stdout)
+
 			By("checking deployments versions are equal to the requiring")
 			Eventually(func() error {
-				// Show cluster health status.
-				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
-					"get", "cephcluster", ns, "-o", "jsonpath='{.status.ceph.health}'")
-				if err != nil {
-					return err
-				}
-				health := strings.TrimSpace(string(stdout))
-				if health != "HEALTH_OK" {
-					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: ns=%s time=%s\n", ns, time.Now())
-				}
-
 				// Confirm deployment version and pod available counts.
 				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
 					"get", "deployment", "-o=json")
@@ -233,7 +235,15 @@ func testClusterStable() {
 					return err
 				}
 
+				var num_mon, num_osd int
 				for _, deployment := range deployments.Items {
+					switch deployment.Labels["app"] {
+					case "rook-ceph-mon":
+						num_mon++
+					case "rook-ceph-osd":
+						num_osd++
+					}
+
 					rookVersion, ok := deployment.Labels["rook-version"]
 					if ok && !strings.HasPrefix(rookVersion, expectRookVersion) {
 						return fmt.Errorf("missing deployment rook version: version=%s name=%s ns=%s", rookVersion, deployment.Name, deployment.Namespace)
@@ -247,22 +257,18 @@ func testClusterStable() {
 					}
 				}
 
+				if num_mon != num_mon_expected {
+					return fmt.Errorf("number of monitors is %d, expected is %d", num_mon, num_mon_expected)
+				}
+				if num_osd != num_osd_expected {
+					return fmt.Errorf("number of OSDs is %d, expected is %d", num_osd, num_osd_expected)
+				}
+
 				return nil
 			}).Should(Succeed())
 
 			By("checking pods statuses are equal to running or job statuses are equal to succeeded")
 			Eventually(func() error {
-				// Show cluster health status.
-				stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
-					"get", "cephcluster", ns, "-o", "jsonpath='{.status.ceph.health}'")
-				if err != nil {
-					return err
-				}
-				health := strings.TrimSpace(string(stdout))
-				if health != "HEALTH_OK" {
-					fmt.Fprintf(GinkgoWriter, "cluster status is not HEALTH_OK: ns=%s time=%s\n", ns, time.Now())
-				}
-
 				// Show pod status.
 				stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
 					"get", "pod", "-o=json")
@@ -294,21 +300,6 @@ func testMONPodsSpreadAll() {
 }
 
 func testMONPodsSpread(cephClusterName, cephClusterNamespace string) {
-	It("should be deployed to "+cephClusterNamespace+" successfully", func() {
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+cephClusterNamespace,
-				"get", "cephcluster", cephClusterName, "-o", "jsonpath='{.status.ceph.health}'")
-			if err != nil {
-				return err
-			}
-			health := strings.TrimSpace(string(stdout))
-			if health != "HEALTH_OK" {
-				return fmt.Errorf("ceph cluster is not HEALTH_OK: %s", health)
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
 	It("should spread MON PODs", func() {
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "node", "-l", "node-role.kubernetes.io/cs=true", "-o=json")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
@@ -351,21 +342,6 @@ func testOSDPodsSpreadAll() {
 }
 
 func testOSDPodsSpread(cephClusterName, cephClusterNamespace, nodeRole string) {
-	It("should be deployed to "+cephClusterNamespace+" successfully", func() {
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+cephClusterNamespace,
-				"get", "cephcluster", cephClusterName, "-o", "jsonpath='{.status.ceph.health}'")
-			if err != nil {
-				return err
-			}
-			health := strings.TrimSpace(string(stdout))
-			if health != "HEALTH_OK" {
-				return fmt.Errorf("ceph cluster is not HEALTH_OK: %s", health)
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
 	It("should spread OSD PODs on "+nodeRole+" nodes", func() {
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "node", "-l", "node-role.kubernetes.io/"+nodeRole+"=true", "-o=json")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
