@@ -18,9 +18,7 @@ spec:
       - ReadWriteOnce
     resources:
       requests:
-        storage: 1Gi
-      limit:
-        storage: 10Gi
+        storage: 30Gi # we don't use pvc-autoresizer. see overlays/*/victoriametrics/vmsingle-smallset.yaml too.
     storageClassName: topolvm-provisioner
   resources:
     requests:

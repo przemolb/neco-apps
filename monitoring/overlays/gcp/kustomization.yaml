@@ -4,6 +4,7 @@ resources:
   - ../../base
 patchesStrategicMerge:
   - prometheus/statefulset.yaml
+  - victoriametrics/vmsingle-smallset.yaml
 configMapGenerator:
   - name: alertmanager
     behavior: merge
