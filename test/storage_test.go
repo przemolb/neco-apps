@@ -545,3 +545,12 @@ spec:
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	})
 }
+
+func testRookCeph() {
+	Context("rookOperator", testRookOperator)
+	Context("clusterStable", testClusterStable)
+	Context("OSDPodsSpread", testOSDPodsSpreadAll)
+	Context("MONPodsSpread", testMONPodsSpreadAll)
+	Context("rookRGW", testRookRGW)
+	Context("rookRBD", testRookRBDAll)
+}
