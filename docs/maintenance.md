@@ -169,9 +169,14 @@ Download the upstream manifest as follows:
 
 ```console
 $ git clone https://github.com/integr8ly/grafana-operator
-$ cd grafana-operator
+$ cd $GOPATH/src/github.com/integr8ly/grafana-operator
 $ git checkout vX.Y.Z
-$ cp -r deploy/* $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
+$ UPSTREAM_DIR=$GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream/
+$ rm -r $UPSTREAM_DIR/*
+$ cp -r deploy/crds $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
+$ cp -r deploy/cluster_roles $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
+$ cp -r deploy/roles $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
+$ cp deploy/operator.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
 ```
 
 ### victoriametrics (operator)
