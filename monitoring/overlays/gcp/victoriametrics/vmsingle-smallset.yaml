@@ -1,0 +1,10 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMSingle
+metadata:
+  name: vmsingle-smallset-0
+  namespace: monitoring
+spec:
+  storage:
+    resources:
+      requests:
+        storage: 3Gi
