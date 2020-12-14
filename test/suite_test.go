@@ -56,6 +56,7 @@ var _ = Describe("Test applications", func() {
 	}
 
 	// preparing resources before test to make things faster
+	Context("preparing rook-ceph", prepareRookCeph)
 	Context("preparing argocd-ingress", prepareArgoCDIngress)
 	Context("preparing contour", prepareContour)
 	Context("preparing elastic", prepareElastic)

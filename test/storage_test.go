@@ -127,6 +127,95 @@ spec:
 	})
 }
 
+func prepareRookCeph() {
+	It("should create test-rook-rgw namespace for testRookRGW", func() {
+		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-rook-rgw", "--ignore-not-found=true")
+		createNamespaceIfNotExists("test-rook-rgw")
+		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-rook-rgw", "i-am-sure-to-delete=test-rook-rgw")
+	})
+
+	It("should apply a OBC resource and a POD for testRookRGW", func() {
+		ns := "test-rook-rgw"
+		podPvcYaml := fmt.Sprintf(`apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: pod-ob
+  namespace: %s
+spec:
+  generateBucketName: obc-poc
+  storageClassName: ceph-hdd-bucket
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-ob
+  namespace: %s
+spec:
+  containers:
+  - name: mycontainer
+    image: quay.io/cybozu/ubuntu-debug:18.04
+    imagePullPolicy: Always
+    args:
+    - infinity
+    command:
+    - sleep
+    envFrom:
+    - configMapRef:
+        name: pod-ob
+    - secretRef:
+        name: pod-ob`, ns, ns)
+
+		_, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "apply", "-f", "-")
+		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+	})
+
+	for _, storageClassName := range []string{"ceph-hdd-block", "ceph-ssd-block"} {
+		ns := "test-rook-rbd-" + storageClassName
+		It("should create "+ns+" namespace for testRookRBD", func() {
+			ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
+			createNamespaceIfNotExists(ns)
+			ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "i-am-sure-to-delete="+ns)
+		})
+
+		It("should create a POD for testRookRBD", func() {
+			podPvcYaml := fmt.Sprintf(`kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-rbd
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: %s
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-rbd
+  labels:
+    app.kubernetes.io/name: pod-rbd
+spec:
+  containers:
+  - name: ubuntu
+    image: quay.io/cybozu/ubuntu-debug:18.04
+    imagePullPolicy: Always
+    command: ["/usr/local/bin/pause"]
+    volumeMounts:
+    - mountPath: /test1
+      name: rbd-volume
+  volumes:
+  - name: rbd-volume
+    persistentVolumeClaim:
+      claimName: pvc-rbd`, storageClassName)
+
+			_, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "apply", "-n", ns, "-f", "-")
+			Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
+		})
+	}
+}
+
 func testRookOperator() {
 	nss := []string{"ceph-hdd", "ceph-ssd"}
 	for _, ns := range nss {
@@ -399,46 +488,8 @@ func testOSDPodsSpread(cephClusterName, cephClusterNamespace, nodeRole string) {
 }
 
 func testRookRGW() {
-	It("should create test-rook-rgw namespace", func() {
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-rook-rgw", "--ignore-not-found=true")
-		createNamespaceIfNotExists("test-rook-rgw")
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-rook-rgw", "i-am-sure-to-delete=test-rook-rgw")
-	})
-
 	It("should be used from a POD with a s3 client", func() {
 		ns := "test-rook-rgw"
-		podPvcYaml := fmt.Sprintf(`apiVersion: objectbucket.io/v1alpha1
-kind: ObjectBucketClaim
-metadata:
-  name: pod-ob
-  namespace: %s
-spec:
-  generateBucketName: obc-poc
-  storageClassName: ceph-hdd-bucket
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: pod-ob
-  namespace: %s
-spec:
-  containers:
-  - name: mycontainer
-    image: quay.io/cybozu/ubuntu-debug:18.04
-    imagePullPolicy: Always
-    args:
-    - infinity
-    command:
-    - sleep
-    envFrom:
-    - configMapRef:
-        name: pod-ob
-    - secretRef:
-        name: pod-ob`, ns, ns)
-
-		_, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "apply", "-f", "-")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
-
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", ns, "exec", "pod-ob", "--", "date")
 			if err != nil {
@@ -463,20 +514,6 @@ spec:
 		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "cat", "/tmp/downloaded")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	})
-
-	// This test confirming the configuration of RBAC so it should be at team-management_test.go but rook/ceph isn't deployed for GCP (without gcp-ceph)
-	It("should deploy OBC resource with maneki role", func() {
-		podPvcYaml := `apiVersion: objectbucket.io/v1alpha1
-kind: ObjectBucketClaim
-metadata:
-  name: hdd-ob
-  namespace: maneki
-spec:
-  generateBucketName: obc-poc
-  storageClassName: ceph-hdd-bucket`
-		stdout, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "--as test", "--as-group sys:authenticated", "--as-group maneki", "apply", "-f", "-")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-	})
 }
 
 func testRookRBDAll() {
@@ -486,48 +523,7 @@ func testRookRBDAll() {
 
 func testRookRBD(storageClassName string) {
 	ns := "test-rook-rbd-" + storageClassName
-	It("should create "+ns+" namespace", func() {
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
-		createNamespaceIfNotExists(ns)
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "i-am-sure-to-delete="+ns)
-	})
-
 	It("should be mounted to a path specified on a POD", func() {
-		podPvcYaml := fmt.Sprintf(`kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: pvc-rbd
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
-  storageClassName: %s
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: pod-rbd
-  labels:
-    app.kubernetes.io/name: pod-rbd
-spec:
-  containers:
-  - name: ubuntu
-    image: quay.io/cybozu/ubuntu-debug:18.04
-    imagePullPolicy: Always
-    command: ["/usr/local/bin/pause"]
-    volumeMounts:
-    - mountPath: /test1
-      name: rbd-volume
-  volumes:
-    - name: rbd-volume
-      persistentVolumeClaim:
-        claimName: pvc-rbd`, storageClassName)
-
-		_, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "apply", "-n", ns, "-f", "-")
-		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
-
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-rbd", "--", "mountpoint", "-d", "/test1")
 			if err != nil {
