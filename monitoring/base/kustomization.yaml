@@ -61,4 +61,4 @@ images:
     newTag: 1.9.7.1
   - name: quay.io/integreatly/grafana-operator
     newName: quay.io/cybozu/grafana-operator
-    newTag: 3.6.0.1
+    newTag: 3.7.0.1
