@@ -21,9 +21,11 @@ metadata:
     prometheus.io/path: "/metrics"
     prometheus.io/scrape: "true"
     prometheus.io/port: "9402"
-    egress.coil.cybozu.com/internet-egress: nat
 spec:
   template:
+    metadata:
+      annotations:
+        egress.coil.cybozu.com/internet-egress: nat
     spec:
       containers:
         - name: cert-manager
