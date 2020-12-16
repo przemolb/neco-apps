@@ -22,12 +22,6 @@ spec:
       "__requires": [
         {
           "type": "panel",
-          "id": "bargauge",
-          "name": "Bar gauge",
-          "version": ""
-        },
-        {
-          "type": "panel",
           "id": "gauge",
           "name": "Gauge",
           "version": ""
@@ -68,7 +62,7 @@ spec:
       "gnetId": null,
       "graphTooltip": 0,
       "id": null,
-      "iteration": 1606443593100,
+      "iteration": 1608108422744,
       "links": [],
       "panels": [
         {
@@ -92,6 +86,7 @@ spec:
             "defaults": {
               "custom": {},
               "mappings": [],
+              "min": 0,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -106,7 +101,7 @@ spec:
           },
           "gridPos": {
             "h": 9,
-            "w": 12,
+            "w": 6,
             "x": 0,
             "y": 1
           },
@@ -117,89 +112,35 @@ spec:
               "calcs": [
                 "mean"
               ],
-              "fields": "",
+              "fields": "/^A$/",
               "values": false
             },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "showThresholdLabels": true,
+            "showThresholdMarkers": false
           },
           "pluginVersion": "7.0.4",
+          "repeat": "pool",
           "targets": [
             {
-              "expr": "coil_controller_max_blocks - coil_controller_allocated_blocks",
+              "expr": "coil_controller_allocated_blocks{pool=\"${pool}\"}",
               "format": "time_series",
               "instant": false,
               "interval": "",
-              "legendFormat": "pool={{pool}}",
+              "legendFormat": "A",
               "refId": "A"
-            }
-          ],
-          "timeFrom": null,
-          "timeShift": null,
-          "title": "Unallocated Blocks",
-          "type": "gauge"
-        },
-        {
-          "datasource": "${DS_PROMETHEUS}",
-          "description": "The rate of address block allocation of the pool.",
-          "fieldConfig": {
-            "defaults": {
-              "custom": {},
-              "mappings": [],
-              "thresholds": {
-                "mode": "percentage",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 75
-                  },
-                  {
-                    "color": "red",
-                    "value": 90
-                  }
-                ]
-              },
-              "unit": "percent"
             },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 1
-          },
-          "id": 4,
-          "options": {
-            "displayMode": "gradient",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showUnfilled": true
-          },
-          "pluginVersion": "7.0.4",
-          "targets": [
             {
-              "expr": "coil_controller_allocated_blocks/coil_controller_max_blocks*100",
-              "instant": false,
+              "expr": "coil_controller_max_blocks{pool=\"${pool}\"} ",
+              "hide": false,
               "interval": "",
-              "legendFormat": "pool={{pool}}",
-              "refId": "A"
+              "legendFormat": "B",
+              "refId": "B"
             }
           ],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Block Allocation Rate",
-          "type": "bargauge"
+          "title": "Allocated Blocks (pool=${pool})",
+          "type": "gauge"
         },
         {
           "collapsed": false,
@@ -289,7 +230,6 @@ spec:
           },
           "yaxes": [
             {
-              "$$hashKey": "object:94",
               "format": "s",
               "label": null,
               "logBase": 1,
@@ -298,7 +238,6 @@ spec:
               "show": true
             },
             {
-              "$$hashKey": "object:95",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -400,7 +339,6 @@ spec:
           },
           "yaxes": [
             {
-              "$$hashKey": "object:152",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -409,7 +347,6 @@ spec:
               "show": true
             },
             {
-              "$$hashKey": "object:153",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -497,7 +434,6 @@ spec:
           },
           "yaxes": [
             {
-              "$$hashKey": "object:152",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -506,7 +442,6 @@ spec:
               "show": true
             },
             {
-              "$$hashKey": "object:153",
               "format": "short",
               "label": null,
               "logBase": 1,
@@ -613,7 +548,6 @@ spec:
               },
               "yaxes": [
                 {
-                  "$$hashKey": "object:109",
                   "format": "decbytes",
                   "label": null,
                   "logBase": 1,
@@ -622,7 +556,6 @@ spec:
                   "show": true
                 },
                 {
-                  "$$hashKey": "object:110",
                   "format": "short",
                   "label": null,
                   "logBase": 1,
@@ -717,7 +650,6 @@ spec:
               },
               "yaxes": [
                 {
-                  "$$hashKey": "object:138",
                   "format": "s",
                   "label": null,
                   "logBase": 1,
@@ -726,7 +658,6 @@ spec:
                   "show": true
                 },
                 {
-                  "$$hashKey": "object:139",
                   "format": "short",
                   "label": null,
                   "logBase": 1,
@@ -821,7 +752,6 @@ spec:
               },
               "yaxes": [
                 {
-                  "$$hashKey": "object:48",
                   "format": "short",
                   "label": null,
                   "logBase": 1,
@@ -830,7 +760,6 @@ spec:
                   "show": true
                 },
                 {
-                  "$$hashKey": "object:49",
                   "format": "short",
                   "label": null,
                   "logBase": 1,
@@ -858,7 +787,7 @@ spec:
           {
             "allValue": null,
             "current": {
-              "selected": true,
+              "selected": false,
               "text": "All",
               "value": "$__all"
             },
@@ -893,6 +822,28 @@ spec:
             "queryValue": "",
             "skipUrlSync": false,
             "type": "custom"
+          },
+          {
+            "allValue": null,
+            "current": {},
+            "datasource": "${DS_PROMETHEUS}",
+            "definition": "label_values(coil_controller_max_blocks, pool)",
+            "hide": 2,
+            "includeAll": true,
+            "label": null,
+            "multi": false,
+            "name": "pool",
+            "options": [],
+            "query": "label_values(coil_controller_max_blocks, pool)",
+            "refresh": 2,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "tagValuesQuery": "",
+            "tags": [],
+            "tagsQuery": "",
+            "type": "query",
+            "useTags": false
           }
         ]
       },
@@ -916,5 +867,5 @@ spec:
       "timezone": "",
       "title": "Coil",
       "uid": "R0qp0eoMk",
-      "version": 22
+      "version": 23
     }
