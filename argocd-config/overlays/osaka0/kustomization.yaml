@@ -12,6 +12,7 @@ patchesStrategicMerge:
 - external-dns.yaml
 - metallb.yaml
 - monitoring.yaml
+- registry.yaml
 - rook.yaml
 - secrets.yaml
 - teleport.yaml

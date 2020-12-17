@@ -1,0 +1,14 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: quay-registry
+  namespace: registry
+spec:
+  virtualhost:
+    fqdn: quay.registry.stage0.cybozu-ne.co
+  routes:
+    - conditions:
+        - prefix: /
+      services:
+        - name: quay-registry
+          port: 5000

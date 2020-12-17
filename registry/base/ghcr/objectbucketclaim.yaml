@@ -1,0 +1,8 @@
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: ghcr-registry-bucket
+  namespace: registry
+spec:
+  generateBucketName: ghcr-registry-bucket
+  storageClassName: ceph-hdd-bucket

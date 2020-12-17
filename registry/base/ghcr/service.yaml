@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ghcr-registry
+  namespace: registry
+spec:
+  selector:
+    app.kubernetes.io/name: ghcr-registry
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000

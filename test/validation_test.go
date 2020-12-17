@@ -180,6 +180,7 @@ func testApplicationResources(t *testing.T) {
 		"moco":                 "6",
 		"rook":                 "6",
 		"monitoring":           "7",
+		"registry":             "7",
 		"sandbox":              "7",
 		"teleport":             "7",
 		"pvc-autoresizer":      "8",

@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+patchesStrategicMerge:
+  - ./elastic/httpproxy.yaml
+  - ./ghcr/httpproxy.yaml
+  - ./quay/deployment.yaml
+  - ./quay/httpproxy.yaml

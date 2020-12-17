@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: registry
+  namespace: registry
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/cybozu-go/neco-apps.git
+    targetRevision: release
+    path: registry/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: registry
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
