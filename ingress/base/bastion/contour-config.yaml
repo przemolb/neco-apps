@@ -10,4 +10,25 @@ data:
     leaderelection:
       configmap-name: contour-leader
       configmap-namespace: ingress-bastion
-    accesslog-format: envoy
+    accesslog-format: json
+    json-fields:
+    - "start_time=%START_TIME%"
+    - "method=%REQ(:METHOD)%"
+    - "envoy_original_path=%REQ(X-ENVOY-ORIGINAL-PATH?:PATH)%"
+    - "protocol=%PROTOCOL%"
+    - "response_code=%RESPONSE_CODE%"
+    - "response_code_details=%RESPONSE_CODE_DETAILS%"
+    - "connection_time_details=%CONNECTION_TERMINATION_DETAILS%"
+    - "response_flags=%RESPONSE_FLAGS%"
+    - "request_duration=%REQUEST_DURATION%"
+    - "response_duration=%RESPONSE_DURATION%"
+    - "bytes_reveived=%BYTES_RECEIVED%"
+    - "bytes_sent=%BYTES_SENT%"
+    - "duration=%DURATION%"
+    - "envoy_upstream_service_time=%RESP(X-ENVOY-UPSTREAM-SERVICE-TIME)%"
+    - "x_forwarded_for=%REQ(X-FORWARDED-FOR)%"
+    - "user_agent=%REQ(USER-AGENT)%"
+    - "x_request_id=%REQ(X-REQUEST-ID)%"
+    - "authority=%REQ(:AUTHORITY)%"
+    - "upstream_host=%UPSTREAM_HOST%"
+    - "upstream_transport_failure_reason=%UPSTREAM_TRANSPORT_FAILURE_REASON%"
