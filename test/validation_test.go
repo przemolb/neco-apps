@@ -492,6 +492,11 @@ func testGeneratedSecretName(t *testing.T) {
 					appeared = true
 				}
 
+				// This lines tests ClusterIssuer at stage0 contains EAB HMAC Secret
+				if strings.Contains(strCondensed, "keySecretRef:name:"+es.Name+"key:eab-hmac-key") {
+					appeared = true
+				}
+
 				// This line tests VMAlertmanager.spec.configSecret
 				if strings.Contains(string(str), "configSecret: "+es.Name) {
 					appeared = true
@@ -504,6 +509,12 @@ func testGeneratedSecretName(t *testing.T) {
 			}
 			if !appeared {
 				t.Error("secret:", es.Name, "was not found in any manifests")
+			}
+
+			// Secret zero-ssl-eabsecret-yymmdd is not appeared except for stage0 manifests
+			// So, test with dummy secret doesn't make sense
+			if strings.HasPrefix(es.Name, "zero-ssl-eabsecret-") {
+				continue OUTER
 			}
 
 			for _, cs := range dummySecrets {
