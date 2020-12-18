@@ -33,6 +33,16 @@ spec:
       labels:
         app: addload
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - addload
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: spread-test-ubuntu
         image: quay.io/cybozu/ubuntu:18.04
@@ -64,6 +74,16 @@ spec:
       labels:
         app: addload
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - addload
+            topologyKey: "kubernetes.io/hostname"
       containers:
       - name: spread-test-ubuntu
         image: quay.io/cybozu/ubuntu:18.04
