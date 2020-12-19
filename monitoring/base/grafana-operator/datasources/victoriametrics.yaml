@@ -5,10 +5,10 @@ metadata:
 spec:
   name: victoriametrics.yaml
   datasources:
-    - name: vmsingle-smallset-0
+    - name: vmsingle-smallset
       type: prometheus
       access: proxy
-      url: http://vmsingle-vmsingle-smallset-0.monitoring.svc:8429
+      url: http://vmsingle-vmsingle-smallset.monitoring.svc:8429
       version: 1
       isDefault: false
       editable: false
