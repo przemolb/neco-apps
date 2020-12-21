@@ -860,10 +860,10 @@ func testVMAlertmanager() {
 }
 
 func testVMSmallsetClusterComponents() {
-	It("should be deployed successfully (vmsingle 0)", func() {
+	It("should be deployed successfully (vmsingle)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/vmsingle-vmsingle-smallset-0", "-o=json")
+				"get", "deployment/vmsingle-vmsingle-smallset", "-o=json")
 			if err != nil {
 				return err
 			}
@@ -880,10 +880,10 @@ func testVMSmallsetClusterComponents() {
 		}).Should(Succeed())
 	})
 
-	It("should be deployed successfully (vmalert 0)", func() {
+	It("should be deployed successfully (vmalert)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/vmalert-vmalert-smallset-0", "-o=json")
+				"get", "deployment/vmalert-vmalert-smallset", "-o=json")
 			if err != nil {
 				return err
 			}
@@ -923,7 +923,7 @@ func testVMSmallsetClusterComponents() {
 	It("should reply successfully (vmsingle)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmsingle,app.kubernetes.io/instance=vmsingle-smallset-0", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=vmsingle,app.kubernetes.io/instance=vmsingle-smallset", "-o=json")
 			if err != nil {
 				return err
 			}
@@ -949,7 +949,7 @@ func testVMSmallsetClusterComponents() {
 	It("should reply successfully (vmalert)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmalert,app.kubernetes.io/instance=vmalert-smallset-0", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=vmalert,app.kubernetes.io/instance=vmalert-smallset", "-o=json")
 			if err != nil {
 				return err
 			}
