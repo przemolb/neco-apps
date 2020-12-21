@@ -239,6 +239,10 @@ Download the upstream tar ball from [releases](https://github.com/topolvm/pvc-au
 $ kustomize build ./config/default > /path/to/pvc-autoresizer/base/upstream.yaml
 ```
 
+## registry
+
+Check [the release notes](https://github.com/docker/distribution/releases).
+
 ## rook
 
 *Do not upgrade Rook and Ceph at the same time!*

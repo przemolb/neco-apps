@@ -5,4 +5,5 @@ metadata:
   namespace: registry
 spec:
   source:
+    targetRevision: stage
     path: registry/overlays/stage0
