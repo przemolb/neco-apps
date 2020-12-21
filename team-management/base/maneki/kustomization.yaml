@@ -6,6 +6,7 @@ resources:
   - app-gorush.yaml
   - app-kodama.yaml
   - app-misc.yaml
+  - app-monitoring-elasticstack.yaml
   - app-monitoring.yaml
   - app-oauth-redirector.yaml
   - app-octodns.yaml

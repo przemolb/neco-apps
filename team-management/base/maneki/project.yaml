@@ -17,6 +17,8 @@ spec:
     server: '*'
   - namespace: app-misc
     server: '*'
+  - namespace: app-monitoring-elasticstack
+    server: '*'
   - namespace: app-monitoring
     server: '*'
   - namespace: app-oauth-redirector
