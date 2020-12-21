@@ -698,7 +698,6 @@ func testVMCustomResources(t *testing.T) {
 			continue
 		}
 		if r.Kind == "VMAgent" && r.Name == "vmagent-smallset" {
-			// There is only one vmagent-smallset.
 			smallsetVMAgent = &r
 			break
 		}
@@ -726,16 +725,9 @@ func testVMCustomResources(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		if r.Kind == "VMAlert" && strings.HasPrefix(r.Name, "vmalert-smallset-") {
-			// There may be multiple vmalert-smallset's
-			if smallsetVMAlert != nil {
-				if !reflect.DeepEqual(smallsetVMAlert.Spec.RuleNamespaceSelector, r.Spec.RuleNamespaceSelector) ||
-					!reflect.DeepEqual(smallsetVMAlert.Spec.RuleSelector, r.Spec.RuleSelector) {
-					t.Fatalf("multiple vmalerts have different rule selector")
-				}
-			} else {
-				smallsetVMAlert = &r
-			}
+		if r.Kind == "VMAlert" && r.Name == "vmalert-smallset" {
+			smallsetVMAlert = &r
+			break
 		}
 	}
 	if smallsetVMAlert == nil {
