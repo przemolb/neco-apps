@@ -1,0 +1,14 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: registry-{{ .Values.instance }}
+  namespace: registry
+spec:
+  virtualhost:
+    fqdn: {{ .Values.httpproxy.fqdn }}
+  routes:
+    - conditions:
+        - prefix: /
+      services:
+        - name: registry-{{ .Values.instance }}
+          port: 5000
