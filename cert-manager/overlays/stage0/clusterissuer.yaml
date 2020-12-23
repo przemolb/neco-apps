@@ -18,7 +18,7 @@ spec:
     server: https://acme.zerossl.com/v2/DV90
     solvers:
       - dns01:
-          clouddns:
+          cloudDNS:
             project: cybozu-neco
             serviceAccountSecretRef:
               key: account.json
