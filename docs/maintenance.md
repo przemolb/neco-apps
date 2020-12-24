@@ -54,8 +54,8 @@ $ vi cert-manager/base/upstream/cert-manager.yaml
 As dex is OIDC used for ArgoCD, this should be upgraded with ArgoCD version up.
 However, if it needs to be upgraded alone for some reason, confirm ArgoCD SSO login through the web browser and cli is still possible after it is staged by the following procedure.
 
-1. access to the url, https://argocd.stage0.cybozu-ne.co/login, from your web browser
-2. run the command, `argocd login argocd.stage0.cybozu-ne.co --sso`
+1. access to the [ArgoCD dashboard on stage0](https://argocd.stage0.cybozu-ne.co/login) from your web browser
+2. run `argocd login argocd.stage0.cybozu-ne.co --sso` on your local PC and confirm that the login is successful
 
 ## elastic (ECK)
 
