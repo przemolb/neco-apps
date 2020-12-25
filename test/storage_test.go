@@ -323,11 +323,21 @@ func testClusterStable() {
 			num_mon_expected, err := strconv.Atoi(strings.TrimSpace(string(stdout)))
 			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", stdout)
 
-			stdout, _, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "--namespace="+ns,
 				"get", "cephcluster", ns, "-o", "jsonpath='{.spec.storage.storageClassDeviceSets[0].count}'")
 			Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 			num_osd_expected, err := strconv.Atoi(strings.TrimSpace(string(stdout)))
 			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", stdout)
+
+			num_rgw_expected := 0
+			if ns == "ceph-hdd" {
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
+					"get", "cephobjectstore", ns+"-object-store", "-o", "jsonpath='{.spec.gateway.instances}'")
+				Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+				n, err := strconv.Atoi(strings.TrimSpace(string(stdout)))
+				Expect(err).ShouldNot(HaveOccurred(), "stdout=%s", stdout)
+				num_rgw_expected = n
+			}
 
 			By("checking deployments versions are equal to the requiring")
 			Eventually(func() error {
@@ -344,16 +354,21 @@ func testClusterStable() {
 					return err
 				}
 
-				var num_mon, num_osd int
+				var num_mon, num_osd, num_rgw int
 				for _, deployment := range deployments.Items {
 					switch deployment.Labels["app"] {
 					case "rook-ceph-mon":
 						num_mon++
 					case "rook-ceph-osd":
 						num_osd++
+					case "rook-ceph-rgw":
+						num_rgw++
 					}
 
 					rookVersion, ok := deployment.Labels["rook-version"]
+					// Some Deployments like rook-ceph-operator and rook-ceph-tools do not have "rook-version" label,
+					// so skip the check of "rook-version" for such Deployments.
+					// This assumes that the operator never misses labeling to the Deployments which need to be labeled.
 					if ok && !strings.HasPrefix(rookVersion, expectRookVersion) {
 						return fmt.Errorf("missing deployment rook version: version=%s name=%s ns=%s", rookVersion, deployment.Name, deployment.Namespace)
 					}
@@ -371,6 +386,9 @@ func testClusterStable() {
 				}
 				if num_osd != num_osd_expected {
 					return fmt.Errorf("number of OSDs is %d, expected is %d", num_osd, num_osd_expected)
+				}
+				if num_rgw != num_rgw_expected {
+					return fmt.Errorf("number of RGWs is %d, expected is %d", num_rgw, num_rgw_expected)
 				}
 
 				return nil
@@ -510,13 +528,7 @@ func testOSDPodsSpread(cephClusterName, cephClusterNamespace, nodeRole string) {
 func testRookRGW() {
 	It("should be used from a POD with a s3 client", func() {
 		ns := "test-rook-rgw"
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", ns, "exec", "pod-ob", "--", "date")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
+		waitRGW(ns, "pod-ob")
 
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "sh", "-c", `"echo foobar > /tmp/foobar"`)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
@@ -568,14 +580,7 @@ func prepareRebootRookCeph() {
 
 	It("should store data via RGW before reboot", func() {
 		ns := "test-rook-rgw"
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", ns, "exec", "pod-ob", "--", "date")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-			return nil
-		}).Should(Succeed())
-
+		waitRGW(ns, "pod-ob")
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "sh", "-c", `"echo foobar > /tmp/foobar"`)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "sh", "-c",
@@ -587,6 +592,7 @@ func prepareRebootRookCeph() {
 func testRebootRookCeph() {
 	It("should get stored data via RGW after reboot", func() {
 		ns := "test-rook-rgw"
+		waitRGW(ns, "pod-ob")
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "sh", "-c",
 			`"s3cmd get s3://\${BUCKET_NAME}/foobar_reboot /tmp/downloaded --no-ssl --host=\${BUCKET_HOST} --host-bucket="`)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
@@ -594,6 +600,17 @@ func testRebootRookCeph() {
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		Expect(stdout).To(Equal([]byte("foobar\n")))
 	})
+}
+
+func waitRGW(ns, podName string) {
+	Eventually(func() error {
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, podName, "--", "sh", "-c",
+			`"s3cmd ls s3://\${BUCKET_NAME}/ --no-ssl --host=\${BUCKET_HOST} --host-bucket="`)
+		if err != nil {
+			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+		}
+		return nil
+	}).Should(Succeed())
 }
 
 func testRookCeph() {
