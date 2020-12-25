@@ -677,3 +677,20 @@ scrape_configs:
         regex: (.*)
         replacement: ${1}
         target_label: component
+  - job_name: "rook"
+    kubernetes_sd_configs:
+      - role: endpoints
+        namespaces:
+          names: ["ceph-hdd", "ceph-ssd"]
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoints_name]
+        action: keep
+        regex: rook-ceph-mgr
+      - source_labels: [__address__]
+        action: replace
+        regex: ([^:]+)(?::\d+)?
+        replacement: ${1}
+        target_label: instance
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
