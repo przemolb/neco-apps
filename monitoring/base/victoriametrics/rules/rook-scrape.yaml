@@ -1,0 +1,23 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: rook
+  namespace: monitoring
+  labels:
+    smallset: "true"
+spec:
+  namespaceSelector:
+    matchNames: [ceph-hdd, ceph-ssd]
+  selector:
+    matchLabels:
+      app: rook-ceph-mgr
+  endpoints:
+  - port: http-metrics
+    relabelConfigs:
+      - replacement: rook
+        targetLabel: job
+      - sourceLabels: [__address__]
+        regex: ([^:]+)(?::\d+)?
+        action: replace
+        replacement: ${1}
+        targetLabel: instance
