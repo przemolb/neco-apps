@@ -6,7 +6,3 @@ metadata:
 spec:
   source:
     targetRevision: stage
-    helm:
-      parameters:
-        - name: "httpproxy.fqdn"
-          value: elastic.registry.stage0.cybozu-ne.co

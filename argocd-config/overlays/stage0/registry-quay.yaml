@@ -8,7 +8,5 @@ spec:
     targetRevision: stage
     helm:
       parameters:
-        - name: "httpproxy.fqdn"
-          value: quay.registry.stage0.cybozu-ne.co
         - name: "proxy.secretName"
           value: quay-credential-t5c62bctdb

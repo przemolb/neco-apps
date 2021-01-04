@@ -93,5 +93,5 @@ spec:
       volumes:
         - name: registry-config
           configMap:
-            name: registry-config
+            name: registry-{{ .Values.instance }}-config
 

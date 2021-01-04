@@ -12,9 +12,6 @@ spec:
     targetRevision: release
     path: registry
     helm:
-      parameters:
-        - name: "httpproxy.fqdn"
-          value: quay.registry.gcp0.dev-ne.co
       valueFiles:
         - values.yaml
         - values-quay.yaml
