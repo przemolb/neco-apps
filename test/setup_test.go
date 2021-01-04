@@ -342,19 +342,6 @@ func applyAndWaitForApplications(commitID string) {
 	}
 	Expect(appList).ShouldNot(HaveLen(0))
 
-	// TODO: remove this block after release the PR bellow
-	// https://github.com/cybozu-go/neco-apps/pull/957
-	if doUpgrade {
-		Eventually(func() error {
-			_, _, err := ExecAt(boot0, "argocd", "app", "sync", "teleport", "--force", "--timeout", "300")
-			if err != nil {
-				ExecAt(boot0, "argocd", "app", "terminate-op", "teleport")
-				return err
-			}
-			return nil
-		}, 40*time.Minute).Should(Succeed())
-	}
-
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 		for _, target := range appList {
@@ -374,27 +361,6 @@ func applyAndWaitForApplications(commitID string) {
 				app.Status.Health.Status == argocd.HealthStatusHealthy &&
 				app.Operation == nil {
 				continue
-			}
-
-			// TODO: remove this block when the following PR is released.
-			// https://github.com/cybozu-go/neco-apps/pull/966
-			if doUpgrade && app.Name == "sandbox" {
-				stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "sandbox", "get", "svc", "grafana", "-o", "json")
-				if err != nil {
-					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", appStdout, stderr, err)
-				}
-
-				var svc corev1.Service
-				err = json.Unmarshal(stdout, &svc)
-				if err != nil {
-					return fmt.Errorf("stdout: %v, err: %v", stdout, err)
-				}
-				if svc.Spec.Type != corev1.ServiceTypeClusterIP {
-					stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-n", "sandbox", "svc", "grafana")
-					if err != nil {
-						return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-					}
-				}
 			}
 
 			// In upgrade test, syncing network-policy app may cause temporal network disruption.
