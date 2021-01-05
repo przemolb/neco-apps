@@ -40,9 +40,6 @@ spec:
     image: ghcr.io/cybozu-go/moco:0.3.1
     imagePullPolicy: Always
     name: moco
-  securityContext:
-    runAsGroup: 1000
-    runAsUser: 1000
 ---
 apiVersion: v1
 kind: Pod
@@ -59,6 +56,18 @@ spec:
   securityContext:
     runAsGroup: 1000
     runAsUser: 1000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: quay-private-testhttpd
+  namespace: registry
+spec:
+  containers:
+  - command:
+    image: quay.io/neco_test/testhttpd:0.1.1
+    imagePullPolicy: Always
+    name: testhttpd
 ---
 `
 		_, stderr, err := ExecAtWithInput(boot0, []byte(podsYaml), "kubectl", "apply", "-f", "-")
@@ -111,5 +120,6 @@ func testRegistry() {
 		err = json.Unmarshal(stdout, &quayCatalog)
 		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 		Expect(quayCatalog.Repositories).Should(ContainElement("cybozu/ubuntu-debug"))
+		Expect(quayCatalog.Repositories).Should(ContainElement("neco_test/testhttpd"))
 	})
 }
