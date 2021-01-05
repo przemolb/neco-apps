@@ -3,7 +3,7 @@ kind: Namespace
 metadata:
   name: ingress-global
   labels:
-    control-plane: "true"
+    vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
 
 ---
@@ -12,7 +12,7 @@ kind: Namespace
 metadata:
   name: ingress-bastion
   labels:
-    control-plane: "true"
+    vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
 
 ---
@@ -21,5 +21,5 @@ kind: Namespace
 metadata:
   name: ingress-forest
   labels:
-    control-plane: "true"
+    vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore

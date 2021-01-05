@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: teleport
   labels:
-    control-plane: "true"
+    vnetworkpolicy.kb.io/ignore: "true"

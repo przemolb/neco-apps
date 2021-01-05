@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: monitoring
   labels:
-    control-plane: "true"
+    vnetworkpolicy.kb.io/ignore: "true"
