@@ -683,14 +683,9 @@ scrape_configs:
         namespaces:
           names: ["ceph-hdd", "ceph-ssd"]
     relabel_configs:
-      - source_labels: [__meta_kubernetes_endpoints_name]
+      - source_labels: [__meta_kubernetes_endpoints_name, __meta_kubernetes_endpoint_port_name]
         action: keep
-        regex: rook-ceph-mgr
-      - source_labels: [__address__]
-        action: replace
-        regex: ([^:]+)(?::\d+)?
-        replacement: ${1}
-        target_label: instance
+        regex: rook-ceph-mgr;http-metrics
       - source_labels: [__meta_kubernetes_namespace]
         action: replace
-        target_label: kubernetes_namespace
+        target_label: instance
