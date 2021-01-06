@@ -26,3 +26,5 @@ resources:
   - node-exporter.yaml
   - sabakan.yaml
   - topolvm-volumegroup.yaml
+  - victoriametrics-vmagent.yaml
+  - victoriametrics-vmsingle.yaml
