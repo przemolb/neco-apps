@@ -1,4 +1,4 @@
-How to write Kubernetes application manifests
+Organization of this repository
 =============================================
 
 Directory tree
@@ -78,9 +78,3 @@ resources:   # It includes all K8s objects for monitoring.
 - deployment.yaml
 - service.yaml
 ```
-
-Caveats
--------
-
-- Please do not add sensitive secrets in this repository.
-- When you add `Namespace` manifest for new applications except `team-management` App, please put in `namespaces` App, not in new application tree.
