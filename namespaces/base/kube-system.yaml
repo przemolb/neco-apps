@@ -3,6 +3,6 @@ kind: Namespace
 metadata:
   name: kube-system
   labels:
-    mpod.kb.io/ignore: "true"
     vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
+    mpod.kb.io/ignore: "true"
