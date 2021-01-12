@@ -9,6 +9,8 @@ resources:
   - vmagent-smallset.yaml
   - vmalert-smallset.yaml
   - vmsingle-smallset.yaml
+  - vmagent-largeset.yaml
+  - vmalert-largeset.yaml
   - vmcluster-largeset.yaml
   - rules/kubernetes-scrape.yaml
   - rules/kubernetes-alertrule.yaml
