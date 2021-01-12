@@ -860,6 +860,8 @@ func testVMAlertmanager() {
 }
 
 func testVMSmallsetClusterComponents() {
+	const vmagentCount = 3
+
 	It("should be deployed successfully (vmsingle)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
@@ -913,8 +915,8 @@ func testVMSmallsetClusterComponents() {
 				return err
 			}
 
-			if int(deployment.Status.AvailableReplicas) != 2 {
-				return fmt.Errorf("AvailableReplicas is not 2: %d", int(deployment.Status.AvailableReplicas))
+			if int(deployment.Status.AvailableReplicas) != vmagentCount {
+				return fmt.Errorf("AvailableReplicas is not %d: %d", vmagentCount, int(deployment.Status.AvailableReplicas))
 			}
 			return nil
 		}).Should(Succeed())
@@ -984,33 +986,40 @@ func testVMSmallsetClusterComponents() {
 			if err != nil {
 				return err
 			}
-			if len(podList.Items) != 2 {
-				return errors.New("vmagent pod doesn't exist")
+			if len(podList.Items) != vmagentCount {
+				return errors.New("vmagent pod count mismatch")
 			}
-			podName := podList.Items[0].Name
+			for _, pod := range podList.Items {
+				podName := pod.Name
 
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
-				podName, "curl", "http://localhost:8429/api/v1/targets")
-			if err != nil {
-				return fmt.Errorf("unable to curl :8429/api/v1/targets, stderr: %s, err: %v", stderr, err)
-			}
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+					podName, "curl", "http://localhost:8429/api/v1/targets")
+				if err != nil {
+					return fmt.Errorf("unable to curl http://%s:8429/api/v1/targets, stderr: %s, err: %v", podName, stderr, err)
+				}
 
-			var response struct {
-				TargetsResult promv1.TargetsResult `json:"data"`
-			}
-			err = json.Unmarshal(stdout, &response)
-			if err != nil {
-				return err
-			}
+				var response struct {
+					TargetsResult promv1.TargetsResult `json:"data"`
+				}
+				err = json.Unmarshal(stdout, &response)
+				if err != nil {
+					return err
+				}
 
-			for _, target := range response.TargetsResult.Active {
-				if value, ok := target.Labels["job"]; ok {
-					if value == "kubernetes-nodes" && target.Health == promv1.HealthGood {
-						return nil
+				found := false
+				for _, target := range response.TargetsResult.Active {
+					if value, ok := target.Labels["job"]; ok {
+						if value == "kubernetes-nodes" && target.Health == promv1.HealthGood {
+							found = true
+							break
+						}
 					}
 				}
+				if !found {
+					return errors.New("cannot find target")
+				}
 			}
-			return errors.New("cannot find target")
+			return nil
 		}).Should(Succeed())
 	})
 }
