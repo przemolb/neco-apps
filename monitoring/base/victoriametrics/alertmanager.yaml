@@ -30,3 +30,12 @@ spec:
     requests:
       cpu: 100m
       memory: 200Mi
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: topolvm-provisioner
