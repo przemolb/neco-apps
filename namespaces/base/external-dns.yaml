@@ -4,4 +4,3 @@ metadata:
   name: external-dns
   labels:
     cert-manager.io/disable-validation: "true"
-    topolvm.cybozu.com/webhook: ignore

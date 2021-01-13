@@ -4,5 +4,3 @@ metadata:
   name: domestic-egress
   annotations:
     coil.cybozu.com/pool: domestic-egress
-  labels:
-    topolvm.cybozu.com/webhook: ignore
