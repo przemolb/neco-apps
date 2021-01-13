@@ -4,4 +4,3 @@ metadata:
   name: bmc-reverse-proxy
   labels:
     vnetworkpolicy.kb.io/ignore: "true"
-    mpod.kb.io/ignore: "true"

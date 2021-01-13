@@ -5,7 +5,6 @@ metadata:
   labels:
     vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
-    mpod.kb.io/ignore: "true"
 
 ---
 apiVersion: v1
@@ -15,7 +14,6 @@ metadata:
   labels:
     vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
-    mpod.kb.io/ignore: "true"
 
 ---
 apiVersion: v1
@@ -25,4 +23,3 @@ metadata:
   labels:
     vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
-    mpod.kb.io/ignore: "true"
