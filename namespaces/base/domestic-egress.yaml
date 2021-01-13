@@ -5,5 +5,4 @@ metadata:
   annotations:
     coil.cybozu.com/pool: domestic-egress
   labels:
-    vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore

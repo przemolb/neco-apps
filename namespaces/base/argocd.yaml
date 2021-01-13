@@ -3,5 +3,4 @@ kind: Namespace
 metadata:
   name: argocd
   labels:
-    vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore

@@ -3,23 +3,24 @@ kind: Namespace
 metadata:
   name: ingress-global
   labels:
-    vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
-
+  annotations:
+    admission.cybozu.com/min-policy-order: 1001
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: ingress-bastion
   labels:
-    vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
-
+  annotations:
+    admission.cybozu.com/min-policy-order: 1001
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: ingress-forest
   labels:
-    vnetworkpolicy.kb.io/ignore: "true"
     topolvm.cybozu.com/webhook: ignore
+  annotations:
+    admission.cybozu.com/min-policy-order: 1001
