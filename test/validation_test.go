@@ -190,8 +190,9 @@ func testApplicationResources(t *testing.T) {
 		"customer-egress":      "8",
 		"neco-admission":       "8",
 		"network-policy":       "9",
-		"ept-apps":             "11",
-		"maneki-apps":          "11",
+		"tenant-apps":          "11",
+		"ept-apps":             "12",
+		"maneki-apps":          "12",
 	}
 
 	necoAppsTargetRevisions := map[string]string{
@@ -210,6 +211,9 @@ func testApplicationResources(t *testing.T) {
 			"osaka0": "release",
 			"stage0": "stage",
 			"tokyo0": "release",
+		},
+		"tenant-apps": {
+			"stage0": "stage",
 		},
 	}
 
@@ -632,18 +636,11 @@ func testVMCustomResources(t *testing.T) {
 	}
 
 	// check namespace label selectors
-
-	expectedNamespaceSelector := metav1.LabelSelector{
-		MatchLabels: map[string]string{
-			"team": "neco",
-		},
-	}
-
-	if !reflect.DeepEqual(smallsetVMAgent.Spec.ServiceScrapeNamespaceSelector, &expectedNamespaceSelector) ||
-		!reflect.DeepEqual(smallsetVMAgent.Spec.PodScrapeNamespaceSelector, &expectedNamespaceSelector) ||
-		!reflect.DeepEqual(smallsetVMAgent.Spec.NodeScrapeNamespaceSelector, &expectedNamespaceSelector) ||
-		!reflect.DeepEqual(smallsetVMAgent.Spec.ProbeNamespaceSelector, &expectedNamespaceSelector) ||
-		!reflect.DeepEqual(smallsetVMAlert.Spec.RuleNamespaceSelector, &expectedNamespaceSelector) {
+	if smallsetVMAgent.Spec.ServiceScrapeNamespaceSelector != nil ||
+		smallsetVMAgent.Spec.PodScrapeNamespaceSelector != nil ||
+		smallsetVMAgent.Spec.NodeScrapeNamespaceSelector != nil ||
+		smallsetVMAgent.Spec.ProbeNamespaceSelector != nil ||
+		smallsetVMAlert.Spec.RuleNamespaceSelector != nil {
 		t.Errorf("bad namespace selector")
 	}
 
