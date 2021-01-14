@@ -2,16 +2,16 @@ package test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strings"
+	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-func prepareRegistry() {
-	It("should prepare resources", func() {
-		By("creating pods")
-		podsYaml := `
+const podsYaml = `
 apiVersion: v1
 kind: Pod
 metadata:
@@ -70,6 +70,10 @@ spec:
     name: testhttpd
 ---
 `
+
+func prepareRegistry() {
+	It("should prepare resources", func() {
+		By("creating pods")
 		_, stderr, err := ExecAtWithInput(boot0, []byte(podsYaml), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
@@ -78,48 +82,118 @@ spec:
 
 func testRegistry() {
 	It("should cache containers on mirror registries", func() {
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "registry", "get", "service", "registry-elastic",
-			"--output=jsonpath={.spec.clusterIP}")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		elasticAddr := string(stdout)
-
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "registry", "get", "service", "registry-ghcr",
-			"--output=jsonpath={.spec.clusterIP}")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		ghcrAddr := string(stdout)
-
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "registry", "get", "service", "registry-quay",
-			"--output=jsonpath={.spec.clusterIP}")
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		quayAddr := string(stdout)
-
 		type catalog struct {
 			Repositories []string `json:"repositories"`
 		}
 
-		By("checking docker.elastic.co")
-		stdout, stderr, err = ExecAt(boot0, "curl", fmt.Sprintf("http://%s:5000/v2/_catalog", elasticAddr))
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		elasticCatalog := catalog{}
-		err = json.Unmarshal(stdout, &elasticCatalog)
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		Expect(elasticCatalog.Repositories).Should(ContainElement("elasticsearch/elasticsearch-oss"))
+		Eventually(func() error {
+			By("checking docker.elastic.co")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-elastic:5000/v2/_catalog")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			elasticCatalog := catalog{}
+			err = json.Unmarshal(stdout, &elasticCatalog)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			cached := false
+			for _, repo := range elasticCatalog.Repositories {
+				if strings.Contains(repo, "elasticsearch/elasticsearch-oss") {
+					cached = true
+					break
+				}
+			}
+			if !cached {
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-nregistry", "pod", "elastic-elasticsearch")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				stdout, stderr, err := ExecAtWithInput(boot0, []byte(podsYaml), "kubectl", "apply", "-f", "-")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				return errors.New("elasticsearch-oss is not found in elastic registry")
+			}
 
-		By("checking ghcr.io")
-		stdout, stderr, err = ExecAt(boot0, "curl", fmt.Sprintf("http://%s:5000/v2/_catalog", ghcrAddr))
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		ghcrCatalog := catalog{}
-		err = json.Unmarshal(stdout, &ghcrCatalog)
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		Expect(ghcrCatalog.Repositories).Should(ContainElement("cybozu-go/moco"))
+			By("checking ghcr.io")
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-ghcr:5000/v2/_catalog")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			ghcrCatalog := catalog{}
+			err = json.Unmarshal(stdout, &ghcrCatalog)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			cached = false
+			for _, repo := range ghcrCatalog.Repositories {
+				if strings.Contains(repo, "cybozu-go/moco") {
+					cached = true
+					break
+				}
+			}
+			if !cached {
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-nregistry", "pod", "ghcr-moco")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				stdout, stderr, err := ExecAtWithInput(boot0, []byte(podsYaml), "kubectl", "apply", "-f", "-")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				return errors.New("cybozu-go/moco is not found in ghcr registry")
+			}
 
-		By("checking quay.io")
-		stdout, stderr, err = ExecAt(boot0, "curl", fmt.Sprintf("http://%s:5000/v2/_catalog", quayAddr))
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		quayCatalog := catalog{}
-		err = json.Unmarshal(stdout, &quayCatalog)
-		Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-		Expect(quayCatalog.Repositories).Should(ContainElement("cybozu/ubuntu-debug"))
-		Expect(quayCatalog.Repositories).Should(ContainElement("neco_test/testhttpd"))
+			By("checking quay.io")
+			stdout, stderr, err = ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-quay:5000/v2/_catalog")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+			quayCatalog := catalog{}
+			err = json.Unmarshal(stdout, &quayCatalog)
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
+
+			cached = false
+			for _, repo := range quayCatalog.Repositories {
+				if strings.Contains(repo, "cybozu/ubuntu-debug") {
+					cached = true
+					break
+				}
+			}
+			if !cached {
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-nregistry", "pod", "ghcr-moco")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				stdout, stderr, err := ExecAtWithInput(boot0, []byte(podsYaml), "kubectl", "apply", "-f", "-")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				return errors.New("cybozu/ubuntu is not found in quay registry")
+			}
+
+			cached = false
+			for _, repo := range quayCatalog.Repositories {
+				if strings.Contains(repo, "neco_test/testhttpd") {
+					cached = true
+					break
+				}
+			}
+			if !cached {
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-nregistry", "pod", "quay-private-testhttpd")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				stdout, stderr, err := ExecAtWithInput(boot0, []byte(podsYaml), "kubectl", "apply", "-f", "-")
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				return errors.New("neco_test/testhttpd is not found in quay registry")
+			}
+			return nil
+		}, 10*time.Minute).Should(Succeed())
 	})
 }
