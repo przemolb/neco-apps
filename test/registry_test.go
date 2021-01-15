@@ -15,7 +15,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: elastic-elasticsearch
-  namespace: registry
+  namespace: test-registry
 spec:
   containers:
   - command:
@@ -31,7 +31,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: ghcr-moco
-  namespace: registry
+  namespace: test-registry
 spec:
   containers:
   - command:
@@ -44,7 +44,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: quay-ubuntu
-  namespace: registry
+  namespace: test-registry
 spec:
   containers:
   - command:
@@ -60,7 +60,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: quay-private-testhttpd
-  namespace: registry
+  namespace: test-registry
 spec:
   containers:
   - command:
@@ -72,6 +72,7 @@ spec:
 func prepareRegistry() {
 	It("should prepare resources", func() {
 		By("creating pods")
+		createNamespaceIfNotExists("test-registry")
 		_, stderr, err := ExecAtWithInput(boot0, []byte(podsYaml), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
@@ -85,7 +86,7 @@ func testRegistry() {
 
 		Eventually(func() error {
 			By("checking docker.elastic.co")
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-elastic:5000/v2/_catalog")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-ntest-registry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-elastic.registry:5000/v2/_catalog")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -102,7 +103,7 @@ func testRegistry() {
 				}
 			}
 			if !cached {
-				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-nregistry", "pod", "elastic-elasticsearch")
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-ntest-registry", "pod", "elastic-elasticsearch")
 				if err != nil {
 					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}
@@ -117,7 +118,7 @@ func testRegistry() {
 
 		By("checking ghcr.io")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-ghcr:5000/v2/_catalog")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-ntest-registry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-ghcr.registry:5000/v2/_catalog")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -134,7 +135,7 @@ func testRegistry() {
 				}
 			}
 			if !cached {
-				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-nregistry", "pod", "ghcr-moco")
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-ntest-registry", "pod", "ghcr-moco")
 				if err != nil {
 					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}
@@ -150,7 +151,7 @@ func testRegistry() {
 
 		By("checking quay.io")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-quay:5000/v2/_catalog")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-ntest-registry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-quay.registry:5000/v2/_catalog")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -168,7 +169,7 @@ func testRegistry() {
 				}
 			}
 			if !cached {
-				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-nregistry", "pod", "ghcr-moco")
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-ntest-registry", "pod", "ghcr-moco")
 				if err != nil {
 					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}
@@ -187,7 +188,7 @@ func testRegistry() {
 				}
 			}
 			if !cached {
-				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-nregistry", "pod", "quay-private-testhttpd")
+				stdout, stderr, err = ExecAt(boot0, "kubectl", "delete", "-ntest-registry", "pod", "quay-private-testhttpd")
 				if err != nil {
 					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 				}
