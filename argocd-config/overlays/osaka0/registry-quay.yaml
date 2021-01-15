@@ -6,6 +6,7 @@ metadata:
 spec:
   source:
     helm:
-      parameters:
-        - name: "proxy.secretName"
-          value: quay-credential-t5c62bctdb
+      valueFiles:
+        - values.yaml
+        - values-quay.yaml
+        - values-quay-credential.yaml
