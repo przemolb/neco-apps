@@ -6,7 +6,7 @@ metadata:
 spec:
   selector:
     app.kubernetes.io/name: registry
-    app.kubernetes.io/instance: {{ .Values.instance }}
+    cybozu.com/registry: {{ .Values.instance }}
   ports:
     - protocol: TCP
       port: 5000
