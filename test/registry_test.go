@@ -64,7 +64,7 @@ metadata:
 spec:
   containers:
   - command:
-    image: quay.io/neco_test/testhttpd:0.1.1
+    image: quay.io/neco_test/testhttpd:0.1.2
     imagePullPolicy: Always
     name: testhttpd
 `
