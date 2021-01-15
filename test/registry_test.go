@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	. "github.com/onsi/ginkgo"
@@ -68,7 +67,6 @@ spec:
     image: quay.io/neco_test/testhttpd:0.1.1
     imagePullPolicy: Always
     name: testhttpd
----
 `
 
 func prepareRegistry() {
@@ -77,7 +75,6 @@ func prepareRegistry() {
 		_, stderr, err := ExecAtWithInput(boot0, []byte(podsYaml), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
-
 }
 
 func testRegistry() {
@@ -99,7 +96,7 @@ func testRegistry() {
 			}
 			cached := false
 			for _, repo := range elasticCatalog.Repositories {
-				if strings.Contains(repo, "elasticsearch/elasticsearch-oss") {
+				if repo == "elasticsearch/elasticsearch-oss" {
 					cached = true
 					break
 				}
@@ -115,9 +112,12 @@ func testRegistry() {
 				}
 				return errors.New("elasticsearch-oss is not found in elastic registry")
 			}
+			return nil
+		}, 10*time.Minute).Should(Succeed())
 
-			By("checking ghcr.io")
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-ghcr:5000/v2/_catalog")
+		By("checking ghcr.io")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-ghcr:5000/v2/_catalog")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -126,9 +126,9 @@ func testRegistry() {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
-			cached = false
+			cached := false
 			for _, repo := range ghcrCatalog.Repositories {
-				if strings.Contains(repo, "cybozu-go/moco") {
+				if repo == "cybozu-go/moco" {
 					cached = true
 					break
 				}
@@ -145,8 +145,12 @@ func testRegistry() {
 				return errors.New("cybozu-go/moco is not found in ghcr registry")
 			}
 
-			By("checking quay.io")
-			stdout, stderr, err = ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-quay:5000/v2/_catalog")
+			return nil
+		}, 10*time.Minute).Should(Succeed())
+
+		By("checking quay.io")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nregistry", "exec", "quay-ubuntu", "--", "curl", "-sf", "http://registry-quay:5000/v2/_catalog")
 			if err != nil {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -156,9 +160,9 @@ func testRegistry() {
 				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
 
-			cached = false
+			cached := false
 			for _, repo := range quayCatalog.Repositories {
-				if strings.Contains(repo, "cybozu/ubuntu-debug") {
+				if repo == "cybozu/ubuntu-debug" {
 					cached = true
 					break
 				}
@@ -177,7 +181,7 @@ func testRegistry() {
 
 			cached = false
 			for _, repo := range quayCatalog.Repositories {
-				if strings.Contains(repo, "neco_test/testhttpd") {
+				if repo == "neco_test/testhttpd" {
 					cached = true
 					break
 				}
