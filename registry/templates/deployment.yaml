@@ -90,6 +90,12 @@ spec:
             httpGet:
               port: http
               path: /
+          startupProbe:
+            httpGet:
+              port: http
+              path: /
+            failureThreshold: 30
+            periodSeconds: 10
       volumes:
         - name: registry-config
           configMap:
