@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   name: monitoring
   annotations:
-    admission.cybozu.com/min-policy-order: "499"
+    admission.cybozu.com/min-policy-order: "500"

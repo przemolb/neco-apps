@@ -4,6 +4,6 @@ metadata:
   name: customer-egress
   annotations:
     coil.cybozu.com/pool: customer-egress
-    admission.cybozu.com/min-policy-order: "99"
+    admission.cybozu.com/min-policy-order: "100"
   labels:
     team: neco
