@@ -235,6 +235,10 @@ func testRebootAllNodes() {
 		}).Should(Succeed())
 	})
 
+	It("re-enable CKE sabakan integration", func() {
+		ExecSafeAt(boot0, "ckecli", "sabakan", "enable")
+	})
+
 	It("wait for Kubernetes cluster to become ready", func() {
 		By("waiting nodes")
 		Eventually(func() error {
@@ -374,9 +378,5 @@ spec:
 			}
 			return nil
 		}).Should(Succeed())
-	})
-
-	It("re-enable CKE sabakan integration", func() {
-		ExecSafeAt(boot0, "ckecli", "sabakan", "enable")
 	})
 }
