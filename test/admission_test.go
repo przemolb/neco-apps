@@ -67,7 +67,7 @@ spec:
 `
 		_, stderr, err := ExecAtWithInput(boot0, []byte(networkPolicyYAML), "kubectl", "apply", "-f", "-")
 		Expect(err).To(HaveOccurred())
-		Expect(string(stderr)).Should(MatchRegexp("order of .* is smaller than required"))
+		Expect(string(stderr)).Should(ContainSubstring(`admission webhook "vnetworkpolicy.kb.io" denied the request`))
 	})
 
 	It("should default/validate Contour HTTPProxy", func() {
