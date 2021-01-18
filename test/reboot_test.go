@@ -278,6 +278,7 @@ spec:
   containers:
   - name: testhttpd
     image: quay.io/cybozu/testhttpd:0
+    imagePullPolicy: Always
 `
 		Eventually(func() error {
 			stdout, stderr, err := ExecAtWithInput(boot0, []byte(testhttpdYAML), "kubectl", "apply", "-f", "-")
