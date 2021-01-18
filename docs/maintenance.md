@@ -140,14 +140,15 @@ Update their CronJobs that run `machines-endpoints`.
 
 Check [releases](https://github.com/metallb/metallb/releases)
 
-Download manifests and remove `Namespace` resource from it as follows:
+Download manifests and update them as follows:
 
 ```console
-$ git clone https://github.com/metallb/metallb
+$ git clone --depth 1 -b vX.Y.Z https://github.com/metallb/metallb
 $ cd metallb
-$ git checkout vX.Y.Z
 $ cp manifests/*.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/metallb/base/upstream
 ```
+
+Then edit `metallb/base/kustomization.yaml` to update the image tags.
 
 ## metrics-server
 
