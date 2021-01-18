@@ -157,13 +157,11 @@ Check [releases](https://github.com/kubernetes-sigs/metrics-server/releases)
 Download the upstream manifest as follows:
 
 ```console
-$ git clone https://github.com/kubernetes-sigs/metrics-server
-$ cd metrics-server
-$ git checkout vX.Y.Z
-$ cp deploy/1.8+/*.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/metrics-server/base/upstream
+$ curl -OLsf https://github.com/kubernetes-sigs/metrics-server/releases/download/vX.Y.Z/components.yaml
+$ cp components.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/metrics-server/base/upstream
 ```
 
-Note: The name of `deploy` directory will be changed.
+Edit `metrics-server/base/kustomization.yaml` to update the image tag.
 
 ## moco
 
