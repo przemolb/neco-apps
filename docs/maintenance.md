@@ -25,6 +25,7 @@ How to maintain neco-apps
   - [ceph](#ceph)
 - [teleport](#teleport)
 - [topolvm](#topolvm)
+- [unbound](#unbound)
 
 ## argocd
 
@@ -367,3 +368,8 @@ $ cp -r deploy/manifests/* $GOPATH/src/github.com/cybozu-go/neco-apps/topolvm/ba
 ```
 
 Update `images.newTag` in `kustomization.yaml`.
+
+## unbound
+
+`quay.io/cybozu/unbound` container image is referenced in `customer-egress/base/kustomization.yaml`.
+When unbound image is updated, edit the YAML as well.
