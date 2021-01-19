@@ -38,9 +38,9 @@ spec:
   roles:
     - name: admin
       groups:
-        - cybozu-private:neco
+        - cybozu-private:Neco
         - cybozu-private:maneki
-        - cybozu-private:garoon
-        - cybozu-private:ept
+        - cybozu-private:Garoon
+        - cybozu-private:EPT
       policies:
         - p, proj:tenant-apps:admin, applications, *, tenant-apps/*, allow
