@@ -76,7 +76,7 @@ metadata:
   name: argocd-rbac-cm
 data:
   policy.csv: |
-    g, cybozu-private:neco, role:admin
+    g, cybozu-private:Neco, role:admin
     g, cybozu-private:neco-readonly, role:readonly
   # unauthenticated users cannot see the app, projects, etc...
   policy.default: ""
