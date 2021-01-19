@@ -12,14 +12,14 @@ import (
 	policyv1beta1 "k8s.io/api/policy/v1beta1"
 )
 
-var ns = "test-topolvm"
+var topolvmNS = "test-topolvm"
 
 func prepareTopoLVM() {
 	It("should create  create a Pod and a PVC", func() {
 		By("creating test-topolvm namespace")
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
-		createNamespaceIfNotExists(ns)
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "i-am-sure-to-delete="+ns)
+		ExecSafeAt(boot0, "kubectl", "delete", "namespace", topolvmNS, "--ignore-not-found=true")
+		createNamespaceIfNotExists(topolvmNS)
+		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", topolvmNS, "i-am-sure-to-delete="+topolvmNS)
 
 		By("creating Pod and a PVC")
 		manifest := `
@@ -59,7 +59,7 @@ spec:
       storage: 3Gi
   storageClassName: topolvm-provisioner
 `
-		stdout, stderr, err := ExecAtWithInput(boot0, []byte(manifest), "kubectl", "apply", "-n", ns, "-f", "-")
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(manifest), "kubectl", "apply", "-n", topolvmNS, "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	})
 }
@@ -76,12 +76,12 @@ func TopoLVMPodTest() {
 
 	By("confirming that the specified volume exists in the Pod")
 	Eventually(func() error {
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "mountpoint", "-d", "/test1")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", topolvmNS, "ubuntu", "--", "mountpoint", "-d", "/test1")
 		if err != nil {
 			return fmt.Errorf("failed to check mount point. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 		}
 
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "grep", "/test1", "/proc/mounts")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", topolvmNS, "ubuntu", "grep", "/test1", "/proc/mounts")
 		if err != nil {
 			return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 		}
@@ -97,18 +97,18 @@ func TopoLVMPodTest() {
 
 	By("writing file under /test1")
 	writePath := "/test1/bootstrap.log"
-	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "cp", "/etc/passwd", writePath)
+	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", topolvmNS, "ubuntu", "--", "cp", "/etc/passwd", writePath)
 	Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "sync")
+	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", topolvmNS, "ubuntu", "--", "sync")
 	Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "cat", writePath)
+	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", topolvmNS, "ubuntu", "--", "cat", writePath)
 	Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	Expect(strings.TrimSpace(string(stdout))).ShouldNot(BeEmpty())
 
 	// skip reboot of node temporarily due to ckecli or Kubernetes issue
 
 	// By("getting node name where pod is placed")
-	// stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", ns, "get", "pods/ubuntu", "-o", "json")
+	// stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", topolvmNS, "get", "pods/ubuntu", "-o", "json")
 	// Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	// var pod corev1.Pod
 	// err = json.Unmarshal(stdout, &pod)
@@ -123,7 +123,7 @@ func TopoLVMPodTest() {
 
 	// By("confirming that the file survives")
 	// Eventually(func() error {
-	// 	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "cat", writePath)
+	// 	stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", topolvmNS, "ubuntu", "--", "cat", writePath)
 	// 	if err != nil {
 	// 		return fmt.Errorf("failed to cat. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 	// 	}
@@ -136,7 +136,7 @@ func TopoLVMPodTest() {
 
 func pvcAutoresizerTest() {
 	By("writing large file")
-	ExecSafeAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "dd", "if=/dev/zero", "of=/test1/largefile", "bs=1M", "count=110")
+	ExecSafeAt(boot0, "kubectl", "exec", "-n", topolvmNS, "ubuntu", "--", "dd", "if=/dev/zero", "of=/test1/largefile", "bs=1M", "count=110")
 
 	By("waiting for the PV getting resized")
 	Eventually(func() error {
@@ -160,7 +160,7 @@ func pvcAutoresizerTest() {
 				continue
 			}
 
-			if string(sample.Metric["namespace"]) != ns {
+			if string(sample.Metric["namespace"]) != topolvmNS {
 				continue
 			}
 			if string(sample.Metric["persistentvolumeclaim"]) != "topo-pvc" {

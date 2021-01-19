@@ -119,24 +119,18 @@ func testPrometheus() {
 		}).Should(Succeed())
 	})
 
-	var podName string
 	It("should reply successfully", func() {
+		var podName string
 		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=prometheus", "-o=json")
+			name, err := getPrometheusPodName()
 			if err != nil {
 				return err
 			}
-			podList := new(corev1.PodList)
-			err = json.Unmarshal(stdout, podList)
-			if err != nil {
-				return err
-			}
-			if len(podList.Items) != 1 {
-				return errors.New("prometheus pod doesn't exist")
-			}
-			podName = podList.Items[0].Name
+			podName = name
+			return nil
+		}).Should(Succeed())
 
+		Eventually(func() error {
 			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/alerts")
 			if err != nil {
@@ -144,9 +138,7 @@ func testPrometheus() {
 			}
 			return nil
 		}).Should(Succeed())
-	})
 
-	It("should find endpoint", func() {
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
 				podName, "curl", "http://localhost:9090/api/v1/targets")
@@ -589,10 +581,17 @@ func testGrafanaOperator() {
 }
 
 func testPrometheusMetrics() {
-	var podName string
-
 	It("should be up all scraping", func() {
-		By("retrieving prometheus podName")
+		var podName string
+		Eventually(func() error {
+			name, err := getPrometheusPodName()
+			if err != nil {
+				return err
+			}
+			podName = name
+			return nil
+		}).Should(Succeed())
+
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "pods", "--selector=app.kubernetes.io/name=prometheus", "-o=json")
@@ -680,6 +679,16 @@ func testPrometheusMetrics() {
 	})
 
 	It("should be loaded all alert rules", func() {
+		var podName string
+		Eventually(func() error {
+			name, err := getPrometheusPodName()
+			if err != nil {
+				return err
+			}
+			podName = name
+			return nil
+		}).Should(Succeed())
+
 		var expected []string
 		var actual []string
 		err := filepath.Walk("../monitoring/base/prometheus/alert_rules", func(path string, info os.FileInfo, err error) error {
@@ -742,6 +751,16 @@ func testPrometheusMetrics() {
 	})
 
 	It("should be loaded all record rules", func() {
+		var podName string
+		Eventually(func() error {
+			name, err := getPrometheusPodName()
+			if err != nil {
+				return err
+			}
+			podName = name
+			return nil
+		}).Should(Succeed())
+
 		var expected []string
 		var actual []string
 		str, err := ioutil.ReadFile("../monitoring/base/prometheus/record_rules.yaml")
@@ -789,7 +808,6 @@ func testPrometheusMetrics() {
 		Expect(reflect.DeepEqual(actual, expected)).To(BeTrue(),
 			"\nactual   = %v\nexpected = %v", actual, expected)
 	})
-
 }
 
 func testVictoriaMetricsOperator() {
@@ -1025,4 +1043,23 @@ func findTarget(job string, targets []promv1.ActiveTarget) *promv1.ActiveTarget 
 		}
 	}
 	return nil
+}
+
+func getPrometheusPodName() (string, error) {
+	stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "get", "pods", "--selector=app.kubernetes.io/name=prometheus", "-o=json")
+	if err != nil {
+		return "", err
+	}
+
+	podList := new(corev1.PodList)
+	err = json.Unmarshal(stdout, podList)
+	if err != nil {
+		return "", err
+	}
+
+	if len(podList.Items) != 1 {
+		return "", errors.New("prometheus pod doesn't exist")
+	}
+	podName := podList.Items[0].Name
+	return podName, nil
 }
