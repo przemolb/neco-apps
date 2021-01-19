@@ -304,8 +304,15 @@ func testPushgateway() {
 	})
 
 	It("should be accessed from Forest", func() {
-		forestIP, err := getLoadBalancerIP("ingress-forest", "envoy")
-		Expect(err).ShouldNot(HaveOccurred())
+		var forestIP string
+		Eventually(func() error {
+			ip, err := getLoadBalancerIP("ingress-forest", "envoy")
+			if err != nil {
+				return err
+			}
+			forestIP = ip
+			return nil
+		}).Should(Succeed())
 		Eventually(func() error {
 			return exec.Command("sudo", "nsenter", "-n", "-t", externalPID, "curl", "--resolve", forestPushgatewayFQDN+":80:"+forestIP, forestPushgatewayFQDN+"/-/healthy", "-m", "5").Run()
 		}).Should(Succeed())
@@ -370,8 +377,8 @@ spec:
 }
 
 func testIngressHealth() {
-	It("should be deployed successfully", func() {
-		By("for ingress-health (testhttpd)")
+	It("should be reported as healthy by ingress-watcher", func() {
+		By("checking ingress-health Deployment")
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "deployment/ingress-health", "-o=json")
@@ -403,9 +410,7 @@ func testIngressHealth() {
 			}
 			return checkCertificate("ingress-health-bastion-test", "monitoring")
 		}).Should(Succeed())
-	})
 
-	It("should replace ingress-watcher configuration file", func() {
 		By("comfirming ingress-watcher configuration file")
 		ingressWatcherConfPath := "/etc/ingress-watcher/ingress-watcher.yaml"
 		Eventually(func() error {
@@ -433,10 +438,8 @@ permitInsecure: true
 		stdout, stderr, err := ExecAtWithInput(boot0, []byte(config), "sudo", "dd", "of="+ingressWatcherConfPath)
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 		ExecSafeAt(boot0, "sudo", "systemctl", "restart", "ingress-watcher.service")
-	})
 
-	It("should push metrics to the push-gateway", func() {
-		By("requesting push-gateway server")
+		By("getting metrics from push-gateway server")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "curl", "-s", "http://"+bastionPushgatewayFQDN+"/metrics")
 			if err != nil {
