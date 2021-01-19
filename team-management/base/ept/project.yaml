@@ -23,7 +23,7 @@ spec:
   roles:
   - name: admin
     groups:
-    - cybozu-private:ept
+    - cybozu-private:EPT
     - cybozu-private:maneki
     policies:
     - p, proj:ept:admin, applications, *, ept/*, allow
