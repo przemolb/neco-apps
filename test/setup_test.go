@@ -398,6 +398,23 @@ func applyAndWaitForApplications(commitID string) {
 				}
 			}
 
+			// Temporary code for upgrading neco-admission and NetworkPolicy simultaneously
+			// TODO: Remove this code after neco-apps#1042 is merged
+			if doUpgrade &&
+				target.name == "network-policy" &&
+				app.Status.Sync.Status == SyncStatusCodeOutOfSync {
+				if app.Operation != nil && app.Status.OperationState.Phase == "Running" {
+					stdout, stderr, err := ExecAt(boot0, "argocd", "app", "terminate-op", target.name)
+					if err != nil {
+						return fmt.Errorf("failed to terminate operation. app: %s, stdout: %s, stderr: %s, err: %v", target.name, stdout, stderr, err)
+					}
+				}
+				stdout, stderr, err = ExecAt(boot0, "argocd", "app", "sync", target.name)
+				if err != nil {
+					return fmt.Errorf("failed to sync application. app: %s, stdout: %s, stderr: %s, err: %v", target.name, stdout, stderr, err)
+				}
+			}
+
 			return fmt.Errorf("%s is not initialized. argocd app get %s -o json: %s", target.name, target.name, appStdout)
 		}
 		return nil
