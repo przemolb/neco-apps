@@ -112,7 +112,7 @@ func testTeamManagement() {
 	It("should give appropriate authority to unprivileged team", func() {
 		namespaceList := []string{}
 		nsOwner := map[string]string{}
-		teamList := []string{}
+		tenantTeamList := []string{}
 
 		By("listing namespaces and their owner team")
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "namespaces", "-o=json")
@@ -125,23 +125,27 @@ func testTeamManagement() {
 		// make namespace list
 		for _, ns := range nsList.Items {
 			namespaceList = append(namespaceList, ns.Name)
-			if ns.Labels["team"] != "" {
+			// Some namespaces (default, kube-public, kube-node-lease) don't have a team label.
+			// In this test, they are considered as managed by the Neco team.
+			if ns.Labels["team"] == "" {
+				nsOwner[ns.Name] = "neco"
+			} else {
 				nsOwner[ns.Name] = ns.Labels["team"]
 			}
 		}
 		sort.Strings(namespaceList)
 
 		// make unprivileged team list
-		teamSet := make(map[string]struct{})
+		tenantTeamSet := make(map[string]struct{})
 		for _, t := range nsOwner {
 			if t != "neco" {
-				teamSet[t] = struct{}{}
+				tenantTeamSet[t] = struct{}{}
 			}
 		}
-		for t := range teamSet {
-			teamList = append(teamList, t)
+		for t := range tenantTeamSet {
+			tenantTeamList = append(tenantTeamList, t)
 		}
-		sort.Strings(teamList)
+		sort.Strings(tenantTeamList)
 
 		By("constructing expected and actual verbs for namespace resources")
 		// Construct the verbs maps. The key and value are as follows.
@@ -154,14 +158,14 @@ func testTeamManagement() {
 			return fmt.Sprintf("%s:%s/%s", team, ns, resource)
 		}
 
-		for _, team := range teamList {
+		for _, team := range tenantTeamList {
 			for _, ns := range namespaceList {
 				actualVerbsByResource := getActualVerbs(team, ns)
 
 				// check secrets
 				key := keyGen(team, ns, "secrets")
 
-				if ns == "sandbox" || team == nsOwner[ns] {
+				if ns == "sandbox" || nsOwner[ns] == team || (team == "maneki" && nsOwner[ns] != "neco") {
 					expectedVerbs[key] = adminVerbs
 				} else {
 					expectedVerbs[key] = prohibitedVerbs
@@ -177,7 +181,7 @@ func testTeamManagement() {
 				for _, resource := range requiredResources {
 					key := keyGen(team, ns, resource)
 
-					if ns == "sandbox" || team == nsOwner[ns] {
+					if ns == "sandbox" || nsOwner[ns] == team || (team == "maneki" && nsOwner[ns] != "neco") {
 						expectedVerbs[key] = adminVerbs
 					} else {
 						expectedVerbs[key] = viewVerbs
@@ -224,7 +228,7 @@ func testTeamManagement() {
 		}
 
 		By("checking RBAC of cluster resources")
-		for _, team := range teamList {
+		for _, team := range tenantTeamList {
 			for _, ns := range namespaceList {
 				actualVerbsByResource := getActualVerbs(team, ns)
 
@@ -243,7 +247,7 @@ func testTeamManagement() {
 
 	It("should give authority of ephemeral containers to unprivileged team", func() {
 		By("creating test pod")
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "run", "-n", "maneki", "neco-ephemeral-test", "--image=quay.io/cybozu/ubuntu-debug:18.04", "pause")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "run", "-n", "maneki", "neco-ephemeral-test", "--image=quay.io/cybozu/ubuntu-debug:20.04", "pause")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 
 		By("waiting the pod become ready")
@@ -266,13 +270,13 @@ func testTeamManagement() {
 		}).Should(Succeed())
 
 		By("adding a ephemeral container by unprivileged team")
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "alpha", "debug", "-i", "-n", "maneki", "neco-ephemeral-test", "--image=quay.io/cybozu/ubuntu-debug:18.04", "--target=neco-ephemeral-test", "--as=test", "--as-group=maneki", "--as-group=system:authenticated", "--", "echo a")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "alpha", "debug", "-i", "-n", "maneki", "neco-ephemeral-test", "--image=quay.io/cybozu/ubuntu-debug:20.04", "--target=neco-ephemeral-test", "--as=test", "--as-group=maneki", "--as-group=system:authenticated", "--", "echo a")
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 	})
 
 	// This test confirming the configuration of RBAC so it should be at team-management_test.go but rook/ceph isn't deployed for GCP (without gcp-ceph)
 	It("should deploy OBC resource with maneki role", func() {
-		podPvcYaml := `apiVersion: objectbucket.io/v1alpha1
+		obcYaml := `apiVersion: objectbucket.io/v1alpha1
 kind: ObjectBucketClaim
 metadata:
   name: hdd-ob
@@ -280,7 +284,26 @@ metadata:
 spec:
   generateBucketName: obc-poc
   storageClassName: ceph-hdd-bucket`
-		stdout, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "--as test", "--as-group sys:authenticated", "--as-group maneki", "apply", "-f", "-")
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(obcYaml), "kubectl", "--as test", "--as-group sys:authenticated", "--as-group maneki", "apply", "-f", "-")
+		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+	})
+
+	It("should read OB resource with maneki role", func() {
+		var obName string
+		Eventually(func() error {
+			stdout, _, err := ExecAtWithInput(boot0, nil, "kubectl", "--as test", "--as-group sys:authenticated", "--as-group maneki", "get", "obc", "-n", "maneki", "hdd-ob", "-o=jsonpath={.spec.objectBucketName}")
+			if err != nil {
+				return err
+			}
+			if len(stdout) == 0 {
+				return fmt.Errorf("failed to get ob name")
+			}
+			obName = string(stdout)
+
+			return nil
+		}).Should(Succeed())
+
+		stdout, stderr, err := ExecAtWithInput(boot0, nil, "kubectl", "--as test", "--as-group sys:authenticated", "--as-group maneki", "get", "ob", string(obName))
 		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 	})
 }
