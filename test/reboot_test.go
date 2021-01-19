@@ -251,6 +251,12 @@ func testRebootAllNodes() {
 		}).Should(Succeed())
 	})
 
+	It("should start all CKE service", func() {
+		ExecSafeAt(boot0, "sudo", "systemctl", "start", "cke.service")
+		ExecSafeAt(boot1, "sudo", "systemctl", "start", "cke.service")
+		ExecSafeAt(boot2, "sudo", "systemctl", "start", "cke.service")
+	})
+
 	It("re-enable CKE sabakan integration", func() {
 		ExecSafeAt(boot0, "ckecli", "sabakan", "enable")
 	})
