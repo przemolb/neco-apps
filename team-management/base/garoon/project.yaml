@@ -23,6 +23,7 @@ spec:
   roles:
   - name: admin
     groups:
-    - cybozu-private:garoon
+    - cybozu-private:Garoon
+    - cybozu-private:maneki
     policies:
     - p, proj:garoon:admin, applications, *, garoon/*, allow
