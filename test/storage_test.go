@@ -239,7 +239,7 @@ spec:
 func testRookOperator() {
 	nss := []string{"ceph-hdd", "ceph-ssd"}
 	for _, ns := range nss {
-		It("should deploy rook operator to "+ns+" ns successfully", func() {
+		By("checking rook-ceph-operator Deployment for "+ns, func() {
 			Eventually(func() error {
 				stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
 					"get", "deployment/rook-ceph-operator", "-o=json")
@@ -260,7 +260,7 @@ func testRookOperator() {
 			}).Should(Succeed())
 		})
 
-		It("should deploy ceph tools to "+ns+" correctly", func() {
+		By("checking ceph-tools Deployment for "+ns, func() {
 			Eventually(func() error {
 				stdout, _, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
 					"get", "deployment/rook-ceph-tools", "-o=json")
@@ -303,7 +303,7 @@ func testRookOperator() {
 func testClusterStable() {
 	nss := []string{"ceph-hdd", "ceph-ssd"}
 	for _, ns := range nss {
-		It("should be rook/ceph cluster("+ns+") stable", func() {
+		By("checking stability of rook/ceph cluster "+ns, func() {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace="+ns,
 				"get", "deployment/rook-ceph-operator", "-o=json")
 			Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
@@ -430,7 +430,7 @@ func testMONPodsSpreadAll() {
 }
 
 func testMONPodsSpread(cephClusterName, cephClusterNamespace string) {
-	It("should spread MON PODs", func() {
+	By("checking MON Pods for "+cephClusterName+" are spread", func() {
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "node", "-l", "node-role.kubernetes.io/cs=true", "-o=json")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 
@@ -472,7 +472,7 @@ func testOSDPodsSpreadAll() {
 }
 
 func testOSDPodsSpread(cephClusterName, cephClusterNamespace, nodeRole string) {
-	It("should spread OSD PODs on "+nodeRole+" nodes", func() {
+	By("checking OSD Pods for "+cephClusterName+" are spread on "+nodeRole+" nodes", func() {
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "node", "-l", "node-role.kubernetes.io/"+nodeRole+"=true", "-o=json")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 
@@ -529,7 +529,7 @@ func testOSDPodsSpread(cephClusterName, cephClusterNamespace, nodeRole string) {
 }
 
 func testRookRGW() {
-	It("should be used from a POD with a s3 client", func() {
+	By("putting/getting data with s3 client", func() {
 		ns := "test-rook-rgw"
 		waitRGW(ns, "pod-ob")
 
@@ -559,7 +559,7 @@ func testRookRBDAll() {
 
 func testRookRBD(storageClassName string) {
 	ns := "test-rook-rbd-" + storageClassName
-	It("should be mounted to a path specified on a POD", func() {
+	By("mounting RBD of "+storageClassName, func() {
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-rbd", "--", "mountpoint", "-d", "/test1")
 			if err != nil {
@@ -640,10 +640,12 @@ func waitRGW(ns, podName string) {
 }
 
 func testRookCeph() {
-	Context("rookOperator", testRookOperator)
-	Context("clusterStable", testClusterStable)
-	Context("OSDPodsSpread", testOSDPodsSpreadAll)
-	Context("MONPodsSpread", testMONPodsSpreadAll)
-	Context("rookRGW", testRookRGW)
-	Context("rookRBD", testRookRBDAll)
+	It("should be available", func() {
+		testRookOperator()
+		testClusterStable()
+		testOSDPodsSpreadAll()
+		testMONPodsSpreadAll()
+		testRookRGW()
+		testRookRBDAll()
+	})
 }
