@@ -36,7 +36,7 @@ spec:
     analytics:
       check_for_updates: true
     grafana_net:
-      url: https://grafana.monitoring.svc.cluster.local
+      url: https://grafana.monitoring.svc
     users:
       viewers_can_edit: true
       auto_assign_org_role: Viewer

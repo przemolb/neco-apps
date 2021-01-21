@@ -208,7 +208,7 @@ func teleportAuthTest() {
 }
 
 func teleportApplicationTest() {
-	// This test requires CNAME record "teleport.gcp0.dev-ne.co : teleport-proxy.teleport.svc.cluster.local".
+	// This test requires CNAME record "teleport.gcp0.dev-ne.co : teleport-proxy.teleport.svc".
 	By("getting the application names")
 	stdout, _, err := kustomizeBuild("../teleport/base/apps")
 	Expect(err).ShouldNot(HaveOccurred())

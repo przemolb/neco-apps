@@ -32,9 +32,9 @@ spec:
         - name: NO_PROXY
           value: 10.0.0.0/8
         - name: HTTP_PROXY
-          value: http://squid.internet-egress.svc.cluster.local:3128
+          value: http://squid.internet-egress.svc:3128
         - name: HTTPS_PROXY
-          value: http://squid.internet-egress.svc.cluster.local:3128
+          value: http://squid.internet-egress.svc:3128
         args:
         - --roles=auth
         - --diag-addr=0.0.0.0:3020
