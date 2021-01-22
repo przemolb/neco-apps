@@ -14,6 +14,7 @@ data:
           clientSecret: $dex.github.clientSecret
           orgs:
           - name: cybozu-private
+          teamNameField: slug
   resource.customizations: |
     cert-manager.io/Certificate:
       health.lua: |
@@ -75,10 +76,11 @@ kind: ConfigMap
 metadata:
   name: argocd-rbac-cm
 data:
+  # Specify the team's slug.
   policy.csv: |
-    g, cybozu-private:Neco, role:admin
+    g, cybozu-private:neco, role:admin
     g, cybozu-private:neco-readonly, role:readonly
-  # unauthenticated users cannot see the app, projects, etc...
+  # Drop default privileges. So unauthenticated users cannot see the app, projects, etc...
   policy.default: ""
 ---
 apiVersion: v1
