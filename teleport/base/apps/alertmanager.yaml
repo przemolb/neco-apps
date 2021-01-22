@@ -32,7 +32,7 @@ spec:
         args:
         - --roles=app
         - --app-name=alertmanager
-        - --app-uri=http://alertmanager.monitoring.svc.cluster.local:9093/
+        - --app-uri=http://alertmanager.monitoring.svc:9093/
         - --labels=team=neco
         - --diag-addr=0.0.0.0:3020
         livenessProbe:
