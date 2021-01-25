@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: https-proxy
 data:
-  HTTPS_PROXY: http://squid.internet-egress.svc.cluster.local:3128
+  HTTPS_PROXY: http://squid.internet-egress.svc:3128
