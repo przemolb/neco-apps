@@ -23,7 +23,8 @@ spec:
   roles:
   - name: admin
     groups:
-    - cybozu-private:Garoon
+    # Specify the team's slug.
+    - cybozu-private:garoon
     - cybozu-private:maneki
     policies:
     - p, proj:garoon:admin, applications, *, garoon/*, allow

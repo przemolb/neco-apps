@@ -50,6 +50,7 @@ spec:
   roles:
   - name: admin
     groups:
+    # Specify the team's slug.
     - cybozu-private:maneki
     policies:
     - p, proj:maneki:admin, applications, *, maneki/*, allow
