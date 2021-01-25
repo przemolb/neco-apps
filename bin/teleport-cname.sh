@@ -7,6 +7,6 @@ ${GCLOUD_DNS} list --zone=$ZONE --name="teleport.gcp0.dev-ne.co." --type="CNAME"
 lines=$(cat zone.txt | wc -l)
 if [ $lines -eq 0 ]; then
    gcloud dns --project=$PROJECT record-sets transaction start --zone=$ZONE
-   gcloud dns --project=$PROJECT record-sets transaction add teleport-proxy.teleport.svc.cluster.local. --name=teleport.gcp0.dev-ne.co. --ttl=300 --type=CNAME --zone=$ZONE
+   gcloud dns --project=$PROJECT record-sets transaction add teleport-proxy.teleport.svc --name=teleport.gcp0.dev-ne.co. --ttl=300 --type=CNAME --zone=$ZONE
    gcloud dns --project=$PROJECT record-sets transaction execute --zone=$ZONE
 fi
