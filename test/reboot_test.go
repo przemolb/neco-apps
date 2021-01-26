@@ -80,7 +80,7 @@ func getSerfMembers() (*serfMemberContainer, error) {
 func testRebootAllNodes() {
 	var beforeNodes map[string]bool
 	// control-plane-count + minimum-workers = 7
-	// https://github.com/cybozu-go/cke/blob/master/docs/sabakan-integration.md#initialization
+	// https://github.com/cybozu-go/cke/blob/main/docs/sabakan-integration.md#initialization
 	expectedNodeNum := 7
 
 	It("fetch cluster nodes", func() {

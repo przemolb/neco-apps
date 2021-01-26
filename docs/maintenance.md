@@ -235,7 +235,7 @@ Note that the tag (version) of VictoriaMetrics itself is written in each compone
 
 ## neco-admission
 
-Update version following [this link](https://github.com/cybozu/neco-containers/blob/master/admission/TAG)
+Update version following [this link](https://github.com/cybozu/neco-containers/blob/main/admission/TAG)
 
 Download the upstream manifest as follows:
 
@@ -260,7 +260,7 @@ See: [Kubernetes controllers configuration](https://docs.projectcalico.org/refer
 
 ## pvc-autoresizer
 
-Check [the CHANGELOG](https://github.com/topolvm/pvc-autoresizer/blob/master/CHANGELOG.md).
+Check [the CHANGELOG](https://github.com/topolvm/pvc-autoresizer/blob/main/CHANGELOG.md).
 
 Download the upstream tar ball from [releases](https://github.com/topolvm/pvc-autoresizer/releases/latest) and generate upstream manifests as follows:
 
