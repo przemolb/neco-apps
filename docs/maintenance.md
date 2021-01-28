@@ -39,6 +39,8 @@ How to maintain neco-apps
    ```
    Then check the diffs by `git diff`.
 
+1. Update `KUSTOMIZE_VERSION` in `test/Makefile`.
+
 ## cert-manager
 
 Check [the upgrading section](https://cert-manager.io/docs/installation/upgrading/) in the official website.
@@ -194,6 +196,8 @@ helm template prom prometheus-community/prometheus --version=11.5.0 > prom-2.18.
 helm template prom prometheus-community/prometheus --version=11.16.7 > prom-2.21.0.yaml
 diff prom-2.18.1.yaml prom-2.21.0.yaml
 ```
+
+Update `PROMTOOL_VERSION` in `test/Makefile`.
 
 ### kube-state-metrics
 
@@ -352,6 +356,8 @@ Update `spec.cephVersion.image` field in CephCluster CR.
 There is no official kubernetes manifests actively maintained for teleport.
 So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/blob/master/CHANGELOG.md) on github,
 and [Helm chart](https://github.com/gravitational/teleport/tree/master/examples/chart/teleport).
+
+Update `TELEPORT_VERSION` in `test/Makefile`.
 
 ## topolvm
 
