@@ -1,4 +1,4 @@
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: MutatingWebhookConfiguration
 metadata:
   name: mutating-webhook-configuration
@@ -8,13 +8,11 @@ metadata:
 webhooks:
 - name: mhttpproxy.kb.io
   clientConfig:
-    caBundle: null
     service:
       name: neco-admission
       namespace: kube-system
 - name: mpod.kb.io
   clientConfig:
-    caBundle: null
     service:
       name: neco-admission
       namespace: kube-system
@@ -31,7 +29,7 @@ webhooks:
       values:
       - neco-admission
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingWebhookConfiguration
 metadata:
   name: validating-webhook-configuration
@@ -41,13 +39,11 @@ metadata:
 webhooks:
 - name: vhttpproxy.kb.io
   clientConfig:
-    caBundle: null
     service:
       name: neco-admission
       namespace: kube-system
 - name: vnetworkpolicy.kb.io
   clientConfig:
-    caBundle: null
     service:
       name: neco-admission
       namespace: kube-system
@@ -59,13 +55,11 @@ webhooks:
       - "true"
 - name: vapplication.kb.io
   clientConfig:
-    caBundle: null
     service:
       name: neco-admission
       namespace: kube-system
 - name: vdelete.kb.io
   clientConfig:
-    caBundle: null
     service:
       name: neco-admission
       namespace: kube-system
@@ -102,14 +96,12 @@ webhooks:
     - cephobjectstores
 - name: vgrafanadashboard.kb.io
   clientConfig:
-    caBundle: null
     service:
       name: neco-admission
       namespace: kube-system
   matchPolicy: Equivalent
 - name: vservice.kb.io
   clientConfig:
-    caBundle: null
     service:
       name: neco-admission
       namespace: kube-system
