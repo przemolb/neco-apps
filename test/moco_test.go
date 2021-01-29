@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
       - name: mysqld
-        image: quay.io/cybozu/moco-mysql:8.0.20.9
+        image: quay.io/cybozu/moco-mysql:8.0.18.4
         resources:
           requests:
             memory: "512Mi"
@@ -198,6 +198,10 @@ func testMoco() {
 			return nil
 		}).Should(Succeed())
 
+		//TODO: Please remove this codes ("copying kubectl-moco") when reaching the following state.
+		// - kubectl-moco is included in neco's deb package.
+		// - The MOCO v0.5.0 (or v0.6.0) is released.
+		//   The next version of MOCO will have some breaking changes. The old version of kubectl-moco cannot be used with the new MOCO.
 		By("copying kubectl-moco")
 		buf, err := ioutil.ReadFile("./bin/kubectl-moco")
 		Expect(err).NotTo(HaveOccurred())
