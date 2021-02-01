@@ -70,15 +70,15 @@ However, if it needs to be upgraded alone for some reason, confirm ArgoCD SSO lo
 
 ## elastic (ECK)
 
-Check the [Upgrade ECK](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-upgrading-eck.html) in the official website.
+Check the [Release Notes](https://www.elastic.co/guide/en/cloud-on-k8s/current/eck-release-notes.html) and [Upgrade ECK](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-upgrading-eck.html) on the official website.
 
-Download manifests and remove `Namespace` resource from it as follows:
+Update the upstream manifests as follows:
 
 ```console
 $ curl -sLf -o elastic/base/upstream/all-in-one.yaml https://download.elastic.co/downloads/eck/X.Y.Z/all-in-one.yaml
-$ vi elastic/base/upstream/all-in-one.yaml
-  (Remove Namespace resources)
 ```
+
+Check the difference, and adjust our patches to the new manifests.
 
 ## external-dns
 
