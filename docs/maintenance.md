@@ -45,12 +45,8 @@ How to maintain neco-apps
 
 Check [the upgrading section](https://cert-manager.io/docs/installation/upgrading/) in the official website.
 
-Download manifests and remove `Namespace` resource from it as follows:
-
 ```console
 $ curl -sLf -o cert-manager/base/upstream/cert-manager.yaml https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
-$ vi cert-manager/base/upstream/cert-manager.yaml
-  (Remove Namespace resources)
 ```
 
 ## customer-egress
