@@ -77,7 +77,7 @@ dctest: install.yaml
 dctest-reboot: install.yaml
 	PATH=$(BINDIR):$$PATH OVERLAY=$(OVERLAY) REBOOT=1 SUITE=$(SUITE) ./test.sh
 
-dctest-upgrade:
+dctest-upgrade: install.yaml
 	if [  "$(SUITE)" = "prepare" ]; then \
 		git worktree remove /tmp/neco-apps; \
 		git worktree add /tmp/neco-apps $(BASE_BRANCH) && \

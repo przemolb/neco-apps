@@ -204,6 +204,16 @@ func testSetup() {
 			applyNetworkPolicy()
 			setupArgoCD()
 		}
+
+		// TODO: remove this after #1139 gets merged
+		if doUpgrade {
+			ExecSafeAt(boot0, "kubectl", "-n", "argocd", "delete", "--ignore-not-found=true", "deployments", "argocd-application-controller")
+			data, err := ioutil.ReadFile("install.yaml")
+			Expect(err).ShouldNot(HaveOccurred())
+			_, stderr, err := ExecAtWithInput(boot0, data, "kubectl", "apply", "-n", "argocd", "-f", "-")
+			Expect(err).ShouldNot(HaveOccurred(), "failed to apply install.yaml. stderr=%s", stderr)
+		}
+
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/overlays/"+overlayName+"/*.yaml")
 		applyAndWaitForApplications(commitID)
