@@ -39,6 +39,8 @@ How to maintain neco-apps
    ```
    Then check the diffs by `git diff`.
 
+1. Update `KUSTOMIZE_VERSION` in `test/Makefile`.
+
 ## cert-manager
 
 Check [the upgrading section](https://cert-manager.io/docs/installation/upgrading/) in the official website.
@@ -195,6 +197,8 @@ helm template prom prometheus-community/prometheus --version=11.16.7 > prom-2.21
 diff prom-2.18.1.yaml prom-2.21.0.yaml
 ```
 
+Update `PROMTOOL_VERSION` in `test/Makefile`.
+
 ### kube-state-metrics
 
 Check [examples/standard](https://github.com/kubernetes/kube-state-metrics/tree/master/examples/standard)
@@ -235,7 +239,7 @@ Note that the tag (version) of VictoriaMetrics itself is written in each compone
 
 ## neco-admission
 
-Update version following [this link](https://github.com/cybozu/neco-containers/blob/master/admission/TAG)
+Update version following [this link](https://github.com/cybozu/neco-containers/blob/main/admission/TAG)
 
 Download the upstream manifest as follows:
 
@@ -260,7 +264,7 @@ See: [Kubernetes controllers configuration](https://docs.projectcalico.org/refer
 
 ## pvc-autoresizer
 
-Check [the CHANGELOG](https://github.com/topolvm/pvc-autoresizer/blob/master/CHANGELOG.md).
+Check [the CHANGELOG](https://github.com/topolvm/pvc-autoresizer/blob/main/CHANGELOG.md).
 
 Download the upstream tar ball from [releases](https://github.com/topolvm/pvc-autoresizer/releases/latest) and generate upstream manifests as follows:
 
@@ -352,6 +356,8 @@ Update `spec.cephVersion.image` field in CephCluster CR.
 There is no official kubernetes manifests actively maintained for teleport.
 So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/blob/master/CHANGELOG.md) on github,
 and [Helm chart](https://github.com/gravitational/teleport/tree/master/examples/chart/teleport).
+
+Update `TELEPORT_VERSION` in `test/Makefile`.
 
 ## topolvm
 

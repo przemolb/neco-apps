@@ -34,6 +34,7 @@ spec:
         args:
         - --cert-dir=/certs
         - --httpproxy-default-class=forest
+        - --zap-stacktrace-level=panic
         image: quay.io/cybozu/neco-admission
         resources:
           requests:
@@ -45,16 +46,21 @@ spec:
           - name: config
             mountPath: /etc/neco-admission
         ports:
-          - containerPort: 8080
+          - name: metrics
+            containerPort: 8080
+          - name: health
+            containerPort: 8081
+          - name: webhook
+            containerPort: 9443
         readinessProbe:
           httpGet:
-            path: /metrics
-            port: 8080
+            path: /readyz
+            port: health
             scheme: HTTP
         livenessProbe:
           httpGet:
-            path: /metrics
-            port: 8080
+            path: /healthz
+            port: health
             scheme: HTTP
         lifecycle:
             preStop:
@@ -80,4 +86,4 @@ spec:
   ports:
   - protocol: TCP
     port: 443
-    targetPort: 8443
+    targetPort: webhook
