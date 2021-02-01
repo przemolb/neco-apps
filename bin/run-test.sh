@@ -3,7 +3,7 @@
 . ${NECO_DIR}/bin/env
 
 TARGET=${TARGET:-dctest}
-BASE_BRANCH=${BASE_BRANCH:-master}
+BASE_BRANCH=${BASE_BRANCH:-main}
 
 cat >run.sh <<EOF
 #!/bin/sh -ex

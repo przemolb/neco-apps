@@ -118,7 +118,7 @@ spec:
   project: %s
   source:
     repoURL: %s
-    targetRevision: master
+    targetRevision: main
     path: dummy/
   destination:
     server: https://kubernetes.default.svc

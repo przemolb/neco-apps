@@ -24,8 +24,7 @@ var requiredResources = []string{
 	"networkpolicies.crd.projectcalico.org",
 	"grafanadatasources.integreatly.org",
 	"grafanadashboards.integreatly.org",
-	// TODO: Remove this comment out when https://github.com/cybozu-go/moco/pull/116 is imported.
-	// "mysqlclusters.moco.cybozu.com",
+	"mysqlclusters.moco.cybozu.com",
 	"objectbucketclaims.objectbucket.io",
 }
 
