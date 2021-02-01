@@ -196,11 +196,25 @@ helm template prom prometheus-community/prometheus --version=11.16.7 > prom-2.21
 diff prom-2.18.1.yaml prom-2.21.0.yaml
 ```
 
+Then edit `monitoring/base/kustomization.yaml` to update the image tags.
+
 Update `PROMTOOL_VERSION` in `test/Makefile`.
 
 ### kube-state-metrics
 
-Check [examples/standard](https://github.com/kubernetes/kube-state-metrics/tree/master/examples/standard)
+Check the manifests in [examples/standard](https://github.com/kubernetes/kube-state-metrics/tree/master/examples/standard) directory.
+
+```console
+$ mkdir -p $HOME/go/src/k8s.io
+$ cd $HOME/go/src/k8s.io
+$ git clone https://github.com/kubernetes/kube-state-metrics
+$ git checkout vX.Y.Z
+$ cd $HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/kube-state-metrics
+$ rm *
+$ cp $HOME/go/src/k8s.io/kube-state-metrics/examples/standard/* .
+```
+
+Then edit `monitoring/base/kustomization.yaml` to update the image tag of `kube-state-metrics`.
 
 ### grafana-operator
 
