@@ -125,6 +125,8 @@ $ diff -u ingress/base/contour/03-envoy.yaml ingress/base/template/deployment-en
 Note that:
 - We do not use contour's certificate issuance feature, but use cert-manager to issue certificates required for gRPC.
 - We change Envoy manifest from DaemonSet to Deployment.
+  - We do not create `envoy` service account, and therefore `serviceAccountName: envoy` is removed from Envoy Deployment.
+  - We replace or add probes with our custom one bundled in our Envoy container image.
 - Not all manifests inherit the upstream. Please check `kustomization.yaml` which manifest inherits or not.
   - If the manifest in the upstream is usable as is, use it from `ingress/base/kustomization.yaml`.
   - If the manifest needs modification:
