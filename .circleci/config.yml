@@ -259,7 +259,7 @@ jobs:
           name: Check diff
           command: |
             git fetch -t origin
-            diffs=$(git diff --name-only master origin/stage)
+            diffs=$(git diff --name-only main origin/stage)
             if [ "$diffs" = "" ]; then touch .skip; exit 0; fi
             printf "%s\n" "$diffs"
       - run:
@@ -268,7 +268,7 @@ jobs:
             if [ -f .skip ]; then exit 0; fi
             BRANCH_NAME="stage-$(date +%Y.%m.%d)-${CIRCLE_BUILD_NUM}"
             git checkout -b op-${BRANCH_NAME} origin/stage
-            git merge --no-edit master
+            git merge --no-edit main
             git push git@github.com:${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git op-${BRANCH_NAME}:op-${BRANCH_NAME}
             hub pull-request --message="[CI] Stage ${BRANCH_NAME}" --base=cybozu-go:stage --head=cybozu-go:op-${BRANCH_NAME}
       - run:
@@ -344,7 +344,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
           requires:
             - bootstrap
             - upgrade-stage
@@ -357,7 +357,7 @@ workflows:
           type: approval
           filters:
             branches:
-              ignore: ["master", "stage", "release", /^op-(stage|release)-.*/]
+              ignore: ["main", "stage", "release", /^op-(stage|release)-.*/]
       - bootstrap:
           name: bootstrap-with-neco-branch
           neco-release-branch: false
@@ -365,7 +365,7 @@ workflows:
             - hold
           filters:
             branches:
-              ignore: ["master", "stage", "release", /^op-(stage|release)-.*/]
+              ignore: ["main", "stage", "release", /^op-(stage|release)-.*/]
 
   daily:
     triggers:
@@ -374,7 +374,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
     jobs:
       - clean-dns
       - reboot:

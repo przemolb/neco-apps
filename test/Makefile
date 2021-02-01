@@ -10,7 +10,7 @@ endif
 SSH_PRIVKEY = $(NECO_DIR)/dctest/dctest_key
 CIRCLE_BUILD_NUM ?= -$(USER)
 TEST_ID := test$(CIRCLE_BUILD_NUM)
-BASE_BRANCH = master
+BASE_BRANCH = main
 COMMIT_ID = $(shell git rev-parse --abbrev-ref HEAD)
 SUDO = sudo
 WGET=wget --retry-connrefused --no-verbose
