@@ -91,6 +91,7 @@ Download CRD manifest as follows:
 ```console
 $ curl -sLf -o external-dns/base/common.yaml https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/contributing/crd-source/crd-manifest.yaml
 ```
+
 Then check the diffs by `git diff`.
 
 ## ingress (Contour & Envoy)
