@@ -562,6 +562,48 @@ func testVMCustomResources(t *testing.T) {
 		"topolvm",
 	}
 
+	// gather CRs in files
+
+	crsInFiles := []string{}
+	err := filepath.Walk("../monitoring/base/victoriametrics/rules", func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		reader := k8sYaml.NewYAMLReader(bufio.NewReader(file))
+		for {
+			data, err := reader.Read()
+			if err == io.EOF {
+				break
+			} else if err != nil {
+				return fmt.Errorf("failed to read yaml: %v", err)
+			}
+			var r resourceMeta
+			yaml.Unmarshal(data, &r)
+			switch r.Kind {
+			case "VMServiceScrape":
+			case "VMPodScrape":
+			case "VMNodeScrape":
+			case "VMProbe":
+			case "VMRule":
+			default:
+				continue
+			}
+			crsInFiles = append(crsInFiles, r.Kind+"/"+r.Name)
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("failed to read CRs files: %v", err)
+	}
+
 	// gather CRs actually applied
 
 	kustomizeResult, err := exec.Command("bin/kustomize", "build", vmBaseDir).Output()
@@ -576,6 +618,7 @@ func testVMCustomResources(t *testing.T) {
 	var nodeScrapes []resourceMeta
 	var probes []resourceMeta
 	var rules []resourceMeta
+	crsInKBuild := []string{}
 
 	for {
 		data, err := reader.Read()
@@ -597,7 +640,16 @@ func testVMCustomResources(t *testing.T) {
 			probes = append(probes, r)
 		case "VMRule":
 			rules = append(rules, r)
+		default:
+			continue
 		}
+		crsInKBuild = append(crsInKBuild, r.Kind+"/"+r.Name)
+	}
+
+	sort.Strings(crsInFiles)
+	sort.Strings(crsInKBuild)
+	if !reflect.DeepEqual(crsInFiles, crsInKBuild) {
+		t.Errorf("some CRs mismatch: actual=%v, expected=%v", crsInFiles, crsInKBuild)
 	}
 
 	// read VMAgent/VMAlert CRs (their label selectors)
