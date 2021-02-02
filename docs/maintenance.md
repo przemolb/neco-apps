@@ -17,7 +17,8 @@ How to maintain neco-apps
   - [kube-state-metrics](#kube-state-metrics)
   - [grafana-operator](#grafana-operator)
   - [Grafana](#grafana)
-  - [victoriametrics (operator)](#victoriametrics-operator)
+  - [victoriametrics-operator](#victoriametrics-operator)
+  - [VictoriaMetrics](#victoriametrics)
 - [neco-admission](#neco-admission)
 - [network-policy (Calico)](#network-policy-calico)
 - [pvc-autoresizer](#pvc-autoresizer)
@@ -246,7 +247,7 @@ args:
 - --grafana-image-tag=7.0.4.1
 ```
 
-### victoriametrics (operator)
+### victoriametrics-operator
 
 Check [releases](https://github.com/VictoriaMetrics/operator/releases)
 
@@ -255,12 +256,31 @@ And then, update upstream-derived manifests.
 ```console
 $ git clone https://github.com/VictoriaMetrics/operator
 $ git checkout vX.Y.Z
-$ UPSTREAM_DIR=$GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/victoriametrics/upstream/
+$ UPSTREAM_DIR=$HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/victoriametrics/upstream/
 $ rm -r $UPSTREAM_DIR/*
-$ cp -r config/{crd,rbac} $UPSTREAM_DIR/
+$ cp -r config/crd config/rbac $UPSTREAM_DIR/
 ```
 
-Note that the tag (version) of VictoriaMetrics itself is written in each component CRs.
+Edit `monitoring/base/victoriametrics/operator.yaml` to update the image tag.
+
+### VictoriaMetrics
+
+Edit the following files:
+
+- `monitoring/base/victoriametrics/alertmanager.yaml`
+  - Update `alertmanager` and `configmap-reload` image tags.
+- `monitoring/base/victoriametrics/vmagent-largeset.yaml`
+  - Update `victoriametrics-vmagent` and `prometheus-config-reloader` image tags.
+- `monitoring/base/victoriametrics/vmagent-smallset.yaml`
+  - Update `victoriametrics-vmagent` and `prometheus-config-reloader` image tags.
+- `monitoring/base/victoriametrics/vmalert-largeset.yaml`
+  - Update `victoriametrics-vmalert` and `configmap-reload` image tags.
+- `monitoring/base/victoriametrics/vmalert-smallset.yaml`
+  - Update `victoriametrics-vmalert` and `configmap-reload` image tags.
+- `monitoring/base/victoriametrics/vmcluster-largeset.yaml`
+  - Update `victoriametrics-vmstorage`, `victoriametrics-vmselect`, and `victoriametrics-vminsert` image tags.
+- `monitoring/base/victoriametrics/vmsingle-smallset.yaml`
+  - Update `victoriametrics-vmsingle` image tag.
 
 ## neco-admission
 
