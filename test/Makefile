@@ -3,7 +3,7 @@ BOOT0 = 10.72.48.0
 BOOT1 = 10.72.48.1
 BOOT2 = 10.72.48.2
 GINKGO = env GO111MODULE=on $(GOPATH)/bin/ginkgo --failFast -v
-SUITE ?= run
+SUITE ?= bootstrap
 ifeq ($(SUITE), run)
 	GINKGO += -p
 endif
@@ -16,7 +16,7 @@ SUDO = sudo
 WGET=wget --retry-connrefused --no-verbose
 NUM_DASHBOARD = $(shell KUSTOMIZE_ENABLE_ALPHA_COMMANDS=true ./bin/kustomize cfg count ../monitoring/base/grafana-operator/dashboards | \
 	grep GrafanaDashboard | cut -d' ' -f2)
-export BOOT0 BOOT1 BOOT2 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID BOOTSTRAP NUM_DASHBOARD
+export BOOT0 BOOT1 BOOT2 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID NUM_DASHBOARD
 
 # Follow Argo CD installed kustomize version
 # https://github.com/cybozu/neco-containers/blob/main/argocd/Dockerfile#L22
@@ -82,7 +82,7 @@ dctest-upgrade:
 		git worktree remove /tmp/neco-apps; \
 		git worktree add /tmp/neco-apps $(BASE_BRANCH) && \
 		cp account.json /tmp/neco-apps/test && \
-		$(MAKE) -C /tmp/neco-apps/test setup dctest BOOTSTRAP=1 COMMIT_ID=$(BASE_BRANCH) && \
+		$(MAKE) -C /tmp/neco-apps/test setup dctest SUITE=bootstrap COMMIT_ID=$(BASE_BRANCH) && \
 		cp /tmp/neco-apps/test/argocd-password.txt ./; \
 	fi
 	PATH=$(BINDIR):$$PATH OVERLAY=$(OVERLAY) UPGRADE=1 SUITE=$(SUITE) ./test.sh
