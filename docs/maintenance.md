@@ -413,6 +413,12 @@ There is no official kubernetes manifests actively maintained for teleport.
 So, check changes in [CHANGELOG.md](https://github.com/gravitational/teleport/blob/master/CHANGELOG.md) on github,
 and [Helm chart](https://github.com/gravitational/teleport/tree/master/examples/chart/teleport).
 
+```console
+$ git checkout https://github.com/gravitational/teleport
+$ cd teleport
+$ git diff vx.y.z...vX.Y.Z examples/chart/teleport
+```
+
 Update `TELEPORT_VERSION` in `test/Makefile`.
 
 ## topolvm
