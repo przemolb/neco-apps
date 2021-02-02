@@ -14,6 +14,7 @@ How to maintain neco-apps
 - [moco](#moco)
 - [monitoring](#monitoring)
   - [prometheus, alertmanager, pushgateway](#prometheus-alertmanager-pushgateway)
+  - [mackerel-agent](#mackerel-agent)
   - [kube-state-metrics](#kube-state-metrics)
   - [grafana-operator](#grafana-operator)
   - [Grafana](#grafana)
@@ -201,6 +202,12 @@ diff prom-2.18.1.yaml prom-2.21.0.yaml
 Then edit `monitoring/base/kustomization.yaml` to update the image tags.
 
 Update `PROMTOOL_VERSION` in `test/Makefile`.
+
+### mackerel-agent
+
+mackerel-agent runs only on the real data centers (stage, prod).
+
+Edit the image tags in `monitoring/overlays/*/mackerel-agent.yaml` files.
 
 ### kube-state-metrics
 
