@@ -80,6 +80,7 @@ func prepareTest() {
 	Context("preparing sandbox grafana", prepareSandboxGrafanaIngress)
 	Context("preparing topolvm", prepareTopoLVM)
 	Context("preparing cursotmer-egress", prepareCustomerEgress)
+	Context("preparing moco", prepareMoco)
 	Context("preparing network-policy", prepareNetworkPolicy) // this must be the last preparation.
 }
 
@@ -112,5 +113,6 @@ func runTest() {
 	Context("local-pv-provisioner", testLocalPVProvisioner)
 	Context("teleport", testTeleport)
 	Context("team-management", testTeamManagement)
+	Context("moco", testMoco)
 	Context("cursotmer-egress", testCustomerEgress)
 }

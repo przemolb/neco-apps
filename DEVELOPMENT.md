@@ -113,23 +113,17 @@ Deployment
 
 ### Deploy to staging environments
 
-Merged changes to `master` branch will be applied automatically.
+Argo CD in staging environments refers to `stage` branch.
+
+CircleCI will create a pull request to update `stage` branch
+when `main` branch is updated.
 
 ### Deploy to production environments
 
 Argo CD in production environments refers to `release` branch.
 
-CircleCI will create a pull request to update `release` branch
-when a tag is pushed as follows:
-
-```console
-$ git checkout master
-$ TAG=release-$(date +%Y.%m.%d)-1
-$ git tag $TAG
-$ git push origin $TAG
-```
-
-Then merge the pull request.
+When `stage` branch is updated, CircleCI creates a pull request to
+update `release` stage to propagate the same set of changes.
 
 Trouble shooting
 ----------------
