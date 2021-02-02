@@ -8,7 +8,7 @@ Overview
 
 - Template based or plain K8s manifests is stored in the neco-apps repository.
 - CI runs tests on a fully virtualized data center called `dctest`.
-- CI creates a pull request to merge `master` into `stage` branch after all tests have passed.
+- CI creates a pull request to merge `main` into `stage` branch after all tests have passed.
 - [Argo CD][] watches changes of this repository, then synchronize(deploy) automatically when new commit detected.
 - After the deployment process finished, [Argo CD][] sends alert to the [Alertmanager][] where is running on the same cluster. Then it notifies to Slack channel and/or Email address.
 
@@ -34,7 +34,7 @@ This repository has 6 CircleCI workflows: `main`, `ceph`, `daily`, `manual-dctes
 | `bootstrap`                 | Bootstrap test on GCP instances                                   | all branches except for `stage`, `release` |
 | `upgrade-stage`             | Upgrade test for `stage` branch (staging env)                     | all branches except for `stage`, `release` |
 | `upgrade-release`           | Upgrade test for `release` branch (production env)                | all branches except for `release`          |
-| `create-pull-request-stage` | Create PR to stage, then trigger `create-pull-request-stage` job. | `master`                                   |
+| `create-pull-request-stage` | Create PR to stage, then trigger `create-pull-request-stage` job. | `main`                                     |
 
 `create-pull-request-stage` is executed only if other jobs succeeded.
 
@@ -52,8 +52,8 @@ This repository has 6 CircleCI workflows: `main`, `ceph`, `daily`, `manual-dctes
 
 | job name    | description                              | target branch |
 | ----------- | ---------------------------------------- | ------------- |
-| `clean-dns` | Clean DNS entries for `dev-ne.co` domain | `master`      |
-| `reboot`    | Reboot test during `bootstrap` job       | `master`      |
+| `clean-dns` | Clean DNS entries for `dev-ne.co` domain | `main`        |
+| `reboot`    | Reboot test during `bootstrap` job       | `main`        |
 
 ### `manual-dctest-with-neco-feature-branch` workflow
 
@@ -61,9 +61,9 @@ This repository has 6 CircleCI workflows: `main`, `ceph`, `daily`, `manual-dctes
 
 This consists of the following job.
 
-| job name                     | description                                 | target branch                                                                     |
-| ---------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------- |
-| `bootstrap-with-neco-branch` | Bootstrap test with `neco`'s feature branch | all branches except `master`, `stage`, `release`, `op-release-*` and `op-stage-*` |
+| job name                     | description                                 | target branch                                                                   |
+| ---------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------- |
+| `bootstrap-with-neco-branch` | Bootstrap test with `neco`'s feature branch | all branches except `main`, `stage`, `release`, `op-release-*` and `op-stage-*` |
 
 `bootstrap-with-neco-branch` is tested with `neco`'s feature branch which is the same name as `neco-apps`'s target branch name.
 For example, when `foo-bar` branch of `neco-apps`, it's tested with `foo-bar` branch of `neco`.

@@ -26,11 +26,11 @@ Staging cluster
 
 ### Apply changes
 
-1. Developer makes changes, commits, and PR which merges to `master` branch.
+1. Developer makes changes, commits, and PR which merges to `main` branch.
 2. Test by CI, Reviewer review, and accept if LGTM.
 3. Reviewer merges PR.
-4. Daily CI tests `master` branch and merges it to `stage` branch, then trigger similar job to secret repository.
-5. In the secret repository, tests `master` branch and merges it to `stage` branch as same as step 4.
+4. Daily CI tests `main` branch and merges it to `stage` branch, then trigger similar job to secret repository.
+5. In the secret repository, tests `main` branch and merges it to `stage` branch as same as step 4.
 6. Argo CD synchronizes latest stage HEAD.
 
 Production cluster

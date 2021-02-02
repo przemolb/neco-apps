@@ -27,7 +27,7 @@ tests:
               project: default
             exp_annotations:
               summary: monitoring is out-of-sync.
-              runbook: See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync
+              runbook: See https://github.com/cybozu-go/neco-apps/blob/main/DEVELOPMENT.md#out-of-sync
           - exp_labels:
               name: metallb
               severity: minor
@@ -35,7 +35,7 @@ tests:
               project: default
             exp_annotations:
               summary: metallb is out-of-sync.
-              runbook: See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync
+              runbook: See https://github.com/cybozu-go/neco-apps/blob/main/DEVELOPMENT.md#out-of-sync
   - interval: 1m
     input_series:
       - series: 'argocd_app_info{name="monitoring",sync_status="Unknown",project="default"}'
@@ -54,7 +54,7 @@ tests:
               project: default
             exp_annotations:
               summary: no application is synced.
-              runbook: See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync
+              runbook: See https://github.com/cybozu-go/neco-apps/blob/main/DEVELOPMENT.md#out-of-sync
   - interval: 1m
     input_series:
       - series: 'up{job="argocd"}'

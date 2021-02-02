@@ -30,16 +30,16 @@ How to maintain neco-apps
 ## argocd
 
 1. Check [releases](https://github.com/argoproj/argo-cd/releases) for changes.
+2. Check [upgrading overview](https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/upgrading/overview.md) when upgrading major or minor version.
+3. Download the upstream manifest as follows:
 
-1. Check [upgrading overview](https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/upgrading/overview.md) when upgrading major or minor version.
-
-1. Download the upstream manifest as follows:
    ```console
    $ curl -sLf -o argocd/base/upstream/install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/vX.Y.Z/manifests/install.yaml
    ```
+
    Then check the diffs by `git diff`.
 
-1. Update `KUSTOMIZE_VERSION` in `test/Makefile`.
+4. Update `KUSTOMIZE_VERSION` in `test/Makefile`.
 
 ## cert-manager
 
@@ -173,8 +173,8 @@ Check [releases](https://github.com/cybozu-go/moco/releases) for changes.
 Download the upstream manifest as follows:
 
 ```console
-$ cd $GOPATH/src/github.com/moco
-$ git clone https://github.com/moco/moco
+$ cd $GOPATH/src/github.com/cybozu-go/moco
+$ git clone https://github.com/cybozu-go/moco
 $ cd moco
 $ git checkout vX.Y.Z
 $ cp -r config/* $GOPATH/src/github.com/cybozu-go/neco-apps/moco/base/upstream
