@@ -16,6 +16,7 @@ How to maintain neco-apps
   - [prometheus, alertmanager, pushgateway](#prometheus-alertmanager-pushgateway)
   - [kube-state-metrics](#kube-state-metrics)
   - [grafana-operator](#grafana-operator)
+  - [Grafana](#grafana)
   - [victoriametrics (operator)](#victoriametrics-operator)
 - [neco-admission](#neco-admission)
 - [network-policy (Calico)](#network-policy-calico)
@@ -223,15 +224,26 @@ Check [releases](https://github.com/integr8ly/grafana-operator/releases)
 Download the upstream manifest as follows:
 
 ```console
+$ mkdir -p $HOME/go/src/github.com/integr8ly
+$ cd $HOME/go/src/github.com/integr8ly
 $ git clone https://github.com/integr8ly/grafana-operator
-$ cd $GOPATH/src/github.com/integr8ly/grafana-operator
+$ cd grafana-operator
 $ git checkout vX.Y.Z
-$ UPSTREAM_DIR=$GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream/
+$ UPSTREAM_DIR=$HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream/
 $ rm -r $UPSTREAM_DIR/*
-$ cp -r deploy/crds $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
-$ cp -r deploy/cluster_roles $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
-$ cp -r deploy/roles $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
-$ cp deploy/operator.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream
+$ cp -r deploy/crds deploy/cluster_roles deploy/roles deploy/operator.yaml $UPSTREAM_DIR
+```
+
+Then edit `monitoring/base/kustomization.yaml` to update the tag for `quay.io/cybozu/grafana-operator`.
+
+### Grafana
+
+Edit `monitoring/base/grafana-operator/operator.yaml` and update the image tag like this:
+
+```yaml
+args:
+- --grafana-image=quay.io/cybozu/grafana
+- --grafana-image-tag=7.0.4.1
 ```
 
 ### victoriametrics (operator)
