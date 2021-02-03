@@ -14,7 +14,7 @@ spec:
             severity: minor
           annotations:
             summary: "{{ $labels.name }} is out-of-sync."
-            runbook: "See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync"
+            runbook: "See https://github.com/cybozu-go/neco-apps/blob/main/DEVELOPMENT.md#out-of-sync"
         - alert: AllAppMissing
           expr: absent(argocd_app_info{sync_status="Synced",project="default"})
           for: 20m
@@ -22,7 +22,7 @@ spec:
             severity: minor
           annotations:
             summary: "no application is synced."
-            runbook: "See https://github.com/cybozu-go/neco-apps/blob/master/DEVELOPMENT.md#out-of-sync"
+            runbook: "See https://github.com/cybozu-go/neco-apps/blob/main/DEVELOPMENT.md#out-of-sync"
         - alert: ArgoCDDown
           expr: |
             absent(up{job="argocd"} == 1)
