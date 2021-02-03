@@ -70,7 +70,7 @@ commands:
           condition: <<parameters.neco-release-branch>>
           steps:
             - run:
-                name: dctest(bootstrap) TAG=release
+                name: neco dctest (bootstrap) TAG=release
                 command: |
                   cd neco
                   ./bin/run-dctest.sh bootstrap release "" menu-ss.yml
@@ -79,7 +79,7 @@ commands:
           condition: <<parameters.neco-release-branch>>
           steps:
             - run:
-                name: dctest(bootstrap) TAG=""
+                name: neco dctest (bootstrap) TAG=""
                 command: |
                   cd neco
                   ./bin/run-dctest.sh bootstrap "" "" menu-ss.yml
@@ -219,7 +219,7 @@ jobs:
       - boot-dctest
       - teleport-dns-cname
       - run:
-          name: Bootstrap neco-apps at stage
+          name: Run upgrade test from stage branch
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=stage ./bin/run-test.sh
@@ -238,7 +238,7 @@ jobs:
       - boot-dctest
       - teleport-dns-cname
       - run:
-          name: Bootstrap neco-apps at release
+          name: Run upgrade test from release branch
           command: |
             export NECO_DIR=$(pwd)/neco
             TARGET=dctest-upgrade BASE_BRANCH=release ./bin/run-test.sh
