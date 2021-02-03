@@ -46,20 +46,23 @@ var _ = Describe("Test applications", func() {
 	})
 
 	switch testSuite {
+	case "bootstrap":
+		bootstrapTest()
 	case "prepare":
+		bootstrapTest()
 		prepareTest()
 	case "run":
 		runTest()
 	}
 })
 
-func prepareTest() {
+func bootstrapTest() {
 	Context("prepareNodes", prepareNodes)
 	Context("prepareLoadPods", prepareLoadPods)
 	Context("setup", testSetup)
-	if doBootstrap {
-		return
-	}
+}
+
+func prepareTest() {
 	if doReboot {
 		Context("prepare reboot rook-ceph", prepareRebootRookCeph)
 		Context("reboot", testRebootAllNodes)
