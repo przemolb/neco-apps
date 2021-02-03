@@ -17,15 +17,28 @@ dctest
     make -C ${NECO_DIR}/dctest test SUITE=bootstrap
     ```
 
-5. Run following commands to setup Argo CD and run tests.
+5. Run following commands to setup tools.
 
     ```console
     cd test
     make setup
-    make test
-    make dctest SUITE=prepare
-    make dctest SUITE=run
     ```
+
+6. Run either one of the following.
+
+    1. Setup all applications without tests.
+
+        ```console
+        make dctest
+        ```
+
+    2. Run all tests.
+
+        ```console
+        make test
+        make dctest SUITE=prepare
+        make dctest SUITE=run
+        ```
 
 `./account.json`
 ----------------
@@ -53,10 +66,10 @@ You can run test for neco-apps on the running dctest.
 
 - `make setup`: Install test required components.
 - `make clean`: Delete generated files.
-- `make test`: Run `gofmt` and other trivial tests.
+- `make code-check`: Run `gofmt` and other trivial tests.
 - `make validation`: Run validation test of manifests.
 - `make test-alert-rules`: Run unit test of Prometheus alerts.
-- `make kustomize-check`: Check syntax of the Kubernetes manifests using `kustomize check`
+- `make test`: Run all static tests.
 
 Ignore the status of tenants' Applications
 ------------------------------------------
