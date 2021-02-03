@@ -355,6 +355,28 @@ func applyAndWaitForApplications(commitID string) {
 		fmt.Println("  " + app)
 	}
 
+	// TODO: remove this after #1139 gets merged and released
+	if doUpgrade {
+		By("removing kube-system/kube-state-metrics")
+		Eventually(func() error {
+			svc := &corev1.Service{}
+			stdout, _, err := ExecAt(boot0, "kubectl", "-n", "kube-system", "get", "-o", "json", "svc", "kube-state-metrics")
+			if err != nil {
+				return err
+			}
+			if err := json.Unmarshal(stdout, svc); err != nil {
+				return err
+			}
+			if svc.Spec.ClusterIP != "None" {
+				if _, _, err := ExecAt(boot0, "kubectl", "-n", "kube-system", "delete", "svc", "kube-state-metrics"); err != nil {
+					return fmt.Errorf("failed to delete kube-state-metrics service: %w", err)
+				}
+				return fmt.Errorf("kube-system/kube-state-metrics service has still clusterIP: %s", svc.Spec.ClusterIP)
+			}
+			return nil
+		}, 40*time.Minute).Should(Succeed())
+	}
+
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 		for _, target := range appList {
@@ -399,11 +421,13 @@ func applyAndWaitForApplications(commitID string) {
 		}
 		return nil
 	}
+
 	// want to do "Eventually( Consistently(checkAllAppsSynced, 15sec, 1sec) )"
 	Eventually(func() error {
-		for i := 0; i < 15; i++ {
-			if i%5 == 1 {
-				fmt.Printf("Checking all app synced: count=%d\n", i)
+		st := time.Now()
+		for {
+			if time.Since(st) > 15*time.Second {
+				return nil
 			}
 			err := checkAllAppsSynced()
 			if err != nil {
@@ -411,7 +435,6 @@ func applyAndWaitForApplications(commitID string) {
 			}
 			time.Sleep(1 * time.Second)
 		}
-		return nil
 	}, 40*time.Minute).Should(Succeed())
 }
 
