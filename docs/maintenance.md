@@ -8,8 +8,8 @@ How to maintain neco-apps
 - [elastic (ECK)](#elastic-eck)
 - [external-dns](#external-dns)
 - [ingress (Contour & Envoy)](#ingress-contour--envoy)
-- [machines-endpoints](#machines-endpoints)
-- [metallb](#metallb)
+- [logging](#logging)
+  - [loki, promtail](#loki-promtail)
 - [metrics-server](#metrics-server)
 - [moco](#moco)
 - [monitoring](#monitoring)
@@ -135,6 +135,31 @@ Note that:
   - If the manifest needs modification:
     - If the manifest is for a cluster-wide resource, put a modified version in the `common` directory.
     - If the manifest is for a namespaced resource, put a template in the `template` directory and apply patches.
+
+## logging
+
+Download Helm used in Loki. Follow `HELM_VERSION` in the upstream configuration.
+
+```console
+# Grafana does not say helm version requirements explicitly. However, we confirm that the procedure succeeds using helm v3.1.0.
+# The [document](https://github.com/grafana/helm-charts/tree/main/charts/grafana#upgrading-an-existing-release-to-a-new-major-version) is also helpful.
+$ HELM_VERSION=X.Y.Z
+$ mkdir -p $GOPATH/src/github.com/cybozu-go/neco-apps/logging/bin
+$ curl -sSLf https://get.helm.sh/helm-v$HELM_VERSION-linux-amd64.tar.gz | tar -C $GOPATH/src/github.com/cybozu-go/neco-apps/logging/bin linux-amd64/helm --strip-components 1 -xzf -
+```
+
+### loki, promtail
+There is no official kubernetes manifests for loki and promtail.
+So, check changes in release notes on github and helm charts like bellow.
+
+```
+LOGGING_DIR=$GOPATH/src/github.com/cybozu-go/neco-apps/logging
+${LOGGING_DIR}/bin/helm repo add grafana https://grafana.github.io/helm-charts
+${LOGGING_DIR}/bin/helm search repo -l grafana
+${LOGGING_DIR}/bin/helm template logging --namespace=logging grafana/loki-stack --version=2.3.1
+#${LOGGING_DIR}/bin/helm template prom prometheus-community/prometheus --version=11.5.0 > prom-2.18.1.yaml
+#${LOGGING_DIR}/bin/helm template prom prometheus-community/prometheus --version=11.16.7 > prom-2.21.0.yaml
+#diff prom-2.18.1.yaml prom-2.21.0.yaml
 
 ## machines-endpoints
 
