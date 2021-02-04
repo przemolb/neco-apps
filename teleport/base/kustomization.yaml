@@ -12,6 +12,7 @@ configMapGenerator:
     namespace: teleport
     files:
       - conf/admin-role.yaml
+      - conf/cydec-role.yaml
       - conf/ept-role.yaml
       - conf/garoon-role.yaml
       - conf/maneki-role.yaml
