@@ -398,6 +398,15 @@ func applyAndWaitForApplications(commitID string) {
 				continue
 			}
 
+			// TODO: remove this after #1145 gets merged and released
+			if doUpgrade &&
+				app.Name == "team-management" &&
+				app.Status.Sync.Status == SyncStatusCodeOutOfSync &&
+				app.Status.Health.Status == HealthStatusHealthy {
+				// ignore errors because this deletion will fail after a few days.
+				ExecAt(boot0, "kubectl", "delete", "rolebinding", "-n", "app-gorush", "maneki-role-binding")
+			}
+
 			// In upgrade test, syncing network-policy app may cause temporal network disruption.
 			// It leads to ArgoCD's improper behavior. In spite of the network-policy app becomes Synced/Healthy, the operation does not end.
 			// So terminate the unexpected operation manually in upgrade test.
