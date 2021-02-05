@@ -65,7 +65,7 @@ spec:
           expr: |
             rate(contour_httpproxy_invalid_total[5m]) > 0
           labels:
-            severity: minor
+            severity: error
           for: 10m
           annotations:
             summary: Invalid HTTPProxy resource exists.

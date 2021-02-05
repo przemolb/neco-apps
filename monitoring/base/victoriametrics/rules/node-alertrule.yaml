@@ -16,13 +16,13 @@ spec:
             sum(sabakan_machine_status{status!="retired"} == 1) by (address)
           for: 30m
           labels:
-            severity: minor
+            severity: error
         - alert: MonitorHWDown
           expr: |
             (up{job="monitor-hw"} == 0) * on (address)
             sum(sabakan_machine_status{status!="retired"} == 1) by (address)
           labels:
-            severity: minor
+            severity: error
           for: 30m
           annotations:
             summary: MonitorHW has disappeared at `{{ $labels.address }}`.

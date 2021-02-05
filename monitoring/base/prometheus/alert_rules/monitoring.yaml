@@ -9,7 +9,7 @@ groups:
           absent(up{job="alertmanager"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: PrometheusDown
         annotations:
           summary: Prometheus has disappeared from Prometheus target discovery.
@@ -18,7 +18,7 @@ groups:
           absent(up{job="prometheus"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: PushGatewayDown
         expr: |
           absent(up{job="pushgateway"} == 1)
