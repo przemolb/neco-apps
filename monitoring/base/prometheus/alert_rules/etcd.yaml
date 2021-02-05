@@ -26,7 +26,17 @@ groups:
           summary: "{{ $labels.instance }}, {{ $labels.job }} of etcd DB space increases {{ $value | humanize }}B/h"
           runbook: "Please consider to find root causes, and solve the problems"
       - alert: BootserverEtcdMissing
-        expr: absent(up{job="bootserver-etcd"} == 1)
+        # "3" is total number of etcd servers
+        expr: absent(up{job="bootserver-etcd"} == 1) or count(up{job="bootserver-etcd"} == 1) < 3
+        labels:
+          severity: warning
+        for: 20m
+        annotations:
+          summary: BootserverEtcd has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: BootserverEtcdMissing
+        # "2" is majority number of etcd servers (= ceil(total/2))
+        expr: absent(up{job="bootserver-etcd"} == 1) or count(up{job="bootserver-etcd"} == 1) < 2
         labels:
           severity: critical
         for: 10m
@@ -34,7 +44,15 @@ groups:
           summary: BootserverEtcd has disappeared from Prometheus target discovery.
           runbook: Please consider to find root causes, and solve the problems
       - alert: CKEEtcdMissing
-        expr: absent(up{job="cke-etcd"} == 1)
+        expr: absent(up{job="cke-etcd"} == 1) or count(up{job="cke-etcd"} == 1) < 3
+        labels:
+          severity: warning
+        for: 20m
+        annotations:
+          summary: CKEEtcd has disappeared from Prometheus target discovery.
+          runbook: Please consider to find root causes, and solve the problems
+      - alert: CKEEtcdMissing
+        expr: absent(up{job="cke-etcd"} == 1) or count(up{job="cke-etcd"} == 1) < 2
         labels:
           severity: critical
         for: 10m
