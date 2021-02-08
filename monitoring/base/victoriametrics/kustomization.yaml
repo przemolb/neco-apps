@@ -49,7 +49,6 @@ resources:
   - rules/teleport-alertrule.yaml
   - rules/teleport-scrape.yaml
   - rules/topolvm-scrape.yaml
-  - rules/topolvm-alertrule.yaml
   - rules/vault-alertrule.yaml
   - rules/vault-scrape.yaml
 patchesStrategicMerge:
