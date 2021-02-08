@@ -13,7 +13,7 @@ import (
 
 func prepareMoco() {
 	It("should deploy mysqlcluster", func() {
-		// This manifest is based on the this example (https://github.com/cybozu-go/moco/blob/v0.4.0/docs/example_mysql_cluster.md).
+		// This manifest is based on the this example (https://github.com/cybozu-go/moco/blob/v0.5.1/docs/example_mysql_cluster.md).
 		// Changed as follows.
 		// - Change the namespace of all resources.
 		// - Change the tag of quay.io/cybozu/moco-mysql image.
