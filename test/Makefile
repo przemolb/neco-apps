@@ -24,7 +24,7 @@ KUSTOMIZE_VERSION = 3.7.0
 PROMTOOL_VERSION := 2.24.1
 TELEPORT_VERSION := 5.1.2
 KUBERNETES_VERSION = 1.19.7
-MOCO_VERSION := 0.4.0
+MOCO_VERSION := 0.5.1
 
 # Cache
 DOWNLOAD_DIR := $(abspath $(CURDIR)/download)
@@ -105,7 +105,7 @@ $(KUBECTL):
 
 $(KUBECTLMOCO):
 	$(MAKE) setup-download
-	$(WGET) -O $@ https://github.com/cybozu-go/moco/releases/download/v$(MOCO_VERSION)/kubectl-moco
+	$(WGET) -O $@ https://github.com/cybozu-go/moco/releases/download/v$(MOCO_VERSION)/kubectl-moco-linux-amd64
 	chmod +x $@
 
 $(KUSTOMIZE):
