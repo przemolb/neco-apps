@@ -376,7 +376,7 @@ groups:
           kube_daemonset_status_number_ready{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             /
           kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} * 100 < 100
-        for: 30m
+        for: 1h
         labels:
           severity: error
       - alert: KubeDaemonSetNotScheduled
@@ -388,7 +388,7 @@ groups:
           kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             -
           kube_daemonset_status_current_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} > 0
-        for: 10m
+        for: 1h
         labels:
           severity: error
       - alert: KubeDaemonSetReplicasMismatch
@@ -398,7 +398,7 @@ groups:
           runbook: TBD
         expr: |
           kube_daemonset_status_number_unavailable{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} != 0
-        for: 30m
+        for: 1h
         labels:
           severity: error
           frequency: daily

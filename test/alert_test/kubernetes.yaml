@@ -319,11 +319,11 @@ tests:
   - interval: 1m
     input_series:
       - series: 'kube_daemonset_status_number_ready{job="kube-state-metrics", namespace="kube-system", daemonset="calico-node"}'
-        values: '8+0x30'
+        values: '8+0x60'
       - series: 'kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics", namespace="kube-system", daemonset="calico-node"}'
-        values: '10+0x30'
+        values: '10+0x60'
     alert_rule_test:
-      - eval_time: 30m
+      - eval_time: 60m
         alertname: KubeDaemonSetRolloutStuck
         exp_alerts:
           - exp_labels:
@@ -337,11 +337,11 @@ tests:
   - interval: 1m
     input_series:
       - series: 'kube_daemonset_status_current_number_scheduled{job="kube-state-metrics", namespace="kube-system", daemonset="calico-node"}'
-        values: '9+0x15'
+        values: '9+0x60'
       - series: 'kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics", namespace="kube-system", daemonset="calico-node"}'
-        values: '10+0x15'
+        values: '10+0x60'
     alert_rule_test:
-      - eval_time: 15m
+      - eval_time: 60m
         alertname: KubeDaemonSetNotScheduled
         exp_alerts:
           - exp_labels:
@@ -355,11 +355,11 @@ tests:
   - interval: 1m
     input_series:
       - series: 'kube_daemonset_status_number_unavailable{job="kube-state-metrics", namespace="topolvm-system", daemonset="node"}'
-        values: '0+0x28 1+1x32'
+        values: '0+0x58 1+1x62'
       - series: 'kube_daemonset_status_number_unavailable{job="kube-state-metrics", namespace="topolvm-system", daemonset="topolvm-scheduler"}'
-        values: '1+1x28 0+0x32'
+        values: '1+1x58 0+0x62'
     alert_rule_test:
-      - eval_time: 60m
+      - eval_time: 120m
         alertname: KubeDaemonSetReplicasMismatch
         exp_alerts:
           - exp_labels:
