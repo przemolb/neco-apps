@@ -30,7 +30,7 @@ spec:
           expr: |
             metallb_bgp_session_up == 0
           labels:
-            severity: critical
+            severity: error
           for: 10m
           annotations:
             summary: BGP session of MetalLB down.

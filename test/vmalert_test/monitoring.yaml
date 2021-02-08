@@ -24,7 +24,7 @@ tests:
         alertname: VMAlertmanagerDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMAlertmanager has disappeared.
@@ -38,7 +38,7 @@ tests:
         alertname: VMAgentSmallsetDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMAgent for smallset has disappeared.
@@ -51,7 +51,7 @@ tests:
         alertname: VMAlertSmallsetDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMAlert for smallset has disappeared.
@@ -64,7 +64,7 @@ tests:
         alertname: VMSingleSmallsetDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMSingle for smallset has disappeared.
@@ -78,7 +78,7 @@ tests:
         alertname: VMAgentLargesetDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMAgent for largeset has disappeared.
@@ -91,7 +91,7 @@ tests:
         alertname: VMAlertLargesetDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMAlert for largeset has disappeared.
@@ -104,7 +104,7 @@ tests:
         alertname: VMStorageLargesetDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMStorage for largeset has disappeared.
@@ -117,7 +117,7 @@ tests:
         alertname: VMSelectLargesetDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMSelect for largeset has disappeared.
@@ -130,7 +130,7 @@ tests:
         alertname: VMInsertLargesetDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: VMInsert for largeset has disappeared.
@@ -144,7 +144,7 @@ tests:
         alertname: AlertmanagerDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: Alertmanager has disappeared from Prometheus target discovery.
@@ -157,7 +157,7 @@ tests:
         alertname: PrometheusDown
         exp_alerts:
           - exp_labels:
-              severity: error
+              severity: critical
             exp_annotations:
               runbook: TBD
               summary: Prometheus has disappeared from Prometheus target discovery.
