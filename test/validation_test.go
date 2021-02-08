@@ -517,7 +517,6 @@ func testVMCustomResources(t *testing.T) {
 		"kubernetes",
 		"monitoring",
 		"rook",
-		"topolvm",
 	}
 
 	// gather CRs in files
