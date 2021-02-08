@@ -36,7 +36,7 @@ spec:
   containers:
   - command:
     - /usr/local/bin/pause
-    image: ghcr.io/cybozu-go/moco:0.4.0
+    image: ghcr.io/cybozu-go/moco:0.5.1
     imagePullPolicy: Always
     name: moco
 ---
