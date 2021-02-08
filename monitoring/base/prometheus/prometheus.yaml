@@ -353,6 +353,8 @@ scrape_configs:
       - source_labels: [__meta_kubernetes_pod_label_k8s_app]
         action: keep
         regex: calico-node
+      - source_labels: [__meta_kubernetes_pod_node_name]
+        target_label: node
       - source_labels: [__address__]
         action: replace
         regex: ([^:]+)(?::\d+)?
