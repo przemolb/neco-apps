@@ -17,47 +17,6 @@ import (
 
 func prepareLoadPods() {
 	It("should deploy pods", func() {
-		yamlCS := `
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: addload-for-cs
-  namespace: default
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: addload
-  template:
-    metadata:
-      labels:
-        app: addload
-    spec:
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - addload
-            topologyKey: "kubernetes.io/hostname"
-      containers:
-      - name: spread-test-ubuntu
-        image: quay.io/cybozu/ubuntu:20.04
-        command:
-        - "/usr/local/bin/pause"
-        securityContext:
-          runAsUser: 10000
-          runAsGroup: 10000
-        resources:
-          requests:
-            cpu: "2"
-`
-		stdout, stderr, err := ExecAtWithInput(boot0, []byte(yamlCS), "kubectl", "apply", "-f", "-")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-
 		yamlSS := `
 apiVersion: apps/v1
 kind: Deployment
@@ -102,28 +61,8 @@ spec:
         operator: Equal
         value: storage
 `
-		stdout, stderr, err = ExecAtWithInput(boot0, []byte(yamlSS), "kubectl", "apply", "-f", "-")
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(yamlSS), "kubectl", "apply", "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-
-		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl",
-				"get", "deployment", "addload-for-cs", "-o=json")
-			if err != nil {
-				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-			}
-
-			deployment := new(appsv1.Deployment)
-			err = json.Unmarshal(stdout, deployment)
-			if err != nil {
-				return fmt.Errorf("stdout: %s, err: %v", stdout, err)
-			}
-
-			if deployment.Status.AvailableReplicas != 2 {
-				return fmt.Errorf("addload-for-cs deployment's AvailableReplicas is not 2: %d", int(deployment.Status.AvailableReplicas))
-			}
-
-			return nil
-		}).Should(Succeed())
 
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl",
@@ -466,12 +405,11 @@ func testMONPodsSpread(cephClusterName, cephClusterNamespace string) {
 	})
 }
 
-func testOSDPodsSpreadAll() {
-	testOSDPodsSpread("ceph-hdd", "ceph-hdd", "ss")
-	testOSDPodsSpread("ceph-ssd", "ceph-ssd", "cs")
-}
+func testOSDPodsSpread() {
+	cephClusterName := "ceph-hdd"
+	cephClusterNamespace := "ceph-hdd"
+	nodeRole := "ss"
 
-func testOSDPodsSpread(cephClusterName, cephClusterNamespace, nodeRole string) {
 	By("checking OSD Pods for "+cephClusterName+" are spread on "+nodeRole+" nodes", func() {
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "node", "-l", "node-role.kubernetes.io/"+nodeRole+"=true", "-o=json")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
@@ -643,7 +581,7 @@ func testRookCeph() {
 	It("should be available", func() {
 		testRookOperator()
 		testClusterStable()
-		testOSDPodsSpreadAll()
+		testOSDPodsSpread()
 		testMONPodsSpreadAll()
 		testRookRGW()
 		testRookRBDAll()
