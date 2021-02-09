@@ -17,7 +17,7 @@ spec:
           absent(up{job="victoriametrics-operator"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: VMAlertmanagerDown
         annotations:
           summary: VMAlertmanager has disappeared.
@@ -26,7 +26,7 @@ spec:
           absent(up{job="vmalertmanager"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
 
       - alert: VMAgentSmallsetDown
         annotations:
@@ -36,7 +36,7 @@ spec:
           absent(up{job="vmagent-smallset"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
       - alert: VMAlertSmallsetDown
         annotations:
           summary: VMAlert for smallset has disappeared.
@@ -45,7 +45,7 @@ spec:
           absent(up{job="vmalert-smallset"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
       - alert: VMSingleSmallsetDown
         annotations:
           summary: VMSingle for smallset has disappeared.
@@ -54,7 +54,7 @@ spec:
           absent(up{job="vmsingle-smallset"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
 
       - alert: VMAgentLargesetDown
         annotations:
@@ -64,7 +64,7 @@ spec:
           absent(up{job="vmagent-largeset"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
       - alert: VMAlertLargesetDown
         annotations:
           summary: VMAlert for largeset has disappeared.
@@ -73,7 +73,7 @@ spec:
           absent(up{job="vmalert-largeset"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
       - alert: VMStorageLargesetDown
         annotations:
           summary: VMStorage for largeset has disappeared.
@@ -82,7 +82,7 @@ spec:
           absent(up{job="vmstorage-largeset"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
       - alert: VMSelectLargesetDown
         annotations:
           summary: VMSelect for largeset has disappeared.
@@ -91,7 +91,7 @@ spec:
           absent(up{job="vmselect-largeset"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
       - alert: VMInsertLargesetDown
         annotations:
           summary: VMInsert for largeset has disappeared.
@@ -100,7 +100,7 @@ spec:
           absent(up{job="vminsert-largeset"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: critical
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMRule
@@ -119,7 +119,7 @@ spec:
             absent(up{job="alertmanager"} == 1)
           for: 15m
           labels:
-            severity: minor
+            severity: critical
         - alert: PrometheusDown
           annotations:
             summary: Prometheus has disappeared from Prometheus target discovery.
@@ -128,7 +128,7 @@ spec:
             absent(up{job="prometheus"} == 1)
           for: 15m
           labels:
-            severity: minor
+            severity: critical
         - alert: PushGatewayDown
           expr: |
             absent(up{job="pushgateway"} == 1)

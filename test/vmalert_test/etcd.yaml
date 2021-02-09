@@ -15,7 +15,7 @@ tests:
           - exp_labels:
               job: etcd
               instance: 10.0.0.1:2379
-              severity: minor
+              severity: error
             exp_annotations:
               summary: "10.0.0.1:2379, etcd of etcd DB space uses more than 80%"
               runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"
@@ -32,14 +32,14 @@ tests:
           - exp_labels:
               job: etcd
               instance: 10.0.0.1:2379
-              severity: minor
+              severity: error
             exp_annotations:
               summary: "10.0.0.1:2379, etcd of etcd DB space uses more than 80%"
               runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"
           - exp_labels:
               job: etcd
               instance: 10.0.0.1:2379
-              severity: minor
+              severity: error
             exp_annotations:
               summary: "10.0.0.1:2379, etcd of etcd DB space uses more than 90%"
               runbook: "Please consider manual compaction and defrag. https://github.com/etcd-io/etcd/blob/master/Documentation/op-guide/maintenance.md"
@@ -60,7 +60,11 @@ tests:
               runbook: "Please consider to find root causes, and solve the problems"
   - interval: 1m
     input_series:
-      - series: 'up{job="bootserver-etcd"}'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.1"}'
+        values: '0+0x10'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.2"}'
+        values: '0+0x10'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.3"}'
         values: '0+0x10'
     alert_rule_test:
       - eval_time: 10m
@@ -73,7 +77,57 @@ tests:
               summary: BootserverEtcd has disappeared from Prometheus target discovery.
   - interval: 1m
     input_series:
-      - series: 'up{job="cke-etcd"}'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.1"}'
+        values: '1+0x10'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.2"}'
+        values: '0+0x10'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.3"}'
+        values: '0+0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: BootserverEtcdMissing
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              runbook: Please consider to find root causes, and solve the problems
+              summary: BootserverEtcd has disappeared from Prometheus target discovery.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.1"}'
+        values: '1+0x10'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.2"}'
+        values: '1+0x10'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.3"}'
+        values: '0+0x10'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BootserverEtcdMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              runbook: Please consider to find root causes, and solve the problems
+              summary: BootserverEtcd has disappeared from Prometheus target discovery.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.1"}'
+        values: '1+0x10'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.2"}'
+        values: '1+0x10'
+      - series: 'up{job="bootserver-etcd",instance="10.0.0.3"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: BootserverEtcdMissing
+        exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'up{job="cke-etcd",instance="10.0.0.1"}'
+        values: '0+0x10'
+      - series: 'up{job="cke-etcd",instance="10.0.0.2"}'
+        values: '0+0x10'
+      - series: 'up{job="cke-etcd",instance="10.0.0.3"}'
         values: '0+0x10'
     alert_rule_test:
       - eval_time: 10m
@@ -84,3 +138,49 @@ tests:
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems
               summary: CKEEtcd has disappeared from Prometheus target discovery.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="cke-etcd",instance="10.0.0.1"}'
+        values: '1+0x10'
+      - series: 'up{job="cke-etcd",instance="10.0.0.2"}'
+        values: '0+0x10'
+      - series: 'up{job="cke-etcd",instance="10.0.0.3"}'
+        values: '0+0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CKEEtcdMissing
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              runbook: Please consider to find root causes, and solve the problems
+              summary: CKEEtcd has disappeared from Prometheus target discovery.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="cke-etcd",instance="10.0.0.1"}'
+        values: '1+0x10'
+      - series: 'up{job="cke-etcd",instance="10.0.0.2"}'
+        values: '1+0x10'
+      - series: 'up{job="cke-etcd",instance="10.0.0.3"}'
+        values: '0+0x10'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: CKEEtcdMissing
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+            exp_annotations:
+              runbook: Please consider to find root causes, and solve the problems
+              summary: CKEEtcd has disappeared from Prometheus target discovery.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="cke-etcd",instance="10.0.0.1"}'
+        values: '1+0x10'
+      - series: 'up{job="cke-etcd",instance="10.0.0.2"}'
+        values: '1+0x10'
+      - series: 'up{job="cke-etcd",instance="10.0.0.3"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 20m
+        alertname: CKEEtcdMissing
+        exp_alerts: []
