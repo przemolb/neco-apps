@@ -7,4 +7,4 @@ patchesStrategicMerge:
 images:
   - name: k8s.gcr.io/metrics-server/metrics-server
     newName: quay.io/cybozu/metrics-server
-    newTag: 0.4.1.1
+    newTag: 0.4.2.1
