@@ -10,6 +10,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: external-dns
   podMetricsEndpoints:
-  - relabelConfigs:
+  - port: metrics
+    relabelConfigs:
     - replacement: external-dns
       targetLabel: job
