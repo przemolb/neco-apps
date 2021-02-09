@@ -18,6 +18,7 @@ resources:
   - rules/cert-manager-scrape.yaml
   - rules/cke-alertrule.yaml
   - rules/cke-scrape.yaml
+  - rules/coil-scrape.yaml
   - rules/elastic-operator-alertrule.yaml
   - rules/elastic-operator-scrape.yaml
   - rules/etcd-alertrule.yaml
