@@ -20,11 +20,12 @@ export BOOT0 BOOT1 BOOT2 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID NUM_DASHBOARD
 
 # Follow Argo CD installed kustomize version
 # https://github.com/cybozu/neco-containers/blob/main/argocd/Dockerfile#L22
-KUSTOMIZE_VERSION = 3.7.0
+KUSTOMIZE_VERSION := 3.7.0
 PROMTOOL_VERSION := 2.24.1
 TELEPORT_VERSION := 5.1.2
-KUBERNETES_VERSION = 1.19.7
+KUBERNETES_VERSION := 1.19.7
 MOCO_VERSION := 0.5.1
+KUBESEAL_VERSION := 0.14.1
 
 # Cache
 DOWNLOAD_DIR := $(abspath $(CURDIR)/download)
@@ -38,6 +39,7 @@ KUBECTLMOCO := $(BINDIR)/kubectl-moco
 KUSTOMIZE := $(BINDIR)/kustomize
 PROMTOOL := $(BINDIR)/promtool
 TSH := $(BINDIR)/tsh
+KUBESEAL := $(BINDIR)/kubeseal
 
 install.yaml: $(shell find ../argocd/base)
 	$(KUSTOMIZE) build ../argocd/base/ > install.yaml
@@ -91,6 +93,7 @@ dctest-upgrade: install.yaml
 	fi
 	PATH=$(BINDIR):$$PATH OVERLAY=$(OVERLAY) UPGRADE=1 SUITE=$(SUITE) ./test.sh
 
+.PHONY: kubeseal
 setup-download:
 	if [ -z "$$(which wget)" ]; then \
 		$(SUDO) apt-get update && $(SUDO) apt-get -y install wget; \
@@ -123,7 +126,13 @@ $(TSH):
 	$(WGET) -O $(TELEPORT_DLPATH) https://get.gravitational.com/teleport-v$(TELEPORT_VERSION)-linux-amd64-bin.tar.gz
 	tar zxf $(TELEPORT_DLPATH) -C $(BINDIR) --strip-component=1 teleport/tsh
 
-setup: $(KUBECTL) $(KUBECTLMOCO) $(KUSTOMIZE) $(PROMTOOL) $(TSH)
+$(KUBESEAL):
+	$(MAKE) setup-download
+	$(WGET) -O $@ https://github.com/bitnami-labs/sealed-secrets/releases/download/v$(KUBESEAL_VERSION)/kubeseal-linux-amd64
+	chmod +x $@
+
+.PHONY: setup
+setup: $(KUBECTL) $(KUBECTLMOCO) $(KUSTOMIZE) $(PROMTOOL) $(TSH) $(KUBESEAL)
 	go install github.com/onsi/ginkgo/ginkgo
 
 .PHONY: test-tools
@@ -141,10 +150,11 @@ nilerr:
 		cd /tmp; env GOFLAGS= GO111MODULE=on go get github.com/gostaticanalysis/nilerr/cmd/nilerr; \
 	fi
 
+.PHONY: clean
 clean:
 	rm -f install.yaml
 	rm -rf $(BINDIR)
 	rm -rf $(DOWNLOAD_DIR)
 
 .PHONY:	validation test-alert-rules code-check test \
-		dctest dctest-reboot dctest-upgrade setup-download setup clean
+		dctest dctest-reboot dctest-upgrade
