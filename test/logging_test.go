@@ -25,22 +25,36 @@ func testLogging() {
 
 func checkLog(title, query string) {
 	By(title, func() {
-		stdout, stderr, err := ExecAt(boot0,
-			"kubectl", "exec", "-n", "logging", "statefulset/logging-loki", "--", "logcli", "query", query, "-ojsonl")
-		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0,
+				"kubectl", "exec", "-n", "logging", "statefulset/logging-loki", "--", "logcli", "query", query, "-ojsonl")
+			if err != nil {
+				return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+			}
 
-		scanner := bufio.NewScanner(bytes.NewBuffer(stdout))
-		hasLog := false
-		for scanner.Scan() {
-			hasLog = true
-			log := make(map[string]interface{})
-			line := scanner.Bytes()
-			err = json.Unmarshal(line, &log)
-			Expect(err).ShouldNot(HaveOccurred(), "log=%s", string(line))
-			Expect(log).Should(HaveKey("labels"))
-			Expect(log).Should(HaveKey("line"))
-		}
-		Expect(hasLog).Should(BeTrue())
+			scanner := bufio.NewScanner(bytes.NewBuffer(stdout))
+			hasLog := false
+			for scanner.Scan() {
+				hasLog = true
+				log := make(map[string]interface{})
+				line := scanner.Bytes()
+				err = json.Unmarshal(line, &log)
+				if err != nil {
+					return fmt.Errorf("stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
+				}
+				if _, ok := log["labels"]; !ok {
+					return fmt.Errorf("expect the `labels` field to be in existence")
+				}
+				if _, ok := log["line"]; !ok {
+					return fmt.Errorf("expect the `line` field to be in existence")
+				}
+			}
+			if !hasLog {
+				return fmt.Errorf("expect least one log to exist")
+			}
+
+			return nil
+		}).Should(Succeed())
 	})
 }
 
