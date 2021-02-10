@@ -1,5 +1,10 @@
 ArgoCDApplicationValidator:
     rules:
+      - repository: https://github.com/cybozu-private/cydec-apps.git
+        projects:
+          - cydec
+          - maneki
+          - tenant-app-of-apps
       - repository: https://github.com/cybozu-private/ept-apps.git
         projects:
           - ept
