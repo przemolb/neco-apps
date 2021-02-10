@@ -162,18 +162,20 @@ func testTeamManagement() {
 				actualVerbsByResource := getActualVerbs(team, ns)
 
 				// check secrets
-				key := keyGen(team, ns, "secrets")
+				for _, resource := range []string{"secrets", "sealedsecrets.bitnami.com"} {
+					key := keyGen(team, ns, resource)
 
-				if ns == "sandbox" || nsOwner[ns] == team || (team == "maneki" && nsOwner[ns] != "neco") {
-					expectedVerbs[key] = adminVerbs
-				} else {
-					expectedVerbs[key] = prohibitedVerbs
-				}
+					if ns == "sandbox" || nsOwner[ns] == team || (team == "maneki" && nsOwner[ns] != "neco") {
+						expectedVerbs[key] = adminVerbs
+					} else {
+						expectedVerbs[key] = prohibitedVerbs
+					}
 
-				if v, ok := actualVerbsByResource["secrets"]; ok {
-					actualVerbs[key] = v
-				} else {
-					actualVerbs[key] = prohibitedVerbs
+					if v, ok := actualVerbsByResource[resource]; ok {
+						actualVerbs[key] = v
+					} else {
+						actualVerbs[key] = prohibitedVerbs
+					}
 				}
 
 				// check required resources

@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sealed-secrets-controller
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: sealed-secrets-controller
+        imagePullPolicy: IfNotPresent
+        command: null
+        args:
+        - --key-renew-period=8760h
+        - --key-ttl=876000h

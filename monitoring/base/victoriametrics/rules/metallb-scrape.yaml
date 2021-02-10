@@ -1,14 +1,35 @@
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMPodScrape
 metadata:
-  name: metallb
+  name: metallb-controller
   namespace: monitoring
 spec:
   namespaceSelector:
     matchNames: [metallb-system]
-  selector: {}
+  selector:
+    matchLabels:
+      component: controller
   podMetricsEndpoints:
   - port: monitoring
     relabelConfigs:
-      - replacement: metallb
+      - replacement: metallb-controller
         targetLabel: job
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMPodScrape
+metadata:
+  name: metallb-speaker
+  namespace: monitoring
+spec:
+  namespaceSelector:
+    matchNames: [metallb-system]
+  selector:
+    matchLabels:
+      component: speaker
+  podMetricsEndpoints:
+  - port: monitoring
+    relabelConfigs:
+      - replacement: metallb-speaker
+        targetLabel: job
+      - sourceLabels: [__meta_kubernetes_pod_node_name]
+        targetLabel: node

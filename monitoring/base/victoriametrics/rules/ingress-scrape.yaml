@@ -18,6 +18,11 @@ spec:
     - sourceLabels: [__meta_kubernetes_service_name]
       action: keep
       regex: contour-metrics
+    - sourceLabels: [__meta_kubernetes_namespace]
+      action: replace
+      targetLabel: kubernetes_namespace
+    - action: labeldrop
+      regex: namespace
 ---
 apiVersion: operator.victoriametrics.com/v1beta1
 kind: VMPodScrape
@@ -36,3 +41,8 @@ spec:
     relabelConfigs:
     - replacement: contour-envoy
       targetLabel: job
+    - sourceLabels: [__meta_kubernetes_namespace]
+      action: replace
+      targetLabel: kubernetes_namespace
+    - action: labeldrop
+      regex: namespace

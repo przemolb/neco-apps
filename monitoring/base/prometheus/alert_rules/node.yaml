@@ -10,13 +10,13 @@ groups:
           label_replace(sum(sabakan_machine_status{status!="retired"} == 1) by (address), "instance", "$1:9100", "address" , "(.+)")
         for: 30m
         labels:
-          severity: minor
+          severity: error
       - alert: MonitorHWDown
         expr: |
           (up{job="monitor-hw"} == 0) * on (instance)
           label_replace(sum(sabakan_machine_status{status!="retired"} == 1) by (address), "instance", "$1", "address" , "(.+)")
         labels:
-          severity: minor
+          severity: error
         for: 30m
         annotations:
           summary: MonitorHW has disappeared at `{{ $labels.instance }}`.
