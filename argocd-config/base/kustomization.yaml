@@ -25,6 +25,7 @@ resources:
 - registry-quay.yaml
 - rook.yaml
 - sandbox.yaml
+- sealed-secrets.yaml
 - secrets.yaml
 - team-management.yaml
 - teleport.yaml

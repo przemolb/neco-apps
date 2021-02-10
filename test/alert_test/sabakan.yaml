@@ -45,7 +45,7 @@ tests:
         alertname: BootServerNotHealthy
         exp_alerts:
           - exp_labels:
-              severity: minor
+              severity: error
             exp_annotations:
               summary: Not-healthy boot server(s) exist.
               runbook: TBD

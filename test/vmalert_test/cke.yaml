@@ -11,7 +11,7 @@ tests:
         alertname: CKEDown
         exp_alerts:
           - exp_labels:
-              severity: minor
+              severity: error
             exp_annotations:
               runbook: TBD
               summary: CKE has disappeared from Prometheus target discovery.
@@ -39,7 +39,7 @@ tests:
         alertname: CKERestartsFrequently
         exp_alerts:
           - exp_labels:
-              severity: minor
+              severity: error
               job: cke
               instance: boot-0
             exp_annotations:
@@ -70,7 +70,7 @@ tests:
         alertname: CKENoLeader
         exp_alerts:
           - exp_labels:
-              severity: minor
+              severity: error
             exp_annotations:
               runbook: TBD
               summary: CKE leader does not exist for more than 15 minutes.
@@ -207,7 +207,7 @@ tests:
         alertname: CKELeaderChangesFrequently
         exp_alerts:
           - exp_labels:
-              severity: minor
+              severity: error
               instance: boot-0
             exp_annotations:
               runbook: TBD

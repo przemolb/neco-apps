@@ -4,17 +4,51 @@ rule_files:
 tests:
   - interval: 1m
     input_series:
-      - series: 'up{job="metallb"}'
+      - series: 'up{job="metallb-controller"}'
         values: '0+0x10'
     alert_rule_test:
       - eval_time: 10m
-        alertname: MetalLBDown
+        alertname: MetalLBControllerDown
         exp_alerts:
           - exp_labels:
-              severity: critical
+              severity: error
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems
-              summary: MetalLB has disappeared from Prometheus target discovery.
+              summary: MetalLB controller has disappeared from Prometheus target discovery.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="metallb-speaker",instance="10.0.0.1:7472",node="10.0.0.1"}'
+        values: '0+0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: MetalLBSpeakerDown
+        exp_alerts:
+          - exp_labels:
+              job: metallb-speaker
+              severity: error
+              node: 10.0.0.1
+              instance: 10.0.0.1:7472
+            exp_annotations:
+              runbook: Please consider to find root causes, and solve the problems
+              summary: MetalLB speaker has disappeared from Prometheus target discovery.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="metallb-speaker",instance="10.0.0.1:7472",node="10.0.0.1"}'
+        values: '0+0x10'
+      - series: 'kube_node_spec_taint{key="node.kubernetes.io/unreachable",effect="NoExecute",node="10.0.0.1"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: MetalLBSpeakerDown
+        exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'up{job="metallb-speaker",instance="10.0.0.1:7472",node="10.0.0.1"}'
+        values: '1+0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: MetalLBSpeakerDown
+        exp_alerts: []
   - interval: 1m
     input_series:
       - series: 'metallb_allocator_addresses_in_use_total{pool="a"}'

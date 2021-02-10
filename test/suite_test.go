@@ -84,6 +84,7 @@ func prepareTest() {
 	Context("preparing topolvm", prepareTopoLVM)
 	Context("preparing cursotmer-egress", prepareCustomerEgress)
 	Context("preparing moco", prepareMoco)
+	Context("preparing sealed-secret", prepareSealedSecret)
 	Context("preparing network-policy", prepareNetworkPolicy) // this must be the last preparation.
 }
 
@@ -118,5 +119,6 @@ func runTest() {
 	Context("teleport", testTeleport)
 	Context("team-management", testTeamManagement)
 	Context("moco", testMoco)
+	Context("sealed-secret", testSealedSecret)
 	Context("cursotmer-egress", testCustomerEgress)
 }

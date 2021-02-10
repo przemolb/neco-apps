@@ -11,7 +11,7 @@ tests:
         alertname: TeleportDown
         exp_alerts:
           - exp_labels:
-              severity: critical
+              severity: error
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems
               summary: Teleport has disappeared from Prometheus target discovery.
