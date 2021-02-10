@@ -213,12 +213,12 @@ groups:
           absent(up{job="kube-state-metrics"} == 1)
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: KubernetesCAdvisorDown
         expr: |
           absent(up{job="kubernetes-cadvisor"} == 1)
         labels:
-          severity: minor
+          severity: error
         for: 10m
         annotations:
           summary: KubernetesCAdvisor has disappeared from Prometheus target discovery.
@@ -261,7 +261,7 @@ groups:
           rate(kube_pod_container_status_restarts_total{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}[5m]) * 60 * 5 > 0
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: KubePodNotReady
         annotations:
           summary: Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-ready
@@ -271,7 +271,7 @@ groups:
           sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown",namespace!~"app-.+|maneki|sandbox"} * on(namespace, pod) group_left(owner_kind) kube_pod_owner{owner_kind!="Job"}) > 0
         for: 30m
         labels:
-          severity: minor
+          severity: error
       - alert: KubePodScheduledNotReady
         annotations:
           summary: Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-ready
@@ -281,7 +281,7 @@ groups:
           sum by (namespace, pod) (kube_pod_status_phase{job="kube-state-metrics", phase=~"Failed|Pending|Unknown",namespace!~"app-.+|maneki|sandbox"} * on(namespace, pod) group_left(owner_kind) kube_pod_owner{owner_kind!="Job"} and on(namespace,pod) kube_pod_info{job="kube-state-metrics",node!=""}) > 0
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: KubePodNotReadyWithContainersReady
         annotations:
           summary: Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-ready
@@ -293,7 +293,7 @@ groups:
             * on(namespace, pod) group_left(owner_kind) kube_pod_owner{owner_kind!="Job"} > 0
         for: 30m
         labels:
-          severity: minor
+          severity: error
           frequency: daily
       - alert: KubeDeploymentGenerationMismatch
         annotations:
@@ -307,7 +307,7 @@ groups:
           kube_deployment_metadata_generation{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeDeploymentReplicasMismatch
         annotations:
           summary: Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not
@@ -319,7 +319,7 @@ groups:
           kube_deployment_status_replicas_available{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
         for: 30m
         labels:
-          severity: minor
+          severity: error
           frequency: daily
       - alert: KubeStatefulSetReplicasMismatch
         annotations:
@@ -332,7 +332,7 @@ groups:
           kube_statefulset_status_replicas{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
         for: 30m
         labels:
-          severity: minor
+          severity: error
           frequency: daily
       - alert: KubeStatefulSetGenerationMismatch
         annotations:
@@ -346,7 +346,7 @@ groups:
           kube_statefulset_metadata_generation{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeStatefulSetUpdateNotRolledOut
         annotations:
           summary: StatefulSet {{ $labels.namespace }}/{{ $labels.statefulset }} update
@@ -366,7 +366,7 @@ groups:
           )
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeDaemonSetRolloutStuck
         annotations:
           summary: Only {{ $value }}% of the desired Pods of DaemonSet {{ $labels.namespace
@@ -376,9 +376,9 @@ groups:
           kube_daemonset_status_number_ready{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             /
           kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} * 100 < 100
-        for: 30m
+        for: 1h
         labels:
-          severity: minor
+          severity: error
       - alert: KubeDaemonSetNotScheduled
         annotations:
           summary: '{{ $value }} Pods of DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset
@@ -388,9 +388,9 @@ groups:
           kube_daemonset_status_desired_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}
             -
           kube_daemonset_status_current_number_scheduled{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} > 0
-        for: 10m
+        for: 1h
         labels:
-          severity: minor
+          severity: error
       - alert: KubeDaemonSetReplicasMismatch
         annotations:
           summary: DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has not
@@ -398,9 +398,9 @@ groups:
           runbook: TBD
         expr: |
           kube_daemonset_status_number_unavailable{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"} != 0
-        for: 30m
+        for: 1h
         labels:
-          severity: minor
+          severity: error
           frequency: daily
       - alert: KubeCronJobRunning
         annotations:
@@ -430,7 +430,7 @@ groups:
           kube_job_failed{job="kube-state-metrics",namespace!~"app-.+|maneki|sandbox"}  > 0
         for: 15m
         labels:
-          severity: minor
+          severity: error
   - name: kubernetes-system
     rules:
       - alert: KubeNodeNotReady
@@ -441,7 +441,7 @@ groups:
           (kube_node_status_condition{job="kube-state-metrics",condition="Ready",status="true"} == 0) and ignoring(condition,status) (kube_node_spec_unschedulable{job="kube-state-metrics"} == 0)
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeNodeUnschedulable
         annotations:
           summary: '{{ $labels.node }} has been unschedulable for more than 1 hour.'
@@ -450,7 +450,7 @@ groups:
           kube_node_spec_unschedulable{job="kube-state-metrics"} == 1
         for: 1h
         labels:
-          severity: minor
+          severity: error
       - alert: KubeVersionMismatch
         annotations:
           summary: There are {{ $value }} different semantic versions of Kubernetes
@@ -482,7 +482,7 @@ groups:
           100 * max(max(kubelet_running_pods{job="kubernetes-nodes"}) by(instance) * on(instance) group_left(node) kubelet_node_name{job="kubernetes-nodes"}) by(node) / max(kube_node_status_capacity_pods{job="kube-state-metrics"}) by(node) > 95
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeAPILatencyHigh
         annotations:
           summary: The API server has a 99th percentile latency of {{ $value }} seconds
@@ -502,7 +502,7 @@ groups:
           cluster_quantile:apiserver_request_duration_seconds:histogram_quantile{job="kubernetes-apiservers",quantile="0.99",subresource!="log",verb!~"^(?:LIST|WATCH|WATCHLIST|PROXY|CONNECT)$"} > 4
         for: 10m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeAPIErrorsHigh
         annotations:
           summary: API server is returning errors for {{ $value }}% of requests.
@@ -524,7 +524,7 @@ groups:
           sum(rate(apiserver_request_total{job="kubernetes-apiservers"}[5m])) * 100 > 1
         for: 10m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeAPIErrorsHigh
         annotations:
           summary: API server is returning errors for {{ $value }}% of requests for
@@ -536,7 +536,7 @@ groups:
           sum(rate(apiserver_request_total{job="kubernetes-apiservers"}[5m])) by (resource,subresource,verb) * 100 > 10
         for: 10m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeAPIErrorsHigh
         annotations:
           summary: API server is returning errors for {{ $value }}% of requests for
@@ -548,7 +548,7 @@ groups:
           sum(rate(apiserver_request_total{job="kubernetes-apiservers"}[5m])) by (resource,subresource,verb) * 100 > 5
         for: 10m
         labels:
-          severity: minor
+          severity: error
       - alert: KubeClientCertificateExpiration
         annotations:
           summary: A client certificate used to authenticate to the apiserver is expiring
@@ -557,7 +557,7 @@ groups:
         expr: |
           apiserver_client_certificate_expiration_seconds_count{job="kubernetes-apiservers"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers"}[5m]))) < 604800
         labels:
-          severity: minor
+          severity: error
       - alert: KubeClientCertificateExpiration
         annotations:
           summary: A client certificate used to authenticate to the apiserver is expiring
@@ -566,7 +566,7 @@ groups:
         expr: |
           apiserver_client_certificate_expiration_seconds_count{job="kubernetes-apiservers"} > 0 and histogram_quantile(0.01, sum by (job, le) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="kubernetes-apiservers"}[5m]))) < 86400
         labels:
-          severity: minor
+          severity: error
       - alert: K8sAPIServersDegraded
         expr: count(up{job="kubernetes-apiservers"} == 1) < 3
         labels:

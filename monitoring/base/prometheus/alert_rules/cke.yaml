@@ -5,7 +5,7 @@ groups:
         expr: |
           absent(up{job="cke"} == 1)
         labels:
-          severity: minor
+          severity: error
         for: 15m
         annotations:
           summary: CKE has disappeared from Prometheus target discovery.
@@ -22,7 +22,7 @@ groups:
         expr: |
           changes(up{job="cke"}[15m]) > 5
         labels:
-          severity: minor
+          severity: error
         annotations:
           summary: CKE on {{ $labels.instance }} restarts more than 5 times in 15 min.
           runbook: TBD
@@ -34,7 +34,7 @@ groups:
           max(cke_leader) < 1
         for: 15m
         labels:
-          severity: minor
+          severity: error
       - alert: CKEOperationTakesLongTime
         expr: |
           sum(cke_operation_phase{phase!~"completed|reboot-nodes"}) > 0
@@ -93,7 +93,7 @@ groups:
         expr: |
           changes(cke_leader[30m]) > 5
         labels:
-          severity: minor
+          severity: error
         annotations:
           summary: CKE leader changes frequently on {{ $labels.instance }}.
           runbook: TBD

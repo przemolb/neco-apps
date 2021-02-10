@@ -22,7 +22,7 @@ tests:
         exp_alerts:
           - exp_labels:
               name: monitoring
-              severity: minor
+              severity: error
               sync_status: Unknown
               project: default
             exp_annotations:
@@ -30,7 +30,7 @@ tests:
               runbook: See https://github.com/cybozu-go/neco-apps/blob/main/DEVELOPMENT.md#out-of-sync
           - exp_labels:
               name: metallb
-              severity: minor
+              severity: error
               sync_status: Unknown
               project: default
             exp_annotations:
@@ -49,7 +49,7 @@ tests:
         alertname: AllAppMissing
         exp_alerts:
           - exp_labels:
-              severity: minor
+              severity: error
               sync_status: Synced
               project: default
             exp_annotations:
@@ -64,7 +64,7 @@ tests:
         alertname: ArgoCDDown
         exp_alerts:
           - exp_labels:
-              severity: minor
+              severity: error
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems
               summary: ArgoCD has disappeared from Prometheus target discovery.

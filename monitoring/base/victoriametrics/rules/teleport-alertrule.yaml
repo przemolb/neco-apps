@@ -11,7 +11,7 @@ spec:
           expr: |
             absent(up{job="teleport"} == 1)
           labels:
-            severity: critical
+            severity: error
           for: 10m
           annotations:
             summary: Teleport has disappeared from Prometheus target discovery.

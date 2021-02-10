@@ -15,4 +15,4 @@ spec:
             absent(up{job="elastic-operator"} == 1)
           for: 15m
           labels:
-            severity: minor
+            severity: error
