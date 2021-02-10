@@ -13,6 +13,8 @@ spec:
   - relabelConfigs:
       - replacement: calico-node
         targetLabel: job
+      - sourceLabels: [__meta_kubernetes_pod_node_name]
+        targetLabel: node
       - sourceLabels: [__address__]
         action: replace
         regex: ([^:]+)(?::\d+)?

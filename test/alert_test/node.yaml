@@ -34,7 +34,7 @@ tests:
         exp_alerts:
           - exp_labels:
               instance: "192.168.0.1:9100"
-              severity: minor
+              severity: error
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems.
               summary: NodeExporter has disappeared at `192.168.0.1:9100`.
@@ -90,7 +90,7 @@ tests:
         exp_alerts:
           - exp_labels:
               instance: "192.168.0.1"
-              severity: minor
+              severity: error
             exp_annotations:
               runbook: Please consider to find root causes, and solve the problems.
               summary: MonitorHW has disappeared at `192.168.0.1`.

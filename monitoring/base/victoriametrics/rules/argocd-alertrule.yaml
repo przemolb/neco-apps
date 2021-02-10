@@ -11,7 +11,7 @@ spec:
           expr: argocd_app_info{sync_status!="Synced",project="default"} == 1
           for: 20m
           labels:
-            severity: minor
+            severity: error
           annotations:
             summary: "{{ $labels.name }} is out-of-sync."
             runbook: "See https://github.com/cybozu-go/neco-apps/blob/main/DEVELOPMENT.md#out-of-sync"
@@ -19,7 +19,7 @@ spec:
           expr: absent(argocd_app_info{sync_status="Synced",project="default"})
           for: 20m
           labels:
-            severity: minor
+            severity: error
           annotations:
             summary: "no application is synced."
             runbook: "See https://github.com/cybozu-go/neco-apps/blob/main/DEVELOPMENT.md#out-of-sync"
@@ -27,7 +27,7 @@ spec:
           expr: |
             absent(up{job="argocd"} == 1)
           labels:
-            severity: minor
+            severity: error
           for: 10m
           annotations:
             summary: ArgoCD has disappeared from Prometheus target discovery.
