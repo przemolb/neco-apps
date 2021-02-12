@@ -24,8 +24,6 @@ KUSTOMIZE_VERSION := 3.7.0
 PROMTOOL_VERSION := 2.24.1
 TELEPORT_VERSION := 5.1.2
 KUBERNETES_VERSION := 1.19.7
-MOCO_VERSION := 0.5.1
-KUBESEAL_VERSION := 0.14.1
 
 # Cache
 DOWNLOAD_DIR := $(abspath $(CURDIR)/download)
@@ -35,11 +33,9 @@ TELEPORT_DLPATH := $(DOWNLOAD_DIR)/teleport-v$(TELEPORT_VERSION).tar.gz
 
 BINDIR := $(abspath $(CURDIR)/bin)
 KUBECTL := $(BINDIR)/kubectl
-KUBECTLMOCO := $(BINDIR)/kubectl-moco
 KUSTOMIZE := $(BINDIR)/kustomize
 PROMTOOL := $(BINDIR)/promtool
 TSH := $(BINDIR)/tsh
-KUBESEAL := $(BINDIR)/kubeseal
 
 install.yaml: $(shell find ../argocd/base)
 	$(KUSTOMIZE) build ../argocd/base/ > install.yaml
@@ -93,7 +89,7 @@ dctest-upgrade: install.yaml
 	fi
 	PATH=$(BINDIR):$$PATH OVERLAY=$(OVERLAY) UPGRADE=1 SUITE=$(SUITE) ./test.sh
 
-.PHONY: kubeseal
+.PHONY: setup-download
 setup-download:
 	if [ -z "$$(which wget)" ]; then \
 		$(SUDO) apt-get update && $(SUDO) apt-get -y install wget; \
@@ -104,11 +100,6 @@ setup-download:
 $(KUBECTL):
 	$(MAKE) setup-download
 	$(WGET) -O $@ https://storage.googleapis.com/kubernetes-release/release/v$(KUBERNETES_VERSION)/bin/linux/amd64/kubectl
-	chmod +x $@
-
-$(KUBECTLMOCO):
-	$(MAKE) setup-download
-	$(WGET) -O $@ https://github.com/cybozu-go/moco/releases/download/v$(MOCO_VERSION)/kubectl-moco-linux-amd64
 	chmod +x $@
 
 $(KUSTOMIZE):
@@ -126,13 +117,8 @@ $(TSH):
 	$(WGET) -O $(TELEPORT_DLPATH) https://get.gravitational.com/teleport-v$(TELEPORT_VERSION)-linux-amd64-bin.tar.gz
 	tar zxf $(TELEPORT_DLPATH) -C $(BINDIR) --strip-component=1 teleport/tsh
 
-$(KUBESEAL):
-	$(MAKE) setup-download
-	$(WGET) -O $@ https://github.com/bitnami-labs/sealed-secrets/releases/download/v$(KUBESEAL_VERSION)/kubeseal-linux-amd64
-	chmod +x $@
-
 .PHONY: setup
-setup: $(KUBECTL) $(KUBECTLMOCO) $(KUSTOMIZE) $(PROMTOOL) $(TSH) $(KUBESEAL)
+setup: $(KUBECTL) $(KUSTOMIZE) $(PROMTOOL) $(TSH)
 	go install github.com/onsi/ginkgo/ginkgo
 
 .PHONY: test-tools
