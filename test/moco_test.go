@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -198,22 +197,8 @@ func testMoco() {
 			return nil
 		}).Should(Succeed())
 
-		//TODO: Please remove this codes ("copying kubectl-moco") when reaching the following state.
-		// - kubectl-moco is included in neco's deb package.
-		// - The MOCO v0.5.0 (or v0.6.0) is released.
-		//   The next version of MOCO will have some breaking changes. The old version of kubectl-moco cannot be used with the new MOCO.
-		By("copying kubectl-moco")
-		buf, err := ioutil.ReadFile("./bin/kubectl-moco")
-		Expect(err).NotTo(HaveOccurred())
-		stdout, stderr, err := ExecAtWithInput(boot0, buf, "dd", "of=kubectl-moco")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "chmod", "+x", "./kubectl-moco")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "./kubectl-moco", "--version")
-		Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
-
-		By("running kubectl-moco mysql")
-		stdout, stderr, err = ExecAt(boot0, "./kubectl-moco", "-n", "test-moco", "mysql", "-u", "root", "my-cluster", "--", "--version")
+		By("running kubectl moco mysql")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "moco", "-n", "test-moco", "mysql", "-u", "root", "my-cluster", "--", "--version")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		Expect(string(stdout)).Should(ContainSubstring("mysql  Ver 8"))
 	})
