@@ -22,7 +22,7 @@ func prepareNetworkPolicy() {
 	It("should create test-netpol namespace", func() {
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-netpol", "--ignore-not-found=true")
 		createNamespaceIfNotExists("test-netpol")
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-netpol", "i-am-sure-to-delete=test-netpol")
+		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-netpol", "admission.cybozu.com/i-am-sure-to-delete=test-netpol")
 	})
 
 	It("should prepare test pods", func() {
