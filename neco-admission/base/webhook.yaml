@@ -18,10 +18,10 @@ webhooks:
       namespace: kube-system
   namespaceSelector:
     matchExpressions:
-    - key: mpod.kb.io/ignore
+    - key: admission.cybozu.com/pod
       operator: NotIn
       values:
-      - "true"
+      - ignore
   objectSelector:
     matchExpressions:
     - key: app.kubernetes.io/name
@@ -106,6 +106,12 @@ webhooks:
       name: neco-admission
       namespace: kube-system
   matchPolicy: Equivalent
+  namespaceSelector:
+    matchExpressions:
+    - key: admission.cybozu.com/pod
+      operator: NotIn
+      values:
+      - ignore
 - name: vpreventdelete.kb.io
   clientConfig:
     service:
