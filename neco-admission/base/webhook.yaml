@@ -100,6 +100,53 @@ webhooks:
       name: neco-admission
       namespace: kube-system
   matchPolicy: Equivalent
+- name: vpod.kb.io
+  clientConfig:
+    service:
+      name: neco-admission
+      namespace: kube-system
+  matchPolicy: Equivalent
+- name: vpreventdelete.kb.io
+  clientConfig:
+    service:
+      name: neco-admission
+      namespace: kube-system
+  matchPolicy: Equivalent
+  # According to this code https://github.com/kubernetes-sigs/controller-tools/blob/master/pkg/webhook/parser.go#L183,
+  # `rules` cannot be generated with multiple GVK, so we should add new GVK manually here.
+  rules:
+  - apiGroups:
+    - ""
+    apiVersions:
+    - v1
+    operations:
+    - DELETE
+    resources:
+    - persistentvolumeclaims
+  - apiGroups:
+    - objectbucket.io
+    apiVersions:
+    - v1alpha1
+    operations:
+    - DELETE
+    resources:
+    - objectbucketclaims
+  - apiGroups:
+    - moco.cybozu.com
+    apiVersions:
+    - v1alpha1
+    operations:
+    - DELETE
+    resources:
+    - mysqlclusters
+  - apiGroups:
+    - elasticsearch.k8s.elastic.co
+    apiVersions:
+    - v1beta1
+    operations:
+    - DELETE
+    resources:
+    - elasticsearches
 - name: vservice.kb.io
   clientConfig:
     service:
