@@ -32,6 +32,20 @@ data:
         hs.status = "Progressing"
         hs.message = "Waiting for Ceph cluster to become HEALTH_OK or HEALTH_WARN"
         return hs
+    objectbucket.io/ObjectBucketClaim:
+      health.lua: |
+        hs = {}
+        if obj.status ~= nil then
+          if obj.status.phase == "Bound" then
+            hs.status = "Healthy"
+            hs.message = "Bound"
+            return hs
+          end
+        end
+
+        hs.status = "Progressing"
+        hs.message = "Waiting for a bucket to get created"
+        return hs
   resource.compareoptions: |
     ignoreAggregatedRoles: true
 ---

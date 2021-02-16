@@ -7,4 +7,4 @@ metadata:
     admission.cybozu.com/min-policy-order: "100"
   labels:
     topolvm.cybozu.com/webhook: ignore
-    mpod.kb.io/ignore: "true"
+    admission.cybozu.com/pod: ignore

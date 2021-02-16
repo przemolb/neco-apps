@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: kube-system
-  labels:
-    topolvm.cybozu.com/webhook: ignore
-    mpod.kb.io/ignore: "true"
   annotations:
     admission.cybozu.com/min-policy-order: "500"
+  labels:
+    topolvm.cybozu.com/webhook: ignore
+    admission.cybozu.com/pod: ignore
