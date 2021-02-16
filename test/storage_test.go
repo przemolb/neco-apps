@@ -90,7 +90,7 @@ func prepareRookCeph() {
 	It("should create test-rook-rgw namespace for testRookRGW", func() {
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-rook-rgw", "--ignore-not-found=true")
 		createNamespaceIfNotExists("test-rook-rgw")
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-rook-rgw", "i-am-sure-to-delete=test-rook-rgw")
+		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-rook-rgw", "admission.cybozu.com/i-am-sure-to-delete=test-rook-rgw")
 	})
 
 	It("should apply a OBC resource and a POD for testRookRGW", func() {
@@ -133,7 +133,7 @@ spec:
 		It("should create "+ns+" namespace for testRookRBD", func() {
 			ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
 			createNamespaceIfNotExists(ns)
-			ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "i-am-sure-to-delete="+ns)
+			ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "admission.cybozu.com/i-am-sure-to-delete="+ns)
 		})
 
 		It("should create a POD for testRookRBD", func() {

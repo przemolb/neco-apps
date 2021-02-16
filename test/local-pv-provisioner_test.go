@@ -40,7 +40,7 @@ func prepareLocalPVProvisioner() {
 	It("should create test-local-pv-provisioner namespace", func() {
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
 		createNamespaceIfNotExists(ns)
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "i-am-sure-to-delete="+ns)
+		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "admission.cybozu.com/i-am-sure-to-delete="+ns)
 	})
 
 	It("should be used as block device", func() {

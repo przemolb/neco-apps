@@ -19,7 +19,7 @@ func prepareContour() {
 	It("should create test-ingress namespace", func() {
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-ingress", "--ignore-not-found=true")
 		createNamespaceIfNotExists("test-ingress")
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-ingress", "i-am-sure-to-delete=test-ingress")
+		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-ingress", "admission.cybozu.com/i-am-sure-to-delete=test-ingress")
 	})
 
 	It("should prepare resources", func() {
