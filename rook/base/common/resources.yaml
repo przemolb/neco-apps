@@ -4,6 +4,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephclusters.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -62,6 +64,8 @@ spec:
                   type: boolean
                 continueUpgradeAfterChecksEvenIfNotHealthy:
                   type: boolean
+                waitTimeoutForHealthyOSDInMinutes:
+                  type: integer
                 mon:
                   type: object
                   properties:
@@ -186,6 +190,8 @@ spec:
                               properties:
                                 name:
                                   type: string
+                                fullPath:
+                                  type: string
                                 config:
                                   type: object
                                   nullable: true
@@ -205,6 +211,19 @@ spec:
                       type: object
                       nullable: true
                       x-kubernetes-preserve-unknown-fields: true
+                    devices:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          fullPath:
+                            type: string
+                          config:
+                            type: object
+                            nullable: true
+                            x-kubernetes-preserve-unknown-fields: true
                     storageClassDeviceSets:
                       type: array
                       nullable: true
@@ -388,6 +407,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephclients.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -421,6 +442,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephrbdmirrors.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -476,6 +499,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephfilesystems.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -642,6 +667,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephnfses.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -702,6 +729,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephobjectstores.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -771,6 +800,8 @@ spec:
                   properties:
                     failureDomain:
                       type: string
+                    deviceClass:
+                      type: string
                     crushRoot:
                       type: string
                     replicated:
@@ -815,6 +846,8 @@ spec:
                   nullable: true
                   properties:
                     failureDomain:
+                      type: string
+                    deviceClass:
                       type: string
                     crushRoot:
                       type: string
@@ -874,6 +907,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephobjectstoreusers.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -911,6 +946,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephobjectrealms.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -946,6 +983,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephobjectzonegroups.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -978,6 +1017,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephobjectzones.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -1083,6 +1124,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: cephblockpools.ceph.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: ceph.rook.io
   names:
@@ -1192,6 +1235,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: volumes.rook.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: rook.io
   names:
@@ -1238,6 +1283,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: objectbuckets.objectbucket.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: objectbucket.io
   names:
@@ -1308,6 +1355,8 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: objectbucketclaims.objectbucket.io
+  annotations:
+    helm.sh/resource-policy: keep
 spec:
   group: objectbucket.io
   names:
