@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: neco-admission
+  namespace: kube-system
+spec:
+  template:
+    spec:
+      containers:
+      - name: neco-admission
+        env:
+        - name: VPOD_IMAGE_PERMISSIVE
+          value: "true"

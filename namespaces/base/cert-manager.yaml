@@ -5,4 +5,4 @@ metadata:
   labels:
     cert-manager.io/disable-validation: "true"
     topolvm.cybozu.com/webhook: ignore
-    mpod.kb.io/ignore: "true"
+    admission.cybozu.com/pod: ignore

@@ -10,6 +10,7 @@ patchesStrategicMerge:
 - local-pv-provisioner.yaml
 - metallb.yaml
 - monitoring.yaml
+- neco-admission.yaml
 - rook.yaml
 - sandbox.yaml
 - secrets.yaml

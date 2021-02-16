@@ -19,7 +19,7 @@ func prepareTopoLVM() {
 		By("creating test-topolvm namespace")
 		ExecSafeAt(boot0, "kubectl", "delete", "namespace", topolvmNS, "--ignore-not-found=true")
 		createNamespaceIfNotExists(topolvmNS)
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", topolvmNS, "i-am-sure-to-delete="+topolvmNS)
+		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", topolvmNS, "admission.cybozu.com/i-am-sure-to-delete="+topolvmNS)
 
 		By("creating Pod and a PVC")
 		manifest := `
