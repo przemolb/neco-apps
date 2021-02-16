@@ -7,4 +7,4 @@ patchesStrategicMerge:
   - namespace.yaml
 images:
   - name: ghcr.io/cybozu-go/moco
-    newTag: 0.5.1
+    newTag: 0.6.0
