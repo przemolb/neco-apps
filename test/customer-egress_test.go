@@ -155,11 +155,5 @@ func testCustomerEgress() {
 			}
 			return nil
 		}).Should(Succeed())
-
-		By("deleting ubuntu pods on sandbox ns")
-		for _, name := range []string{"ubuntu-without-nat-annotation", "ubuntu-with-nat-annotation"} {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "-nsandbox", "delete", "deployments", name)
-			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
-		}
 	})
 }

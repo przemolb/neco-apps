@@ -87,19 +87,12 @@ spec:
 }
 
 func prepareRookCeph() {
-	It("should create test-rook-rgw namespace for testRookRGW", func() {
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-rook-rgw", "--ignore-not-found=true")
-		createNamespaceIfNotExists("test-rook-rgw")
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-rook-rgw", "admission.cybozu.com/i-am-sure-to-delete=test-rook-rgw")
-	})
-
 	It("should apply a OBC resource and a POD for testRookRGW", func() {
-		ns := "test-rook-rgw"
-		podPvcYaml := fmt.Sprintf(`apiVersion: objectbucket.io/v1alpha1
+		podPvcYaml := `apiVersion: objectbucket.io/v1alpha1
 kind: ObjectBucketClaim
 metadata:
   name: pod-ob
-  namespace: %s
+  namespace: sandbox
 spec:
   generateBucketName: obc-poc
   storageClassName: ceph-hdd-bucket
@@ -108,7 +101,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: pod-ob
-  namespace: %s
+  namespace: sandbox
 spec:
   containers:
   - name: mycontainer
@@ -122,25 +115,20 @@ spec:
     - configMapRef:
         name: pod-ob
     - secretRef:
-        name: pod-ob`, ns, ns)
+        name: pod-ob
+`
 
 		_, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 	})
 
-	for _, storageClassName := range []string{"ceph-hdd-block", "ceph-ssd-block"} {
-		ns := "test-rook-rbd-" + storageClassName
-		It("should create "+ns+" namespace for testRookRBD", func() {
-			ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
-			createNamespaceIfNotExists(ns)
-			ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "admission.cybozu.com/i-am-sure-to-delete="+ns)
-		})
-
-		It("should create a POD for testRookRBD", func() {
+	It("should create a POD for testRookRBD", func() {
+		for _, storageClassName := range []string{"ceph-hdd-block", "ceph-ssd-block"} {
 			podPvcYaml := fmt.Sprintf(`kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: pvc-rbd
+  name: %s-pvc-rbd
+  namespace: sandbox
 spec:
   accessModes:
   - ReadWriteOnce
@@ -152,9 +140,8 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pod-rbd
-  labels:
-    app.kubernetes.io/name: pod-rbd
+  name: %s-pod-rbd
+  namespace: sandbox
 spec:
   containers:
   - name: ubuntu
@@ -167,12 +154,12 @@ spec:
   volumes:
   - name: rbd-volume
     persistentVolumeClaim:
-      claimName: pvc-rbd`, storageClassName)
+      claimName: %s-pvc-rbd`, storageClassName, storageClassName, storageClassName, storageClassName)
 
-			_, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "apply", "-n", ns, "-f", "-")
+			_, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "apply", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
-		})
-	}
+		}
+	})
 }
 
 func testRookOperator() {
@@ -468,7 +455,7 @@ func testOSDPodsSpread() {
 
 func testRookRGW() {
 	By("putting/getting data with s3 client", func() {
-		ns := "test-rook-rgw"
+		ns := "sandbox"
 		waitRGW(ns, "pod-ob")
 
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "sh", "-c", `"echo foobar > /tmp/foobar"`)
@@ -496,10 +483,10 @@ func testRookRBDAll() {
 }
 
 func testRookRBD(storageClassName string) {
-	ns := "test-rook-rbd-" + storageClassName
+	pod := storageClassName + "-pod-rbd"
 	By("mounting RBD of "+storageClassName, func() {
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-rbd", "--", "mountpoint", "-d", "/test1")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", "sandbox", pod, "--", "mountpoint", "-d", "/test1")
 			if err != nil {
 				return fmt.Errorf("failed to check mount point. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -507,11 +494,11 @@ func testRookRBD(storageClassName string) {
 		}).Should(Succeed())
 
 		writePath := "/test1/test.txt"
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-rbd", "--", "cp", "/etc/passwd", writePath)
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", "sandbox", pod, "--", "cp", "/etc/passwd", writePath)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-rbd", "--", "sync")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", "sandbox", pod, "--", "sync")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-rbd", "--", "cat", writePath)
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", "sandbox", pod, "--", "cat", writePath)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	})
 }
@@ -520,7 +507,7 @@ func prepareRebootRookCeph() {
 	Context("preparing rook-ceph for reboot", prepareRookCeph)
 
 	It("should store data via RGW before reboot", func() {
-		ns := "test-rook-rgw"
+		ns := "sandbox"
 		waitRGW(ns, "pod-ob")
 		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "sh", "-c", `"echo foobar > /tmp/foobar"`)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
@@ -532,13 +519,12 @@ func prepareRebootRookCeph() {
 
 func testRebootRookCeph() {
 	It("should get stored data via RGW after reboot", func() {
-		ns := "test-rook-rgw"
 		By("recreating Pod using OBC")
-		podPvcYaml := fmt.Sprintf(`apiVersion: v1
+		podPvcYaml := `apiVersion: v1
 kind: Pod
 metadata:
   name: pod-ob
-  namespace: %s
+  namespace: sandbox
 spec:
   containers:
   - name: mycontainer
@@ -552,15 +538,16 @@ spec:
     - configMapRef:
         name: pod-ob
     - secretRef:
-        name: pod-ob`, ns)
+        name: pod-ob
+`
 		_, stderr, err := ExecAtWithInput(boot0, []byte(podPvcYaml), "kubectl", "apply", "-f", "-")
 		Expect(err).NotTo(HaveOccurred(), "stderr: %s", stderr)
 
-		waitRGW(ns, "pod-ob")
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "sh", "-c",
+		waitRGW("sandbox", "pod-ob")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", "sandbox", "pod-ob", "--", "sh", "-c",
 			`"s3cmd get s3://\${BUCKET_NAME}/foobar_reboot /tmp/downloaded --no-ssl --host=\${BUCKET_HOST} --host-bucket="`)
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
-		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", ns, "pod-ob", "--", "cat", "/tmp/downloaded")
+		stdout, stderr, err = ExecAt(boot0, "kubectl", "exec", "-n", "sandbox", "pod-ob", "--", "cat", "/tmp/downloaded")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 		Expect(stdout).To(Equal([]byte("foobar\n")))
 	})
