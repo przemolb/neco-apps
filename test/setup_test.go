@@ -208,6 +208,11 @@ func testSetup() {
 			applyMutatingWebhooks()
 		}
 
+		// TODO: remove this block after #1223 is released.
+		if doUpgrade {
+			ExecSafeAt(boot0, "kubectl", "-n", "logging", "delete", "pods", "logging-loki-0", "--grace-period=300", "--wait=false")
+		}
+
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/overlays/"+overlayName+"/*.yaml")
 		applyAndWaitForApplications(commitID)
@@ -268,16 +273,26 @@ func testSetup() {
 		ExecSafeAt(boot0, "neco", "config", "set", "node-proxy", proxyURL)
 
 		// "neco config set" restarts neco-worker which may do something on the system.
-		// To avoid surprises, sleep a shile.
+		// To avoid surprises, sleep a while.
 		time.Sleep(20 * time.Second)
 
+		// want to do "Eventually( Consistently(<check logic>, 15sec, 1sec) )"
 		Eventually(func() error {
-			_, _, err := ExecAt(boot0, "sabactl", "machines", "get")
-			if err != nil {
-				return err
+			st := time.Now()
+			for {
+				if time.Since(st) > 15*time.Second {
+					return nil
+				}
+				_, _, err := ExecAt(boot0, "sabactl", "machines", "get")
+				if err != nil {
+					return err
+				}
+				_, _, err = ExecAt(boot0, "ckecli", "cluster", "get")
+				if err != nil {
+					return err
+				}
+				time.Sleep(1 * time.Second)
 			}
-			_, _, err = ExecAt(boot0, "ckecli", "cluster", "get")
-			return err
 		}).Should(Succeed())
 
 		necoVersion := string(ExecSafeAt(boot0, "dpkg-query", "-W", "-f", "'${Version}'", "neco"))
