@@ -1,0 +1,48 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmagent-viewer-role
+labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmalert-viewer-role
+labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmalertmanager-viewer-role
+labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmpodscrape-viewer-role
+labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmprobe-viewer-role
+labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmrule-viewer-role
+labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: vmservicescrape-viewer-role
+labels:
+    rbac.authorization.k8s.io/aggregate-to-view: "true"

@@ -4,6 +4,20 @@ resources:
 - leader_election_role.yaml
 - leader_election_role_binding.yaml
 - psp.yaml
+- vmagent_editor_role.yaml
+- vmagent_viewer_role.yaml
+- vmalert_editor_role.yaml
+- vmalert_viewer_role.yaml
+- vmalertmanager_editor_role.yaml
+- vmalertmanager_viewer_role.yaml
+- vmpodscrape_editor_role.yaml
+- vmpodscrape_viewer_role.yaml
+- vmprobe_editor_role.yaml
+- vmprobe_viewer_role.yaml
+- vmrule_editor_role.yaml
+- vmrule_viewer_role.yaml
+- vmservicescrape_editor_role.yaml
+- vmservicescrape_viewer_role.yaml
 # Comment the following 4 lines if you want to disable
 # the auth proxy (https://github.com/brancz/kube-rbac-proxy)
 # which protects your /metrics endpoint.
