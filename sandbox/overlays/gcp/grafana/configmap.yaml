@@ -51,3 +51,13 @@ data:
       url: http://vmselect-vmcluster-largeset.monitoring.svc:8481/select/0/prometheus
       isDefault: false
       editable: false
+    - name: loki
+      type: loki
+      access: proxy
+      url: http://logging-loki.logging.svc:3100
+      version: 1
+      isDefault: false
+      editable: false
+      jsonData:
+        tlsSkipVerify: true
+        timeInterval: "30s"
