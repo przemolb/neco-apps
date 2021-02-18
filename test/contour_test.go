@@ -216,16 +216,22 @@ func testContour() {
 		}).Should(Succeed())
 
 		By("checking PodDisruptionBudget for contour Deployment")
-		for _, ns := range ingressNamespaces {
-			pdb := policyv1beta1.PodDisruptionBudget{}
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "contour-pdb", "-n", ns, "-o", "json")
-			if err != nil {
-				Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
+		Eventually(func() error {
+			for _, ns := range ingressNamespaces {
+				pdb := policyv1beta1.PodDisruptionBudget{}
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "get", "poddisruptionbudgets", "contour-pdb", "-n", ns, "-o", "json")
+				if err != nil {
+					return fmt.Errorf("failed to get %s/contour-pdb: %s: %w", ns, stderr, err)
+				}
+				if err := json.Unmarshal(stdout, &pdb); err != nil {
+					return err
+				}
+				if pdb.Status.CurrentHealthy != 2 {
+					return fmt.Errorf("unhalthy contour-pdb in %s: %d", ns, pdb.Status.CurrentHealthy)
+				}
 			}
-			err = json.Unmarshal(stdout, &pdb)
-			Expect(err).ShouldNot(HaveOccurred())
-			Expect(pdb.Status.CurrentHealthy).Should(Equal(int32(2)), "namespace=%s", ns)
-		}
+			return nil
+		}).Should(Succeed())
 
 		By("checking PodDisruptionBudget for envoy Deployment")
 		for _, ns := range ingressNamespaces {
