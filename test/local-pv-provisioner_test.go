@@ -36,22 +36,14 @@ func getNodeIPFromPV(pv *corev1.PersistentVolume) (string, error) {
 }
 
 func prepareLocalPVProvisioner() {
-	ns := "test-local-pv-provisioner"
-	It("should create test-local-pv-provisioner namespace", func() {
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns, "--ignore-not-found=true")
-		createNamespaceIfNotExists(ns)
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", ns, "admission.cybozu.com/i-am-sure-to-delete="+ns)
-	})
-
 	It("should be used as block device", func() {
 		By("deploying Pod with PVC")
 		manifest := `
 apiVersion: v1
 kind: Pod
 metadata:
-  name: ubuntu
-  labels:
-    app.kubernetes.io/name: ubuntu
+  name: test-local-pv-provisioner
+  namespace: sandbox
 spec:
   containers:
   - name: ubuntu
@@ -73,6 +65,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: local-pvc
+  namespace: sandbox
 spec:
   storageClassName: local-storage
   accessModes:
@@ -82,7 +75,7 @@ spec:
     requests:
       storage: 1Gi
 `
-		stdout, stderr, err := ExecAtWithInput(boot0, []byte(manifest), "kubectl", "apply", "-n", ns, "-f", "-")
+		stdout, stderr, err := ExecAtWithInput(boot0, []byte(manifest), "kubectl", "apply", "-f", "-")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 	})
 }
@@ -94,8 +87,6 @@ func testLocalPVProvisioner() {
 	var ssNumber int
 	var targetDeviceNum int
 	var targetPVList []corev1.PersistentVolume
-
-	ns := "test-local-pv-provisioner"
 
 	It("should have created PV successfully", func() {
 		By("confirming it has be successfully deployed")
@@ -175,9 +166,9 @@ func testLocalPVProvisioner() {
 	})
 
 	It("should access a local PV as block device from Pod", func() {
-		By("waiting to be able to execute a command in Pod")
+		By("waiting for the test Pod to get ready")
 		Eventually(func() error {
-			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "date")
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", "sandbox", "test-local-pv-provisioner", "--", "date")
 			if err != nil {
 				return fmt.Errorf("failed to execute a command. stdout: %s, stderr: %s, err: %v", stdout, stderr, err)
 			}
@@ -185,13 +176,12 @@ func testLocalPVProvisioner() {
 			return nil
 		}).Should(Succeed())
 
-		By("confirming that can make filesystem for the block device")
-		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", ns, "ubuntu", "--", "mkfs.ext4", "-F", "/dev/local-dev")
+		By("making a filesystem on the local-pv")
+		stdout, stderr, err := ExecAt(boot0, "kubectl", "exec", "-n", "sandbox", "test-local-pv-provisioner", "--", "mkfs.ext4", "-F", "/dev/local-dev")
 		Expect(err).ShouldNot(HaveOccurred(), "stdout=%s, stderr=%s", stdout, stderr)
 
-		By("cleaning up")
 		By("getting used local PV")
-		stdout = ExecSafeAt(boot0, "kubectl", "get", "pvc", "local-pvc", "-n", ns, "-o", "json")
+		stdout = ExecSafeAt(boot0, "kubectl", "get", "pvc", "local-pvc", "-n", "sandbox", "-o", "json")
 
 		pvc := new(corev1.PersistentVolumeClaim)
 		err = json.Unmarshal(stdout, pvc)
@@ -199,7 +189,8 @@ func testLocalPVProvisioner() {
 		usedPVName := pvc.Spec.VolumeName
 
 		By("deleting test resources")
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", ns)
+		ExecSafeAt(boot0, "kubectl", "-n", "sandbox", "delete", "pods", "test-local-pv-provisioner")
+		ExecSafeAt(boot0, "kubectl", "-n", "sandbox", "delete", "pvc", "local-pvc")
 
 		var pv corev1.PersistentVolume
 		By("waiting used local PV will be recreated")
