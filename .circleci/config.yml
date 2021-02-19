@@ -53,6 +53,10 @@ commands:
             echo $GCLOUD_SERVICE_ACCOUNT > account.json
             gcloud auth activate-service-account --key-file=account.json
       - run:
+          name: Store ZeroSSL EAB Secret
+          command: |
+            echo "$ZEROSSL_SECRET_RESOURCE" > zerossl-secret-resource.json
+      - run:
           name: Store secrets
           command: |
             echo "$QUAY_PASSWORD" > neco/secrets
