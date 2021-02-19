@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -249,6 +250,7 @@ func testSetup() {
 
 	It("should set HTTP proxy", func() {
 		var proxyIP string
+		By("getting proxy address")
 		Eventually(func() error {
 			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "internet-egress", "get", "svc", "squid", "-o", "json")
 			if err != nil {
@@ -269,21 +271,30 @@ func testSetup() {
 		}).Should(Succeed())
 
 		proxyURL := fmt.Sprintf("http://%s:3128", proxyIP)
-		ExecSafeAt(boot0, "neco", "config", "set", "proxy", proxyURL)
 		ExecSafeAt(boot0, "neco", "config", "set", "node-proxy", proxyURL)
+		ExecSafeAt(boot0, "neco", "config", "set", "proxy", proxyURL)
 
-		// "neco config set" restarts neco-worker which may do something on the system.
-		// To avoid surprises, sleep a while.
-		time.Sleep(20 * time.Second)
+		By("waiting for docker to be restarted")
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "docker", "info", "-f", "{{.HTTPProxy}}")
+			if err != nil {
+				return fmt.Errorf("docker info failed: %s: %w", stderr, err)
+			}
+			if strings.TrimSpace(string(stdout)) != proxyURL {
+				return errors.New("docker has not been restarted")
+			}
+			return nil
+		}).Should(Succeed())
 
 		// want to do "Eventually( Consistently(<check logic>, 15sec, 1sec) )"
+		By("waiting for the system to become stable")
 		Eventually(func() error {
 			st := time.Now()
 			for {
 				if time.Since(st) > 15*time.Second {
 					return nil
 				}
-				_, _, err := ExecAt(boot0, "sabactl", "machines", "get")
+				_, _, err := ExecAt(boot0, "sabactl", "ipam", "get")
 				if err != nil {
 					return err
 				}
@@ -294,14 +305,23 @@ func testSetup() {
 				time.Sleep(1 * time.Second)
 			}
 		}).Should(Succeed())
+	})
 
+	It("should reconfigure ignitions", func() {
 		necoVersion := string(ExecSafeAt(boot0, "dpkg-query", "-W", "-f", "'${Version}'", "neco"))
 		rolePaths := strings.Fields(string(ExecSafeAt(boot0, "ls", "/usr/share/neco/ignitions/roles/*/site.yml")))
 		for _, rolePath := range rolePaths {
 			role := strings.Split(rolePath, "/")[6]
 			ExecSafeAt(boot0, "sabactl", "ignitions", "delete", role, necoVersion)
 		}
-		ExecSafeAt(boot0, "neco", "init-data", "--ignitions-only")
+		Eventually(func() error {
+			_, stderr, err := ExecAt(boot0, "neco", "init-data", "--ignitions-only")
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "neco init-data failed: %s: %v\n", stderr, err)
+				return fmt.Errorf("neco init-data failed: %s: %w", stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
 	})
 }
 
