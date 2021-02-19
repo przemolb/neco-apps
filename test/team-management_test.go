@@ -45,7 +45,7 @@ var prohibitedResources = []string{
 }
 
 var (
-	allVerbs        = []string{"get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"}
+	allVerbs        = []string{"get", "list", "watch", "create", "update", "patch", "delete"}
 	adminVerbs      = []string{"get", "list", "watch", "create", "update", "patch", "delete"}
 	viewVerbs       = []string{"get", "list", "watch"}
 	prohibitedVerbs = []string{}
