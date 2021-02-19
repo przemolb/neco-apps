@@ -220,11 +220,6 @@ func testSetup() {
 			applyMutatingWebhooks()
 		}
 
-		// TODO: remove this block after #1223 is released.
-		if doUpgrade {
-			ExecSafeAt(boot0, "kubectl", "-n", "logging", "delete", "pods", "logging-loki-0", "--grace-period=300", "--wait=false")
-		}
-
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/base/*.yaml")
 		ExecSafeAt(boot0, "sed", "-i", "s/release/"+commitID+"/", "./neco-apps/argocd-config/overlays/"+overlayName+"/*.yaml")
 		applyAndWaitForApplications(commitID)
