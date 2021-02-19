@@ -1,16 +1,16 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: tenant-apps
+  name: garoon-apps
   namespace: argocd
   labels:
     is-tenant: "true"
 spec:
   project: tenant-app-of-apps
   source:
-    repoURL: https://github.com/cybozu-private/neco-tenant-apps.git
-    targetRevision: stage
-    path: argocd-config
+    repoURL: https://github.com/garoon-private/garoon-apps.git
+    targetRevision: main
+    path: argocd-config/overlays/stage0
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
