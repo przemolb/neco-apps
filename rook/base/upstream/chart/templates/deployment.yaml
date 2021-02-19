@@ -110,6 +110,10 @@ spec:
           value: {{ .Values.csi.enableRbdDriver | quote }}
         - name: ROOK_CSI_ENABLE_CEPHFS
           value: {{ .Values.csi.enableCephfsDriver | quote }}
+        - name: CSI_ENABLE_CEPHFS_SNAPSHOTTER
+          value: {{ .Values.csi.enableCephfsSnapshotter | quote }}
+        - name: CSI_ENABLE_RBD_SNAPSHOTTER
+          value: {{ .Values.csi.enableRBDSnapshotter | quote }}
         - name: CSI_PLUGIN_PRIORITY_CLASSNAME
           value: {{ .Values.csi.pluginPriorityClassName | quote }}
         - name: CSI_PROVISIONER_PRIORITY_CLASSNAME
@@ -119,6 +123,14 @@ spec:
 {{- if .Values.csi.cephFSPluginUpdateStrategy }}
         - name: CSI_CEPHFS_PLUGIN_UPDATE_STRATEGY
           value: {{ .Values.csi.cephFSPluginUpdateStrategy | quote }}
+{{- end }}
+{{- if .Values.csi.rbdFSGroupPolicy }}
+        - name: CSI_RBD_FSGROUPPOLICY
+          value: {{ .Values.csi.rbdFSGroupPolicy | quote }}
+{{- end }}
+{{- if .Values.csi.cephFSFSGroupPolicy }}
+        - name: CSI_CEPHFS_FSGROUPPOLICY
+          value: {{ .Values.csi.cephFSFSGroupPolicy | quote }}
 {{- end }}
 {{- if .Values.csi.rbdPluginUpdateStrategy }}
         - name: CSI_RBD_PLUGIN_UPDATE_STRATEGY
@@ -267,6 +279,10 @@ spec:
 {{- if .Values.unreachableNodeTolerationSeconds }}
         - name: ROOK_UNREACHABLE_NODE_TOLERATION_SECONDS
           value: {{ .Values.unreachableNodeTolerationSeconds | quote }}
+{{- end }}
+{{- if .Values.allowMultipleFilesystems }}
+        - name: ROOK_ALLOW_MULTIPLE_FILESYSTEMS
+          value: {{ .Values.allowMultipleFilesystems }}
 {{- end }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
