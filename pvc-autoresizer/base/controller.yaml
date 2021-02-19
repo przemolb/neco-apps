@@ -9,4 +9,4 @@ spec:
       containers:
       - name: manager
         args:
-        - --prometheus-url=http://prometheus.monitoring.svc:9090
+        - --prometheus-url=http://vmselect-vmcluster-largeset.monitoring.svc:8481/select/0/prometheus
