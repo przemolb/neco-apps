@@ -1,5 +1,5 @@
 # NOTE: most of the rules are downloaded from the following link:
-# https://github.com/coreos/kube-prometheus/blob/master/manifests/prometheus-rules.yaml
+# https://github.com/prometheus-operator/kube-prometheus/blob/master/manifests/kubernetes-prometheusRule.yaml
 # The following Apache License is kube-prometheus's one.
 
 # Apache License
