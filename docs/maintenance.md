@@ -25,7 +25,6 @@ How to maintain neco-apps
 - [neco-admission](#neco-admission)
 - [network-policy (Calico)](#network-policy-calico)
 - [pvc-autoresizer](#pvc-autoresizer)
-- [registry](#registry)
 - [rook](#rook)
   - [ceph](#ceph)
 - [sealed-secrets](#sealed-secrets)
@@ -366,12 +365,6 @@ Download the upstream tar ball from [releases](https://github.com/topolvm/pvc-au
 ```console
 $ kustomize build ./config/default > /path/to/pvc-autoresizer/base/upstream.yaml
 ```
-
-## registry
-
-Check [the release notes](https://github.com/docker/distribution/releases).
-
-These manifest files were created from scratch. The based manifest does not exist.
 
 ## rook
 
