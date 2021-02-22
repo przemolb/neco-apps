@@ -2,11 +2,13 @@ currentNamespaceOnly: true
 enableDiscoveryDaemon: false
 csi:
   enableCephfsDriver: false
+  # The case of cephFS described in upstream is different and may be corrected.
+  enableCephfsSnapshotter: false
   pluginPriorityClassName: ""
   provisionerPriorityClassName: ""
 image:
   repository: quay.io/cybozu/rook
-  tag: 1.5.4.2
+  tag: 1.5.7.1
   pullPolicy: IfNotPresent
 resources:
   limits:

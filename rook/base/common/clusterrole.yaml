@@ -403,6 +403,9 @@ rules:
   - apiGroups: [""]
     resources: ["persistentvolumeclaims/status"]
     verbs: ["update", "patch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get"]
 ---
 # Source: rook-ceph/templates/clusterrole.yaml
 apiVersion: rbac.authorization.k8s.io/v1
