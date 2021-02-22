@@ -3,6 +3,20 @@ kind: Kustomization
 namespace: monitoring
 resources:
   - upstream/crd
+  - upstream/rbac/vmagent_editor_role.yaml
+  - upstream/rbac/vmagent_viewer_role.yaml
+  - upstream/rbac/vmalert_editor_role.yaml
+  - upstream/rbac/vmalert_viewer_role.yaml
+  - upstream/rbac/vmalertmanager_editor_role.yaml
+  - upstream/rbac/vmalertmanager_viewer_role.yaml
+  - upstream/rbac/vmpodscrape_editor_role.yaml
+  - upstream/rbac/vmpodscrape_viewer_role.yaml
+  - upstream/rbac/vmprobe_editor_role.yaml
+  - upstream/rbac/vmprobe_viewer_role.yaml
+  - upstream/rbac/vmrule_editor_role.yaml
+  - upstream/rbac/vmrule_viewer_role.yaml
+  - upstream/rbac/vmservicescrape_editor_role.yaml
+  - upstream/rbac/vmservicescrape_viewer_role.yaml
   - rbac
   - operator.yaml
   - alertmanager.yaml
@@ -54,6 +68,8 @@ resources:
   - rules/vault-scrape.yaml
 patchesStrategicMerge:
   - remove_crd_status.yaml
+  - rbac/viewer_aggregation.yaml
+  - rbac/editor_aggregation.yaml
 configMapGenerator:
   - name: vmalertmanager
     files:

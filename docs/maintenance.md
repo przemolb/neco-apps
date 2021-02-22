@@ -300,9 +300,10 @@ And then, update upstream-derived manifests.
 
 ```console
 $ git clone https://github.com/VictoriaMetrics/operator
+$ cd operator
 $ git checkout vX.Y.Z
 $ UPSTREAM_DIR=$HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/victoriametrics/upstream/
-$ rm -r $UPSTREAM_DIR/*
+$ rm -rf $UPSTREAM_DIR/*
 $ cp -r config/crd config/rbac $UPSTREAM_DIR/
 ```
 
