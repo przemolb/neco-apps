@@ -12,7 +12,7 @@ import (
 
 func prepareMoco() {
 	It("should deploy mysqlcluster", func() {
-		// This manifest is based on the this example (https://github.com/cybozu-go/moco/blob/v0.6.0/docs/example_mysql_cluster.md).
+		// This manifest is based on the this example (https://github.com/cybozu-go/moco/blob/v0.7.0/docs/example_mysql_cluster.md).
 		// Changed as follows.
 		// - Change the namespace of all resources.
 		// - Change the tag of quay.io/cybozu/moco-mysql image.
@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: mysqld
-        image: quay.io/cybozu/moco-mysql:8.0.18.4
+        image: quay.io/cybozu/moco-mysql:8.0.18
         resources:
           requests:
             memory: "512Mi"
@@ -88,10 +88,6 @@ spec:
           name: slow-filebeat-config
       - name: slow-filebeat-data
         emptyDir: {}
-  logRotationSecurityContext:
-    runAsUser: 10000
-    runAsGroup: 10000
-    fsGroup: 10000
   dataVolumeClaimTemplateSpec:
     storageClassName: topolvm-provisioner
     accessModes: [ "ReadWriteOnce" ]
