@@ -26,6 +26,13 @@ var requiredResources = []string{
 	"grafanadashboards.integreatly.org",
 	"mysqlclusters.moco.cybozu.com",
 	"objectbucketclaims.objectbucket.io",
+	"vmagents.operator.victoriametrics.com",
+	"vmalertmanagers.operator.victoriametrics.com",
+	"vmalerts.operator.victoriametrics.com",
+	"vmpodscrapes.operator.victoriametrics.com",
+	"vmprobes.operator.victoriametrics.com",
+	"vmrules.operator.victoriametrics.com",
+	"vmservicescrapes.operator.victoriametrics.com",
 }
 
 // prohibitedResources is a list of namespace resources that are not allowed to be created by unprivileged teams.
@@ -38,8 +45,8 @@ var prohibitedResources = []string{
 }
 
 var (
-	allVerbs        = []string{"get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"}
-	adminVerbs      = []string{"get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"}
+	allVerbs        = []string{"get", "list", "watch", "create", "update", "patch", "delete"}
+	adminVerbs      = []string{"get", "list", "watch", "create", "update", "patch", "delete"}
 	viewVerbs       = []string{"get", "list", "watch"}
 	prohibitedVerbs = []string{}
 )

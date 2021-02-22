@@ -26,7 +26,6 @@ resources:
   - memory-usage.yaml
   - neco-admission.yaml
   - node-exporter.yaml
-  - registry.yaml
   - sabakan.yaml
   - topolvm-volumegroup.yaml
   - victoriametrics-vmagent.yaml

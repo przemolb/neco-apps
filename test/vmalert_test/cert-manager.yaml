@@ -1,0 +1,112 @@
+rule_files:
+   - ../../monitoring/base/victoriametrics/rules/converted/cert-manager-alertrule.yaml
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'up{job="cert-manager"}'
+        values: 0+0x10
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CertManagerDown
+        exp_alerts:
+          - exp_labels:
+              severity: error
+            exp_annotations:
+              summary: Cert Manager has disappeared from Prometheus target discovery.
+              runbook: TBD
+  - interval: 1m
+    input_series:
+      - series: 'certmanager_certificate_ready_status{condition="False",exported_namespace="ours",name="certname"}'
+        values: 1+0x10
+      - series: 'kube_namespace_labels{namespace="ours",label_team="neco"}'
+        values: 1+0x10
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CertificateNotReady
+        exp_alerts:
+          - exp_labels:
+              severity: error
+              exported_namespace: ours
+              name: certname
+              label_team: neco
+              condition: "False"
+            exp_annotations:
+              summary: Certificate resource is not ready.
+              runbook: Please check the status of Cert Manager and Certificate resources.
+  - interval: 1m
+    input_series:
+      - series: 'certmanager_certificate_ready_status{condition="False",exported_namespace="others",name="certname"}'
+        values: 1+0x10
+      - series: 'kube_namespace_labels{namespace="ours",label_team="neco"}'
+        values: 1+0x10
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: CertificateNotReady
+        exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'certmanager_certificate_expiration_timestamp_seconds{exported_namespace="ours",name="certname"}'
+        values: 1209600+0x120 # 14 days
+      - series: 'kube_namespace_labels{namespace="ours",label_team="neco"}'
+        values: 1+0x120
+    alert_rule_test:
+      - eval_time: 120m
+        alertname: CertificateExpire
+        exp_alerts:
+          - exp_labels:
+              severity: error
+              frequency: daily
+              exported_namespace: ours
+              name: certname
+              label_team: neco
+            exp_annotations:
+              summary: Certificate ours/certname will expire in 14 day(s).
+              runbook: Please check the status of Cert Manager and Certificate resources.
+  - interval: 1m
+    input_series:
+      - series: 'certmanager_certificate_expiration_timestamp_seconds{exported_namespace="ours",name="certname"}'
+        values: 0+0x120
+      - series: 'kube_namespace_labels{namespace="ours",label_team="neco"}'
+        values: 1+0x120
+    alert_rule_test:
+      - eval_time: 120m
+        alertname: CertificateExpire
+        exp_alerts:
+          - exp_labels:
+              severity: error
+              frequency: daily
+              exported_namespace: ours
+              name: certname
+              label_team: neco
+            exp_annotations:
+              summary: Certificate ours/certname will expire in 14 day(s).
+              runbook: Please check the status of Cert Manager and Certificate resources.
+          - exp_labels:
+              severity: critical
+              exported_namespace: ours
+              name: certname
+              label_team: neco
+            exp_annotations:
+              summary: Certificate ours/certname has already expired.
+              runbook: Please check the status of Cert Manager and Certificate resources.
+  - interval: 1m
+    input_series:
+      - series: 'certmanager_certificate_expiration_timestamp_seconds{exported_namespace="ours",name="certname"}'
+        values: 1296000+0x120 # 15 days
+      - series: 'kube_namespace_labels{namespace="ours",label_team="neco"}'
+        values: 1+0x120
+    alert_rule_test:
+      - eval_time: 120m
+        alertname: CertificateExpire
+        exp_alerts: []
+  - interval: 1m
+    input_series:
+      - series: 'certmanager_certificate_expiration_timestamp_seconds{exported_namespace="others",name="certname"}'
+        values: 0+0x120
+      - series: 'kube_namespace_labels{namespace="ours",label_team="neco"}'
+        values: 1+0x120
+    alert_rule_test:
+      - eval_time: 120m
+        alertname: CertificateExpire
+        exp_alerts: []

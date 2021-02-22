@@ -1,6 +1,0 @@
-instance: quay
-proxy:
-  remoteURL: https://quay.io
-  secretName: quay-credential
-  usernameEnv: QUAY_USERNAME
-  passwordEnv: QUAY_PASSWORD
