@@ -16,12 +16,12 @@ spec:
           for: 10m
           labels:
             severity: error
-        - alert: CertificateDoesNotReady
+        - alert: CertificateNotReady
           expr: |
-            certmanager_certificate_ready_status{condition="False", namespace!~"app-.+|maneki|sandbox"} > 0
+            certmanager_certificate_ready_status{condition="False"} *on(exported_namespace) group_left(label_team) label_replace(kube_namespace_labels{label_team="neco"}, "exported_namespace", "$1", "namespace", "(^.*$)") > 0
           for: 10m
           labels:
             severity: error
           annotations:
-            summary: Certificate resource does not ready.
+            summary: Certificate resource is not ready.
             runbook: Please check the status of Cert Manager and Certificate resources.
