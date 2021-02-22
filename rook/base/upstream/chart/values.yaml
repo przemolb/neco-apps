@@ -56,11 +56,23 @@ csi:
   enableRbdDriver: true
   enableCephfsDriver: true
   enableGrpcMetrics: true
+  # set to false to disable deployment of snapshotter container in CephFS provisioner pod.
+  enableCephFSSnapshotter: true
+  # set to false to disable deployment of snapshotter container in RBD provisioner pod.
+  enableRBDSnapshotter: true
   # (Optional) set user created priorityclassName for csi plugin pods.
   # pluginPriorityClassName: system-node-critical
 
   # (Optional) set user created priorityclassName for csi provisioner pods.
   # provisionerPriorityClassName: system-cluster-critical
+
+  # (Optional) policy for modifying a volume's ownership or permissions when the RBD PVC is being mounted.
+  # supported values are documented at https://kubernetes-csi.github.io/docs/support-fsgroup.html
+  rbdFSGroupPolicy: "ReadWriteOnceWithFSType"
+
+  # (Optional) policy for modifying a volume's ownership or permissions when the CephFS PVC is being mounted.
+  # supported values are documented at https://kubernetes-csi.github.io/docs/support-fsgroup.html
+  cephFSFSGroupPolicy: "ReadWriteOnceWithFSType"
 
   # OMAP generator generates the omap mapping between the PV name and the RBD image
   # which helps CSI to identify the rbd images for CSI operations.
@@ -270,6 +282,11 @@ csi:
 
 enableFlexDriver: false
 enableDiscoveryDaemon: false
+
+# enable the ability to have multiple Ceph filesystems in the same cluster
+# WARNING: Experimental feature in Ceph Releases Octopus (v15) and Nautilus (v14)
+# https://docs.ceph.com/en/octopus/cephfs/experimental-features/#multiple-file-systems-within-a-ceph-cluster
+allowMultipleFilesystems: false
 
 ## if true, run rook operator on the host network
 # useOperatorHostNetwork: true

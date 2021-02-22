@@ -58,9 +58,9 @@ tests:
   - interval: 1m
     input_series:
       - series: 'up{job="vmsingle-smallset"}'
-        values: '0+0x15'
+        values: '0+0x60'
     alert_rule_test:
-      - eval_time: 15m
+      - eval_time: 60m
         alertname: VMSingleSmallsetDown
         exp_alerts:
           - exp_labels:
@@ -151,9 +151,9 @@ tests:
   - interval: 1m
     input_series:
       - series: 'up{job="prometheus"}'
-        values: '0+0x15'
+        values: '0+0x60'
     alert_rule_test:
-      - eval_time: 15m
+      - eval_time: 60m
         alertname: PrometheusDown
         exp_alerts:
           - exp_labels:

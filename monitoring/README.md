@@ -1,9 +1,8 @@
-Prometheus
+monitoring
 ==========
 
-This directory contains the following files:
-- K8s manifests for Prometheus
-- Configuration files for Prometheus
+This directory contains manifests and configuration files for monitoring.
+We are using Prometheus, Grafana, VictoriaMetrics, and mackerel-agent.
 
 Alert rules
 -----------
