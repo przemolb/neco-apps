@@ -52,7 +52,7 @@ spec:
           runbook: TBD
         expr: |
           absent(up{job="vmsingle-smallset"} == 1)
-        for: 15m
+        for: 60m
         labels:
           severity: critical
 
@@ -126,7 +126,7 @@ spec:
             runbook: TBD
           expr: |
             absent(up{job="prometheus"} == 1)
-          for: 15m
+          for: 60m
           labels:
             severity: critical
         - alert: PushGatewayDown
