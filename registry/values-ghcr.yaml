@@ -1,3 +1,0 @@
-instance: ghcr
-proxy:
-  remoteURL: https://ghcr.io

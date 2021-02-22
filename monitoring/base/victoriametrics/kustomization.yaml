@@ -43,7 +43,6 @@ resources:
   - rules/network-policy-scrape.yaml
   - rules/node-alertrule.yaml
   - rules/node-scrape.yaml
-  - rules/registry-scrape.yaml
   - rules/rook-scrape.yaml
   - rules/rook-alertrule.yaml
   - rules/sabakan-alertrule.yaml
