@@ -22,8 +22,7 @@ cd \$HOME/go/src/github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME
 git checkout -qf ${CIRCLE_SHA1}
 
 cd test
-cp /home/cybozu/account.json ./
-cp /home/cybozu/zerossl-secret-resource.json ./
+cp /home/cybozu/account.json /home/cybozu/zerossl-secret-resource.json ./
 make setup
 make $TARGET COMMIT_ID=${CIRCLE_SHA1} BASE_BRANCH=${BASE_BRANCH} SUITE=prepare
 make $TARGET COMMIT_ID=${CIRCLE_SHA1} BASE_BRANCH=${BASE_BRANCH} SUITE=run
