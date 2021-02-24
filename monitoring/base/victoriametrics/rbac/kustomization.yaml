@@ -13,5 +13,3 @@ patches:
     name: manager-rolebinding
 patchesStrategicMerge:
 - psp_clusterrole_patch.yaml
-- viewer_aggregation.yaml
-- editor_aggregation.yaml
