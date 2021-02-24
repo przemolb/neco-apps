@@ -26,7 +26,7 @@ var _ = BeforeSuite(func() {
 	fmt.Println("Preparing...")
 
 	SetDefaultEventuallyPollingInterval(time.Second)
-	SetDefaultEventuallyTimeout(20 * time.Minute)
+	SetDefaultEventuallyTimeout(40 * time.Minute)
 
 	prepare()
 
