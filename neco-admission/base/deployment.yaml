@@ -42,6 +42,8 @@ spec:
         - --valid-image-prefix=ghcr.io/cybozu-private/
         - --valid-image-prefix=docker.elastic.co/
         - --valid-image-prefix=quay.io/gravitational/teleport-ent
+        - --valid-image-prefix=gcr.io/datadoghq/agent
+        # TODO: remove this after maneki complete the transition to gcr.io
         - --valid-image-prefix=datadog/agent,docker.io/datadog/agent
         # TODO: remove this after we build our own images for Rook
         - --valid-image-prefix=k8s.gcr.io/sig-storage/,quay.io/cephcsi/
