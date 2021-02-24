@@ -26,9 +26,6 @@ patchesStrategicMerge:
 - neco-admission.yaml
 - network-policy.yaml
 - pvc-autoresizer.yaml
-- registry-elastic.yaml
-- registry-ghcr.yaml
-- registry-quay.yaml
 - rook.yaml
 - sandbox.yaml
 - sealed-secrets.yaml
