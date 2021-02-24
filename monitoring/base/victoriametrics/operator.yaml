@@ -43,7 +43,7 @@ spec:
           value: "false"
         - name: VM_ENABLEDPROMETHEUSCONVERTER_PROBE
           value: "false"
-        image: quay.io/cybozu/victoriametrics-operator:0.7.4.1
+        image: quay.io/cybozu/victoriametrics-operator:0.9.0.1
         imagePullPolicy: IfNotPresent
         name: manager
         ports:
