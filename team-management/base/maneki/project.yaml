@@ -24,7 +24,11 @@ spec:
     server: '*'
   - namespace: app-elasticsearch
     server: '*'
+  - namespace: app-forest-certs
+    server: '*'
   - namespace: app-kodama
+    server: '*'
+  - namespace: app-maneki-static-cybozu-com
     server: '*'
   - namespace: app-misc
     server: '*'
