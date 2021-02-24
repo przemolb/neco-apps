@@ -1,5 +1,6 @@
 install.yaml
 account.json
+zerossl-secret-resource.json
 /alertmanager.yaml
 /grafana.yaml
 /lets.crt
