@@ -198,7 +198,9 @@ func testApplicationResources(t *testing.T) {
 			"tokyo0": "release",
 		},
 		"tenant-apps": {
-			"stage0": "stage",
+			"osaka0": "release",
+			"stage0": "main",
+			"tokyo0": "release",
 		},
 	}
 
