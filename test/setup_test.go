@@ -192,6 +192,10 @@ func testSetup() {
 			stdout, stderr, err = ExecAtWithInput(boot0, buf.Bytes(), "kubectl", "apply", "-n", "teleport", "-f", "-")
 			Expect(err).NotTo(HaveOccurred(), "stdout: %s, stderr: %s", stdout, stderr)
 		})
+
+		It("should prepare ceph-hdd namespace to config map for debug", func() {
+			createNamespaceIfNotExists("ceph-hdd")
+		})
 	}
 
 	It("should apply zerossl secrets", func() {
