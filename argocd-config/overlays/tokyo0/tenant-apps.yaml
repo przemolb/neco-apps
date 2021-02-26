@@ -9,8 +9,8 @@ spec:
   project: tenant-app-of-apps
   source:
     repoURL: https://github.com/cybozu-private/neco-tenant-apps.git
-    targetRevision: main
-    path: argocd-config/overlays/stage0
+    targetRevision: release
+    path: argocd-config/overlays/tokyo0
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
