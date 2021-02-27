@@ -103,7 +103,6 @@ func runTest() {
 	Context("pushgateway", testPushgateway)
 	Context("ingress-health", testIngressHealth)
 	Context("prometheus-metrics", testPrometheusMetrics)
-	Context("metrics-server", testMetricsServer)
 	Context("victoriametrics-operator", testVictoriaMetricsOperator)
 	Context("vmsmallset-components", testVMSmallsetClusterComponents)
 	Context("vmlargeset-components", testVMLargesetClusterComponents)

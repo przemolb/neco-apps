@@ -12,7 +12,6 @@ How to maintain neco-apps
   - [loki, promtail](#loki-promtail)
 - [machines-endpoints](#machines-endpoints)
 - [metallb](#metallb)
-- [metrics-server](#metrics-server)
 - [moco](#moco)
 - [monitoring](#monitoring)
   - [prometheus, alertmanager, pushgateway](#prometheus-alertmanager-pushgateway)
@@ -192,19 +191,6 @@ $ cp manifests/*.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/metallb/base/up
 ```
 
 Then edit `metallb/base/kustomization.yaml` to update the image tags.
-
-## metrics-server
-
-Check [releases](https://github.com/kubernetes-sigs/metrics-server/releases)
-
-Download the upstream manifest as follows:
-
-```console
-$ curl -OLsf https://github.com/kubernetes-sigs/metrics-server/releases/download/vX.Y.Z/components.yaml
-$ cp components.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/metrics-server/base/upstream
-```
-
-Edit `metrics-server/base/kustomization.yaml` to update the image tag.
 
 ## moco
 

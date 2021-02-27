@@ -13,7 +13,6 @@ resources:
 - local-pv-provisioner.yaml
 - logging.yaml
 - metallb.yaml
-- metrics-server.yaml
 - moco.yaml
 - monitoring.yaml
 - namespaces.yaml
