@@ -23,6 +23,7 @@ How to maintain neco-apps
   - [VictoriaMetrics](#victoriametrics)
 - [neco-admission](#neco-admission)
 - [network-policy (Calico)](#network-policy-calico)
+- [prometheus-adapter](#prometheus-adapter)
 - [pvc-autoresizer](#pvc-autoresizer)
 - [rook](#rook)
   - [ceph](#ceph)
@@ -342,6 +343,20 @@ See: [Kubernetes controllers configuration](https://docs.projectcalico.org/refer
 Then, check `git diff network-policy/base/calico/upstream/` to see any changes that need to be addressed by our patches.
 
 Finally, edit `network-policy/base/kustomization.yaml` to update the image tags.
+
+## prometheus-adapter
+
+Check [releases](https://github.com/kubernetes-sigs/prometheus-adapter/releases).
+
+Check the latest Helm chart for prometheus-adapter on https://github.com/prometheus-community/helm-charts .
+For example, `prometheus-adapter-2.12.1` is the latest release as of Feb. 28th, 2021.
+
+Update the Helm chart as follows:
+
+```console
+$ make update-prometheus-adapter CHART_VERSION=2.12.1
+$ git commit -a argocd-config
+```
 
 ## pvc-autoresizer
 
