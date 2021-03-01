@@ -13,12 +13,12 @@ resources:
 - local-pv-provisioner.yaml
 - logging.yaml
 - metallb.yaml
-- metrics-server.yaml
 - moco.yaml
 - monitoring.yaml
 - namespaces.yaml
 - neco-admission.yaml
 - network-policy.yaml
+- prometheus-adapter.yaml
 - pvc-autoresizer.yaml
 - rook.yaml
 - sandbox.yaml

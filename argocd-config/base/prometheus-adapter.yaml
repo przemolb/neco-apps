@@ -1,0 +1,90 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-adapter
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prometheus-adapter
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  ignoreDifferences:
+  - group: cert-manager.io
+    kind: Certificate
+    jsonPointers:
+    - /spec/duration
+  - group: apiregistration.k8s.io
+    kind: APIService
+    jsonPointers:
+    - /spec/insecureSkipTLSVerify
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: prometheus-adapter
+    targetRevision: 2.12.1
+    helm:
+      version: v3
+      values: |
+        image:
+          repository: quay.io/cybozu/prometheus-adapter
+          tag: 0.8.3.1
+          pullPolicy: IfNotPresent
+        
+        # Url to access prometheus
+        prometheus:
+          url: http://vmselect-vmcluster-largeset.monitoring.svc
+          port: 8481
+          path: "/select/0/prometheus"
+        
+        replicas: 2
+        
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        
+        rules:
+          default: true
+          resource:
+            cpu:
+              containerQuery: sum(rate(container_cpu_usage_seconds_total{<<.LabelMatchers>>}[3m])) by (<<.GroupBy>>)
+              nodeQuery: sum(rate(container_cpu_usage_seconds_total{<<.LabelMatchers>>, id='/'}[3m])) by (<<.GroupBy>>)
+              resources:
+                overrides:
+                  instance:
+                    resource: node
+                  namespace:
+                    resource: namespace
+                  pod:
+                    resource: pod
+              containerLabel: container
+            memory:
+              containerQuery: sum(container_memory_working_set_bytes{<<.LabelMatchers>>}) by (<<.GroupBy>>)
+              nodeQuery: sum(container_memory_working_set_bytes{<<.LabelMatchers>>,id='/'}) by (<<.GroupBy>>)
+              resources:
+                overrides:
+                  instance:
+                    resource: node
+                  namespace:
+                    resource: namespace
+                  pod:
+                    resource: pod
+              containerLabel: container
+            window: 3m        
+        
+        podDisruptionBudget:
+          # Specifies if PodDisruptionBudget should be enabled
+          # When enabled, minAvailable or maxUnavailable should also be defined.
+          enabled: true
+          minAvailable:
+          maxUnavailable: 1
+        
+        certManager:
+          enabled: true
+          caCertDuration: 438000h
+          certDuration: 87600h

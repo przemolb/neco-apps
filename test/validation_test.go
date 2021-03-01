@@ -242,6 +242,10 @@ func testApplicationResources(t *testing.T) {
 					t.Error(err)
 				}
 
+				if app.Name == "prometheus-adapter" {
+					continue
+				}
+
 				// Check the tergetRevision
 				var expectedTargetRevision string
 				if app.GetLabels()["is-tenant"] == "true" {
