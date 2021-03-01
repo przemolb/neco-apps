@@ -79,10 +79,11 @@ func prepareTest() {
 	Context("preparing metallb", prepareMetalLB)
 	Context("preparing pushgateway", preparePushgateway)
 	Context("preparing ingress-health", prepareIngressHealth)
+	Context("preparing hpa", prepareHPA)
 	Context("preparing grafana-operator", prepareGrafanaOperator)
 	Context("preparing sandbox grafana", prepareSandboxGrafanaIngress)
 	Context("preparing topolvm", prepareTopoLVM)
-	Context("preparing cursotmer-egress", prepareCustomerEgress)
+	Context("preparing customer-egress", prepareCustomerEgress)
 	Context("preparing sealed-secret", prepareSealedSecret)
 	Context("preparing network-policy", prepareNetworkPolicy) // this must be the last preparation.
 }
@@ -102,6 +103,7 @@ func runTest() {
 	Context("alertmanager", testAlertmanager)
 	Context("pushgateway", testPushgateway)
 	Context("ingress-health", testIngressHealth)
+	Context("hpa", testHPA)
 	Context("prometheus-metrics", testPrometheusMetrics)
 	Context("victoriametrics-operator", testVictoriaMetricsOperator)
 	Context("vmsmallset-components", testVMSmallsetClusterComponents)
@@ -116,5 +118,5 @@ func runTest() {
 	Context("team-management", testTeamManagement)
 	Context("moco", testMoco)
 	Context("sealed-secret", testSealedSecret)
-	Context("cursotmer-egress", testCustomerEgress)
+	Context("customer-egress", testCustomerEgress)
 }
