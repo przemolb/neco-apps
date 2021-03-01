@@ -242,6 +242,10 @@ func testApplicationResources(t *testing.T) {
 					t.Error(err)
 				}
 
+				if app.Name == "prometheus-adapter" {
+					continue
+				}
+
 				// Check the tergetRevision
 				var expectedTargetRevision string
 				if app.GetLabels()["is-tenant"] == "true" {
@@ -501,7 +505,8 @@ func testVMCustomResources(t *testing.T) {
 		"vmagent-smallset",
 		"vmalert-largeset",
 		"vmalert-smallset",
-		"vmalertmanager",
+		"vmalertmanager-largeset",
+		"vmalertmanager-smallset",
 		"vminsert-largeset",
 		"vmselect-largeset",
 		"vmsingle-smallset",
@@ -517,8 +522,6 @@ func testVMCustomResources(t *testing.T) {
 	}
 	expectedSmallsetProbes := []string{}
 	expectedSmallsetRules := []string{
-		"kube-state-metrics",
-		"kubernetes",
 		"monitoring",
 		"rook",
 	}
