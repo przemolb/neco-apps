@@ -349,6 +349,45 @@ func applyAndWaitForApplications(commitID string) {
 		return nil
 	}).Should(Succeed())
 
+	// TODO: remove the following block after #1268 is merged and released
+	if doUpgrade {
+		By("removing metrics-server")
+		ExecSafeAt(boot0, "kubectl", "-n", "argocd", "patch", "applications", "metrics-server",
+			"-p", `'{"metadata": {"finalizers": ["resources-finalizer.argocd.argoproj.io"]}}'`, "--type=merge")
+
+		// this is only for test because auto-pruning is not enabled for argocd-config app in tests.
+		ExecSafeAt(boot0, "kubectl", "-n", "argocd", "delete", "applications", "metrics-server")
+
+		// this is necessary to accept prometheus-adapter app as it references a new Helm repository.
+		ExecSafeAt(boot0, "argocd", "app", "set", "--sync-policy=none", "neco-admission")
+		Eventually(func() error {
+			_, stderr, err := ExecAt(boot0, "argocd", "app", "sync", "--prune", "--revision="+commitID, "neco-admission")
+			if err != nil {
+				return fmt.Errorf("failed to sync neco-admission: %s: %w", stderr, err)
+			}
+			return nil
+		}).Should(Succeed())
+		Eventually(func() error {
+			stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "kube-system", "get", "deployments", "neco-admission", "-o", "json")
+			if err != nil {
+				return fmt.Errorf("failed to get neco-admission deployment: %s: %w", stderr, err)
+			}
+			dpl := &appsv1.Deployment{}
+			if err := json.Unmarshal(stdout, dpl); err != nil {
+				return err
+			}
+			if dpl.Status.UpdatedReplicas != 2 {
+				return fmt.Errorf("too few updated replicas %d", dpl.Status.UpdatedReplicas)
+			}
+			if dpl.Status.AvailableReplicas != 2 {
+				return fmt.Errorf("too few available replicas %d", dpl.Status.AvailableReplicas)
+			}
+			return nil
+		}).Should(Succeed())
+		// extra safety
+		ExecSafeAt(boot0, "kubectl", "delete", "validatingwebhookconfigurations", "neco-admission")
+	}
+
 	Eventually(func() error {
 		stdout, stderr, err := ExecAt(boot0, "cd", "./neco-apps", "&&", "argocd", "app", "sync", "argocd-config", "--local", "argocd-config/overlays/"+overlayName, "--async")
 		if err != nil {
@@ -388,30 +427,6 @@ func applyAndWaitForApplications(commitID string) {
 		fmt.Println("  " + app)
 	}
 
-	// TODO: remove this after #1249 gets merged and released
-	if doUpgrade {
-		By("removing old teleport app Deployments")
-		Eventually(func() error {
-			for _, name := range []string{"teleport-app-alertmanager", "teleport-app-vmalertmanager"} {
-				dpl := &appsv1.Deployment{}
-				stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "teleport", "get", "deployment", name, "-o", "json")
-				if err != nil {
-					return fmt.Errorf("failed to get %s: %s: %w", name, stderr, err)
-				}
-				if err := json.Unmarshal(stdout, dpl); err != nil {
-					return err
-				}
-				if dpl.Spec.Selector.MatchLabels["app"] == "" {
-					if _, stderr, err := ExecAt(boot0, "kubectl", "-n", "teleport", "delete", "deployment", name); err != nil {
-						return fmt.Errorf("failed to delete %s: %s: %w", name, stderr, err)
-					}
-					return fmt.Errorf("%s is still old", name)
-				}
-			}
-			return nil
-		}).Should(Succeed())
-	}
-
 	By("waiting initialization")
 	checkAllAppsSynced := func() error {
 		for _, target := range appList {
@@ -424,8 +439,13 @@ func applyAndWaitForApplications(commitID string) {
 			if err != nil {
 				return fmt.Errorf("stdout: %s, err: %v", appStdout, err)
 			}
-			if app.Status.Sync.ComparedTo.Source.TargetRevision != commitID {
-				return errors.New(target + " does not have correct target yet")
+			switch app.Name {
+			case "prometheus-adapter":
+			// These reference upstream Helm chart versions, so no need to check commitID.
+			default:
+				if app.Status.Sync.ComparedTo.Source.TargetRevision != commitID {
+					return errors.New(target + " does not have correct target yet")
+				}
 			}
 			if app.Status.Sync.Status == SyncStatusCodeSynced &&
 				app.Status.Health.Status == HealthStatusHealthy &&
@@ -455,6 +475,11 @@ func applyAndWaitForApplications(commitID string) {
 			return fmt.Errorf("%s is not initialized. argocd app get %s -o json: %s", target, target, appStdout)
 		}
 		return nil
+	}
+
+	// TODO: remove the following block after #1268 is merged and released
+	if doUpgrade {
+		ExecSafeAt(boot0, "argocd", "app", "set", "--sync-policy=auto", "neco-admission")
 	}
 
 	// want to do "Eventually( Consistently(checkAllAppsSynced, 15sec, 1sec) )"
