@@ -433,23 +433,19 @@ $ cd teleport
 $ git diff vx.y.z...vX.Y.Z examples/chart/teleport
 ```
 
-Update `TELEPORT_VERSION` in `test/Makefile`.
+- Update `newTag` in `teleport/base/kustomizaton.yaml`.
+- Update `TELEPORT_VERSION` in `test/Makefile`.
 
 ## topolvm
 
 Check [releases](https://github.com/cybozu-go/topolvm/releases) for changes.
 
-Download the upstream manifest as follows:
+Update the manifest as follows:
 
 ```console
-$ cd $GOPATH/src/github.com/topolvm
-$ git clone https://github.com/topolvm/topolvm
-$ cd topolvm
-$ git checkout vX.Y.Z
-$ cp -r deploy/manifests/* $GOPATH/src/github.com/cybozu-go/neco-apps/topolvm/base/upstream
+$ make update-topolvm
+$ git diff
 ```
-
-Update `images.newTag` in `kustomization.yaml`.
 
 ## unbound
 
