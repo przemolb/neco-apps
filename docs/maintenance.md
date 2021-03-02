@@ -256,12 +256,10 @@ $ git diff
 
 ### Grafana
 
-Edit `monitoring/base/grafana-operator/operator.yaml` and update the image tag like this:
+Run the following command.
 
 ```yaml
-args:
-- --grafana-image=quay.io/cybozu/grafana
-- --grafana-image-tag=7.0.4.1
+$ make update-grafana
 ```
 
 ### victoriametrics-operator
