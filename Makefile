@@ -74,6 +74,16 @@ update-metallb:
 	rm -rf /tmp/metallb
 	sed -i -E 's/newTag:.*$$/newTag: $(latest_tag)/' metallb/base/kustomization.yaml
 
+.PHONY: update-moco
+update-moco:
+	$(call get-latest-gh,cybozu-go/moco)
+	rm -rf /tmp/moco
+	cd /tmp; git clone --depth 1 -b $(latest_gh) https://github.com/cybozu-go/moco
+	rm -rf moco/base/upstream/*
+	cp -r /tmp/moco/config/* moco/base/upstream
+	rm -rf /tmp/moco
+	sed -i -E 's/newTag:.*$$/newTag: $(patsubst v%,%,$(latest_gh))/' moco/base/kustomization.yaml
+
 .PHONY: update-prometheus-adapter
 update-prometheus-adapter:
 	$(call get-latest-tag,prometheus-adapter)
@@ -91,6 +101,11 @@ endef
 # usage: upstream-tag 1.2.3.4
 define upstream-tag
 $(shell echo $1 | sed -E 's/^(.*)\.[[:digit:]]+$$/v\1/')
+endef
+
+# usage get-latest-gh OWNER/REPO
+define get-latest-gh
+$(eval latest_gh := $(shell curl -sf https://api.github.com/repos/$1/releases/latest | jq -r '.tag_name'))
 endef
 
 .PHONY: setup

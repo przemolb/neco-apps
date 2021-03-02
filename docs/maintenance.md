@@ -200,17 +200,12 @@ $ git diff
 
 Check [releases](https://github.com/cybozu-go/moco/releases) for changes.
 
-Download the upstream manifest as follows:
+Update the manifest as follows:
 
 ```console
-$ cd $GOPATH/src/github.com/cybozu-go/moco
-$ git clone https://github.com/cybozu-go/moco
-$ cd moco
-$ git checkout vX.Y.Z
-$ cp -r config/* $GOPATH/src/github.com/cybozu-go/neco-apps/moco/base/upstream
+$ make update-moco
+$ git diff
 ```
-
-Update `images.newTag` in `kustomization.yaml`.
 
 ## monitoring
 
