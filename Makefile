@@ -64,6 +64,16 @@ update-machines-endpoints:
 	sed -i -E 's,image: quay.io/cybozu/machines-endpoints:.*$$,image: quay.io/cybozu/machines-endpoints:$(latest_tag),' bmc-reverse-proxy/base/machines-endpoints/cronjob.yaml
 	sed -i -E 's,image: quay.io/cybozu/machines-endpoints:.*$$,image: quay.io/cybozu/machines-endpoints:$(latest_tag),' monitoring/base/machines-endpoints/cronjob.yaml
 
+.PHONY: update-metallb
+update-metallb:
+	$(call get-latest-tag,metallb)
+	rm -rf /tmp/metallb
+	cd /tmp; git clone --depth 1 -b $(call upstream-tag,$(latest_tag)) https://github.com/metallb/metallb
+	rm -f metallb/base/upstream/*
+	cp /tmp/metallb/manifests/*.yaml metallb/base/upstream
+	rm -rf /tmp/metallb
+	sed -i -E 's/newTag:.*$$/newTag: $(latest_tag)/' metallb/base/kustomization.yaml
+
 .PHONY: update-prometheus-adapter
 update-prometheus-adapter:
 	$(call get-latest-tag,prometheus-adapter)

@@ -189,15 +189,12 @@ $ git diff
 
 Check [releases](https://github.com/metallb/metallb/releases)
 
-Download manifests and update them as follows:
+Update the manifests as follows
 
 ```console
-$ git clone --depth 1 -b vX.Y.Z https://github.com/metallb/metallb
-$ cd metallb
-$ cp manifests/*.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/metallb/base/upstream
+$ make update-metallb
+$ git diff
 ```
-
-Then edit `metallb/base/kustomization.yaml` to update the image tags.
 
 ## moco
 
