@@ -3,7 +3,7 @@ How to maintain neco-apps
 
 - [argocd](#argocd)
 - [cert-manager](#cert-manager)
-- [customer-egress](#customer-egress)
+- [customer-egress (Squid and unbound)](#customer-egress-squid-and-unbound)
 - [elastic (ECK)](#elastic-eck)
 - [external-dns](#external-dns)
 - [kube-metrics-adapter](#kube-metrics-adapter)
@@ -30,7 +30,6 @@ How to maintain neco-apps
 - [sealed-secrets](#sealed-secrets)
 - [teleport](#teleport)
 - [topolvm](#topolvm)
-- [unbound](#unbound)
 
 ## argocd
 
@@ -54,7 +53,9 @@ $ make update-cert-manager
 $ git diff
 ```
 
-## customer-egress
+## customer-egress (Squid and unbound)
+
+customer-egress contains Squid and unbound containers.
 
 Update the manifests as follows:
 
@@ -446,8 +447,3 @@ Update the manifest as follows:
 $ make update-topolvm
 $ git diff
 ```
-
-## unbound
-
-`quay.io/cybozu/unbound` container image is referenced in `customer-egress/base/kustomization.yaml`.
-When unbound image is updated, edit the YAML as well.
