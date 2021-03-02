@@ -4,7 +4,6 @@ How to maintain neco-apps
 - [argocd](#argocd)
 - [cert-manager](#cert-manager)
 - [customer-egress](#customer-egress)
-- [dex](#dex)
 - [elastic (ECK)](#elastic-eck)
 - [external-dns](#external-dns)
 - [kube-metrics-adapter](#kube-metrics-adapter)
@@ -37,13 +36,12 @@ How to maintain neco-apps
 
 1. Check [releases](https://github.com/argoproj/argo-cd/releases) for changes.
 2. Check [upgrading overview](https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/upgrading/overview.md) when upgrading major or minor version.
-3. Download the upstream manifest as follows:
+3. Run the following command and check the diff.
 
    ```console
-   $ curl -sLf -o argocd/base/upstream/install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/vX.Y.Z/manifests/install.yaml
+   $ make update-argocd
+   $ git diff
    ```
-
-   Then check the diffs by `git diff`.
 
 4. Update `KUSTOMIZE_VERSION` in `test/Makefile`.
 
@@ -65,14 +63,6 @@ $ sed -e 's/internet-egress/customer-egress/g' -e 's/{{ .squid }}/quay.io\/cyboz
 ```
 
 Update `images.newTag` in `kustomization.yaml`.
-
-## dex
-
-As dex is OIDC used for ArgoCD, this should be upgraded with ArgoCD version up.
-However, if it needs to be upgraded alone for some reason, confirm ArgoCD SSO login through the web browser and cli is still possible after it is staged by the following procedure.
-
-1. access to the [ArgoCD dashboard on stage0](https://argocd.stage0.cybozu-ne.co/login) from your web browser
-2. run `argocd login argocd.stage0.cybozu-ne.co --sso` on your local PC and confirm that the login is successful
 
 ## elastic (ECK)
 
