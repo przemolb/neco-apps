@@ -37,6 +37,13 @@ update-customer-egress:
 	$(call get-latest-tag,unbound)
 	sed -i -E '/name:.*unbound$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' customer-egress/base/kustomization.yaml
 
+.PHONY: update-external-dns
+update-external-dns:
+	$(call get-latest-tag,external-dns)
+	curl -sLf -o external-dns/base/upstream/crd.yaml \
+		https://raw.githubusercontent.com/kubernetes-sigs/external-dns/$(call upstream-tag,$(latest_tag))/docs/contributing/crd-source/crd-manifest.yaml
+	sed -i -E 's,quay.io/cybozu/external-dns:.*$$,quay.io/cybozu/external-dns:$(latest_tag),' external-dns/base/deployment.yaml
+
 .PHONY: update-kube-metrics-adapter
 update-kube-metrics-adapter:
 	$(call get-latest-tag,kube-metrics-adapter)
