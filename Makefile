@@ -113,6 +113,13 @@ update-moco:
 	rm -rf /tmp/moco
 	sed -i -E 's/newTag:.*$$/newTag: $(patsubst v%,%,$(latest_gh))/' moco/base/kustomization.yaml
 
+.PHONY: update-neco-admission
+update-neco-admission:
+	$(call get-latest-tag,neco-admission)
+	curl -sfL -o neco-admission/base/upstream/manifests.yaml \
+		https://raw.githubusercontent.com/cybozu/neco-containers/main/admission/config/webhook/manifests.yaml
+	sed -i -E 's/newTag:.*$$/newTag: $(latest_tag)/' neco-admission/base/kustomization.yaml
+
 .PHONY: update-prometheus-adapter
 update-prometheus-adapter:
 	$(call get-latest-tag,prometheus-adapter)
