@@ -1,0 +1,236 @@
+---
+# Source: kube-metrics-adapter/templates/service-account.yaml
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: kube-metrics-adapter
+  namespace: kube-metrics-adapter
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-metrics-adapter-server-resources
+rules:
+- apiGroups:
+  - custom.metrics.k8s.io
+  resources: ["*"]
+  verbs: ["*"]
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: external-metrics-server-resources
+rules:
+- apiGroups:
+  - external.metrics.k8s.io
+  resources: ["*"]
+  verbs: ["*"]
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-metrics-adapter-resource-reader
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  - pods
+  - services
+  - configmaps
+  verbs:
+  - get
+  - list
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-metrics-adapter-resource-collector
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - list
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - statefulsets
+  verbs:
+  - get
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - get
+- apiGroups:
+  - autoscaling
+  resources:
+  - horizontalpodautoscalers
+  verbs:
+  - get
+  - list
+  - watch
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hpa-controller-custom-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-metrics-adapter-server-resources
+subjects:
+- kind: ServiceAccount
+  name: horizontal-pod-autoscaler
+  namespace: kube-system
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hpa-controller-external-metrics
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: external-metrics-server-resources
+subjects:
+- kind: ServiceAccount
+  name: horizontal-pod-autoscaler
+  namespace: kube-system
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: custom-metrics:system:auth-delegator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: kube-metrics-adapter
+  namespace: kube-metrics-adapter
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-metrics-adapter-resource-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-metrics-adapter-resource-collector
+subjects:
+- kind: ServiceAccount
+  name: kube-metrics-adapter
+  namespace: kube-metrics-adapter
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-metrics-adapter-resource-reader
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-metrics-adapter-resource-reader
+subjects:
+- kind: ServiceAccount
+  name: kube-metrics-adapter
+  namespace: kube-metrics-adapter
+---
+# Source: kube-metrics-adapter/templates/rbac.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kube-metrics-adapter-auth-reader
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: kube-metrics-adapter
+  namespace: kube-metrics-adapter
+---
+# Source: kube-metrics-adapter/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-metrics-adapter
+  namespace: kube-metrics-adapter
+spec:
+  ports:
+    - port: 443
+      targetPort: 6443
+  selector:
+    application: kube-metrics-adapter
+---
+# Source: kube-metrics-adapter/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-metrics-adapter
+  namespace: kube-metrics-adapter
+  labels:
+    application: kube-metrics-adapter
+    version: v0.1.9
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      application: kube-metrics-adapter
+  template:
+    metadata:
+      labels:
+        application: kube-metrics-adapter
+        version: v0.1.9
+    spec:
+      serviceAccountName: kube-metrics-adapter
+      containers:
+        - name: kube-metrics-adapter
+          image: registry.opensource.zalan.do/teapot/kube-metrics-adapter:v0.1.9
+          args:
+            - --enable-external-metrics-api=true
+            - --prometheus-server=http://prometheus.kube-system.svc.cluster.local
+            - --secure-port=6443
+          resources:
+            limits:
+              cpu: 100m
+              memory: 100Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+---
+# Source: kube-metrics-adapter/templates/external-metrics-apiservice.yaml
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  name: v1beta1.external.metrics.k8s.io
+spec:
+  service:
+    name: kube-metrics-adapter
+    namespace: kube-metrics-adapter
+  group: external.metrics.k8s.io
+  version: v1beta1
+  insecureSkipTLSVerify: true
+  groupPriorityMinimum: 100
+  versionPriority: 100

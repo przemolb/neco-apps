@@ -352,11 +352,14 @@ func applyAndWaitForApplications(commitID string) {
 	// TODO: remove the following block after #1268 is merged and released
 	if doUpgrade {
 		By("removing metrics-server")
-		ExecSafeAt(boot0, "kubectl", "-n", "argocd", "patch", "applications", "metrics-server",
-			"-p", `'{"metadata": {"finalizers": ["resources-finalizer.argocd.argoproj.io"]}}'`, "--type=merge")
+		_, _, err := ExecAt(boot0, "kubectl", "-n", "argocd", "get", "applications", "metrics-server")
+		if err == nil {
+			ExecSafeAt(boot0, "kubectl", "-n", "argocd", "patch", "applications", "metrics-server",
+				"-p", `'{"metadata": {"finalizers": ["resources-finalizer.argocd.argoproj.io"]}}'`, "--type=merge")
 
-		// this is only for test because auto-pruning is not enabled for argocd-config app in tests.
-		ExecSafeAt(boot0, "kubectl", "-n", "argocd", "delete", "applications", "metrics-server")
+			// this is only for test because auto-pruning is not enabled for argocd-config app in tests.
+			ExecSafeAt(boot0, "kubectl", "-n", "argocd", "delete", "applications", "metrics-server")
+		}
 
 		// this is necessary to accept prometheus-adapter app as it references a new Helm repository.
 		ExecSafeAt(boot0, "argocd", "app", "set", "--sync-policy=none", "neco-admission")

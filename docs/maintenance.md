@@ -7,6 +7,7 @@ How to maintain neco-apps
 - [dex](#dex)
 - [elastic (ECK)](#elastic-eck)
 - [external-dns](#external-dns)
+- [kube-metrics-adapter](#kube-metrics-adapter)
 - [ingress (Contour & Envoy)](#ingress-contour--envoy)
 - [logging](#logging)
   - [loki, promtail](#loki-promtail)
@@ -98,6 +99,18 @@ $ curl -sLf -o external-dns/base/common.yaml https://github.com/kubernetes-sigs/
 ```
 
 Then check the diffs by `git diff`.
+
+## kube-metrics-adapter
+
+Check [releases](https://github.com/zalando-incubator/kube-metrics-adapter/releases).
+
+Update the manifests as follows:
+
+```console
+$ make setup   # for the first time to install Helm
+$ make update-kube-metrics-adapter
+$ git diff kube-metrics-adapter
+```
 
 ## ingress (Contour & Envoy)
 
