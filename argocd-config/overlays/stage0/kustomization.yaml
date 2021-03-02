@@ -16,6 +16,7 @@ patchesStrategicMerge:
 - elastic.yaml
 - external-dns.yaml
 - ingress.yaml
+- kube-metrics-adapter.yaml
 - local-pv-provisioner.yaml
 - logging.yaml
 - metallb.yaml

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-metrics-adapter
+  namespace: kube-metrics-adapter
+  labels: null
+spec:
+  template:
+    metadata:
+      labels:
+        version: null
+    spec:
+      containers:
+      - name: kube-metrics-adapter
+        imagePullPolicy: IfNotPresent
+        args:
+        - --prometheus-server=http://vmselect-vmcluster-largeset.monitoring.svc:8481/select/0/prometheus
+        - --enable-custom-metrics-api=false
+        - --secure-port=6443
+        - --tls-cert-file=/certs/tls.crt
+        - --tls-private-key-file=/certs/tls.key
+        resources:
+          limits: null
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp
+        - mountPath: /certs
+          name: volume-serving-cert
+          readOnly: true
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: volume-serving-cert
+        secret:
+          defaultMode: 420
+          secretName: kube-metrics-adapter
