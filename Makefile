@@ -136,6 +136,15 @@ update-prometheus-adapter:
 		argocd-config/base/prometheus-adapter.yaml
 	rm -rf /tmp/prometheus-adapter
 
+.PHONY: update-pvc-autoresizer
+update-pvc-autoresizer:
+	$(call get-latest-gh,topolvm/pvc-autoresizer)
+	rm -rf /tmp/pvc-autoresizer
+	cd /tmp; git clone --depth 1 -b $(latest_gh) https://github.com/topolvm/pvc-autoresizer
+	rm -rf pvc-autoresizer/base/upstream/*
+	cp -r /tmp/pvc-autoresizer/config/* pvc-autoresizer/base/upstream
+	rm -rf /tmp/pvc-autoresizer
+
 .PHONY: update-victoriametrics-operator
 update-victoriametrics-operator:
 	$(call get-latest-tag,victoriametrics-operator)

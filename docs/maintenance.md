@@ -330,10 +330,11 @@ $ git diff
 
 Check [the CHANGELOG](https://github.com/topolvm/pvc-autoresizer/blob/main/CHANGELOG.md).
 
-Download the upstream tar ball from [releases](https://github.com/topolvm/pvc-autoresizer/releases/latest) and generate upstream manifests as follows:
+Update the manifest as follows:
 
 ```console
-$ kustomize build ./config/default > /path/to/pvc-autoresizer/base/upstream.yaml
+$ make update-pvc-autoresizer
+$ git diff
 ```
 
 ## rook
