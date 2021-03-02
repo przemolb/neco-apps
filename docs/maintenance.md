@@ -178,7 +178,12 @@ In upstream, loki and promtail settings are stored in secret resource. The confi
 ## machines-endpoints
 
 `machines-endpoints` are used in `monitoring` and `bmc-reverse-proxy`.
-Update their CronJobs that run `machines-endpoints`.
+Update their CronJobs as follows:
+
+```console
+$ make update-machines-endpoints
+$ git diff
+```
 
 ## metallb
 

@@ -58,6 +58,12 @@ update-kube-metrics-adapter:
 	rm -rf /tmp/kube-metrics-adapter
 	sed -i 's/newTag: .*/newTag: $(latest_tag)/' kube-metrics-adapter/base/kustomization.yaml
 
+.PHONY: update-machines-endpoints
+update-machines-endpoints:
+	$(call get-latest-tag,machines-endpoints)
+	sed -i -E 's,image: quay.io/cybozu/machines-endpoints:.*$$,image: quay.io/cybozu/machines-endpoints:$(latest_tag),' bmc-reverse-proxy/base/machines-endpoints/cronjob.yaml
+	sed -i -E 's,image: quay.io/cybozu/machines-endpoints:.*$$,image: quay.io/cybozu/machines-endpoints:$(latest_tag),' monitoring/base/machines-endpoints/cronjob.yaml
+
 .PHONY: update-prometheus-adapter
 update-prometheus-adapter:
 	$(call get-latest-tag,prometheus-adapter)
