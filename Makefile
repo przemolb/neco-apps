@@ -122,6 +122,16 @@ update-prometheus-adapter:
 		argocd-config/base/prometheus-adapter.yaml
 	rm -rf /tmp/prometheus-adapter
 
+.PHONY: update-victoriametrics-operator
+update-victoriametrics-operator:
+	$(call get-latest-tag,victoriametrics-operator)
+	rm -rf /tmp/operator
+	cd /tmp; git clone --depth 1 -b $(call upstream-tag,$(latest_tag)) https://github.com/VictoriaMetrics/operator
+	rm -rf monitoring/base/victoriametrics/upstream/*
+	cp -r /tmp/operator/config/crd /tmp/operator/config/rbac monitoring/base/victoriametrics/upstream/
+	rm -rf /tmp/operator
+	sed -i -E 's,quay.io/cybozu/victoriametrics-operator:.*$$,quay.io/cybozu/victoriametrics-operator:$(latest_tag),' monitoring/base/victoriametrics/operator.yaml
+
 # usage: get-latest-tag NAME
 define get-latest-tag
 $(eval latest_tag := $(shell curl -sf https://quay.io/api/v1/repository/cybozu/$1/tag/ | jq -r '.tags[] | .name' | awk '/.*\..*\./ {print $$1; exit}'))

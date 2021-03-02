@@ -266,18 +266,12 @@ $ make update-grafana
 
 Check [releases](https://github.com/VictoriaMetrics/operator/releases)
 
-And then, update upstream-derived manifests.
+Update the manifest as follows:
 
 ```console
-$ git clone https://github.com/VictoriaMetrics/operator
-$ cd operator
-$ git checkout vX.Y.Z
-$ UPSTREAM_DIR=$HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/victoriametrics/upstream/
-$ rm -rf $UPSTREAM_DIR/*
-$ cp -r config/crd config/rbac $UPSTREAM_DIR/
+$ make update-victoriametrics-operator
+$ git diff
 ```
-
-Edit `monitoring/base/victoriametrics/operator.yaml` to update the image tag.
 
 ### VictoriaMetrics
 
