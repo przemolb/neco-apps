@@ -50,7 +50,8 @@ How to maintain neco-apps
 Check [the upgrading section](https://cert-manager.io/docs/installation/upgrading/) in the official website.
 
 ```console
-$ curl -sLf -o cert-manager/base/upstream/cert-manager.yaml https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
+$ make update-cert-manager
+$ git diff
 ```
 
 ## customer-egress

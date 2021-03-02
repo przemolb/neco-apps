@@ -13,6 +13,13 @@ update-argocd:
 	$(call get-latest-tag,redis)
 	sed -i -E '/name:.*redis$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' argocd/base/kustomization.yaml
 
+.PHONY: update-cert-manager
+update-cert-manager:
+	$(call get-latest-tag,cert-manager)
+	curl -sLf -o cert-manager/base/upstream/cert-manager.yaml \
+		https://github.com/jetstack/cert-manager/releases/download/$(call upstream-tag,$(latest_tag))/cert-manager.yaml
+	sed -i -E 's/newTag:.*$$/newTag: $(latest_tag)/' cert-manager/base/kustomization.yaml
+
 .PHONY: update-kube-metrics-adapter
 update-kube-metrics-adapter:
 	$(call get-latest-tag,kube-metrics-adapter)
