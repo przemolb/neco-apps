@@ -236,17 +236,12 @@ Edit the image tags in `monitoring/overlays/*/mackerel-agent.yaml` files.
 
 Check the manifests in [examples/standard](https://github.com/kubernetes/kube-state-metrics/tree/master/examples/standard) directory.
 
-```console
-$ mkdir -p $HOME/go/src/k8s.io
-$ cd $HOME/go/src/k8s.io
-$ git clone https://github.com/kubernetes/kube-state-metrics
-$ git checkout vX.Y.Z
-$ cd $HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/kube-state-metrics
-$ rm *
-$ cp $HOME/go/src/k8s.io/kube-state-metrics/examples/standard/* .
-```
+Update the manifest as follows:
 
-Then edit `monitoring/base/kustomization.yaml` to update the image tag of `kube-state-metrics`.
+```console
+$ make update-kube-state-metrics
+$ git diff
+```
 
 ### grafana-operator
 

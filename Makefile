@@ -58,6 +58,16 @@ update-kube-metrics-adapter:
 	rm -rf /tmp/kube-metrics-adapter
 	sed -i 's/newTag: .*/newTag: $(latest_tag)/' kube-metrics-adapter/base/kustomization.yaml
 
+.PHONY: update-kube-state-metrics
+update-kube-state-metrics:
+	$(call get-latest-tag,kube-state-metrics)
+	rm -rf /tmp/kube-state-metrics
+	cd /tmp; git clone --depth 1 -b $(call upstream-tag,$(latest_tag)) https://github.com/kubernetes/kube-state-metrics
+	rm -f monitoring/base/kube-state-metrics/*
+	cp /tmp/kube-state-metrics/examples/standard/* monitoring/base/kube-state-metrics
+	rm -rf /tmp/kube-state-metrics
+	sed -i -E '/newName:.*kube-state-metrics$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' monitoring/base/kustomization.yaml
+
 .PHONY: update-machines-endpoints
 update-machines-endpoints:
 	$(call get-latest-tag,machines-endpoints)
