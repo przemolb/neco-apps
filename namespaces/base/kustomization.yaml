@@ -13,6 +13,7 @@ resources:
 - logging.yaml
 - metallb.yaml
 - monitoring.yaml
+- prometheus-adapter.yaml
 - pvc-autoresizer.yaml
 - registry.yaml
 - rook-ceph.yaml
