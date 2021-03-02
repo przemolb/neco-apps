@@ -1,0 +1,53 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: kube-metrics-adapter-self-signed-issuer
+  namespace: kube-metrics-adapter
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kube-metrics-adapter-root-cert
+  namespace: kube-metrics-adapter
+spec:
+  commonName: ca.webhook.kube-metrics-adapter
+  duration: 438000h0m0s
+  isCA: true
+  usages:
+  - digital signature
+  - key encipherment
+  - cert sign
+  issuerRef:
+    name: kube-metrics-adapter-self-signed-issuer
+  secretName: kube-metrics-adapter-root-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: kube-metrics-adapter-root-issuer
+  namespace: kube-metrics-adapter
+spec:
+  ca:
+    secretName: kube-metrics-adapter-root-cert
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kube-metrics-adapter-cert
+  namespace: kube-metrics-adapter
+spec:
+  dnsNames:
+  - kube-metrics-adapter
+  - kube-metrics-adapter.kube-metrics-adapter
+  - kube-metrics-adapter.kube-metrics-adapter.svc
+  usages:
+  - digital signature
+  - key encipherment
+  - server auth
+  - client auth
+  duration: 87600h0m0s
+  issuerRef:
+    name: kube-metrics-adapter-root-issuer
+  secretName: kube-metrics-adapter
