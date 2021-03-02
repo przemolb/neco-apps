@@ -247,20 +247,12 @@ $ git diff
 
 Check [releases](https://github.com/integr8ly/grafana-operator/releases)
 
-Download the upstream manifest as follows:
+Update the manifest as follows:
 
 ```console
-$ mkdir -p $HOME/go/src/github.com/integr8ly
-$ cd $HOME/go/src/github.com/integr8ly
-$ git clone https://github.com/integr8ly/grafana-operator
-$ cd grafana-operator
-$ git checkout vX.Y.Z
-$ UPSTREAM_DIR=$HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream/
-$ rm -r $UPSTREAM_DIR/*
-$ cp -r deploy/crds deploy/cluster_roles deploy/roles deploy/operator.yaml $UPSTREAM_DIR
+$ make update-grafana-operator
+$ git diff
 ```
-
-Then edit `monitoring/base/kustomization.yaml` to update the tag for `quay.io/cybozu/grafana-operator`.
 
 ### Grafana
 

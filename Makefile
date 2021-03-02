@@ -44,6 +44,19 @@ update-external-dns:
 		https://raw.githubusercontent.com/kubernetes-sigs/external-dns/$(call upstream-tag,$(latest_tag))/docs/contributing/crd-source/crd-manifest.yaml
 	sed -i -E 's,quay.io/cybozu/external-dns:.*$$,quay.io/cybozu/external-dns:$(latest_tag),' external-dns/base/deployment.yaml
 
+.PHONY: update-grafana-operator
+update-grafana-operator:
+	$(call get-latest-tag,grafana-operator)
+	rm -rf /tmp/grafana-operator
+	cd /tmp; git clone --depth 1 -b $(call upstream-tag,$(latest_tag)) https://github.com/integr8ly/grafana-operator
+	rm -rf monitoring/base/grafana-operator/upstream/*
+	cp -r /tmp/grafana-operator/deploy/crds monitoring/base/grafana-operator/upstream
+	cp -r /tmp/grafana-operator/deploy/cluster_roles monitoring/base/grafana-operator/upstream
+	cp -r /tmp/grafana-operator/deploy/roles monitoring/base/grafana-operator/upstream
+	cp /tmp/grafana-operator/deploy/operator.yaml monitoring/base/grafana-operator/upstream
+	rm -rf /tmp/grafana-operator
+	sed -i -E '/newName:.*grafana-operator$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' monitoring/base/kustomization.yaml
+
 .PHONY: update-kube-metrics-adapter
 update-kube-metrics-adapter:
 	$(call get-latest-tag,kube-metrics-adapter)
