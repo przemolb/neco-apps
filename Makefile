@@ -2,6 +2,10 @@
 
 HELM_VERSION = 3.5.2
 
+.PHONY: all
+all:
+	@echo Read docs/maintenance.md for the usage
+
 .PHONY: update-argocd
 update-argocd:
 	$(call get-latest-tag,argocd)
@@ -19,6 +23,19 @@ update-cert-manager:
 	curl -sLf -o cert-manager/base/upstream/cert-manager.yaml \
 		https://github.com/jetstack/cert-manager/releases/download/$(call upstream-tag,$(latest_tag))/cert-manager.yaml
 	sed -i -E 's/newTag:.*$$/newTag: $(latest_tag)/' cert-manager/base/kustomization.yaml
+
+.PHONY: update-customer-egress
+update-customer-egress:
+	curl -sLf -o customer-egress/base/neco/squid.yaml \
+		https://raw.githubusercontent.com/cybozu-go/neco/release/etc/squid.yml
+	sed -e 's/internet-egress/customer-egress/g' \
+		-e 's,{{ .squid }},quay.io/cybozu/squid,g' \
+		-e 's,{{ index . "cke-unbound" }},quay.io/cybozu/unbound,g' \
+		-e '/nodePort: 30128/d' customer-egress/base/neco/squid.yaml > customer-egress/base/squid.yaml
+	$(call get-latest-tag,squid)
+	sed -i -E '/name:.*squid$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' customer-egress/base/kustomization.yaml
+	$(call get-latest-tag,unbound)
+	sed -i -E '/name:.*unbound$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' customer-egress/base/kustomization.yaml
 
 .PHONY: update-kube-metrics-adapter
 update-kube-metrics-adapter:
@@ -45,7 +62,7 @@ update-prometheus-adapter:
 
 # usage: get-latest-tag NAME
 define get-latest-tag
-$(eval latest_tag := $(shell curl -sf https://quay.io/api/v1/repository/cybozu/$1/tag/ | jq -r '.tags[] | .name' | awk '/.*\..*\..*\./ {print $$1; exit}'))
+$(eval latest_tag := $(shell curl -sf https://quay.io/api/v1/repository/cybozu/$1/tag/ | jq -r '.tags[] | .name' | awk '/.*\..*\./ {print $$1; exit}'))
 endef
 
 # usage: upstream-tag 1.2.3.4
