@@ -414,14 +414,12 @@ Update `spec.cephVersion.image` field in CephCluster CR.
 
 Check the [release notes](https://github.com/bitnami-labs/sealed-secrets/blob/master/RELEASE-NOTES.md).
 
-Update the upstream manifests and check the differences as follows:
+Update the manifest as follows:
 
 ```console
-$ curl -sfL -o sealed-secrets/base/upstream/controller.yaml https://github.com/bitnami-labs/sealed-secrets/releases/download/vX.Y.Z/controller.yaml
+$ make update-sealed-secrets
 $ git diff
 ```
-
-Then edit `sealed-secrets/base/kustomization.yaml` to update the tag for `quay.io/cybozu/sealed-secrets`.
 
 ## teleport
 

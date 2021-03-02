@@ -145,6 +145,13 @@ update-pvc-autoresizer:
 	cp -r /tmp/pvc-autoresizer/config/* pvc-autoresizer/base/upstream
 	rm -rf /tmp/pvc-autoresizer
 
+.PHONY: update-sealed-secrets
+update-sealed-secrets:
+	$(call get-latest-tag,sealed-secrets)
+	curl -sfL -o sealed-secrets/base/upstream/controller.yaml \
+		https://github.com/bitnami-labs/sealed-secrets/releases/download/$(call upstream-tag,$(latest_tag))/controller.yaml
+	sed -i -E 's/newTag:.*$$/newTag: $(latest_tag)/' sealed-secrets/base/kustomization.yaml
+
 .PHONY: update-victoriametrics-operator
 update-victoriametrics-operator:
 	$(call get-latest-tag,victoriametrics-operator)
