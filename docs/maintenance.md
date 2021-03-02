@@ -305,18 +305,12 @@ $ git diff
 
 Check [the release notes](https://docs.projectcalico.org/release-notes/).
 
-Download the upstream manifest as follows (note: do not add a patch version, just `vX.Y`):
+Update the manifest as follows:
 
 ```console
-$ curl -sLf -o network-policy/base/calico/upstream/calico-policy-only.yaml https://docs.projectcalico.org/vX.Y/manifests/calico-policy-only.yaml
+$ make update-calico
+$ git diff
 ```
-
-Remove the resources related to `calico-kube-controllers` from `calico-policy-only.yaml` because we do not need to use `calico/kube-controllers`.
-See: [Kubernetes controllers configuration](https://docs.projectcalico.org/reference/resources/kubecontrollersconfig)
-
-Then, check `git diff network-policy/base/calico/upstream/` to see any changes that need to be addressed by our patches.
-
-Finally, edit `network-policy/base/kustomization.yaml` to update the image tags.
 
 ## prometheus-adapter
 

@@ -17,6 +17,13 @@ update-argocd:
 	$(call get-latest-tag,redis)
 	sed -i -E '/name:.*redis$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' argocd/base/kustomization.yaml
 
+.PHONY: update-calico
+update-calico:
+	$(call get-latest-tag,calico)
+	curl -sfL -o network-policy/base/calico/upstream/calico-policy-only.yaml \
+		https://docs.projectcalico.org/v$(shell echo $(latest_tag) | sed -E 's/^(.*)\.[[:digit:]]+\.[[:digit:]]+$$/\1/')/manifests/calico-policy-only.yaml
+	sed -i -E 's/newTag:.*$$/newTag: $(latest_tag)/' network-policy/base/kustomization.yaml
+
 .PHONY: update-cert-manager
 update-cert-manager:
 	$(call get-latest-tag,cert-manager)
