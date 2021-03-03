@@ -3,8 +3,7 @@ How to maintain neco-apps
 
 - [argocd](#argocd)
 - [cert-manager](#cert-manager)
-- [customer-egress](#customer-egress)
-- [dex](#dex)
+- [customer-egress (Squid and unbound)](#customer-egress-squid-and-unbound)
 - [elastic (ECK)](#elastic-eck)
 - [external-dns](#external-dns)
 - [kube-metrics-adapter](#kube-metrics-adapter)
@@ -31,19 +30,17 @@ How to maintain neco-apps
 - [sealed-secrets](#sealed-secrets)
 - [teleport](#teleport)
 - [topolvm](#topolvm)
-- [unbound](#unbound)
 
 ## argocd
 
 1. Check [releases](https://github.com/argoproj/argo-cd/releases) for changes.
 2. Check [upgrading overview](https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/upgrading/overview.md) when upgrading major or minor version.
-3. Download the upstream manifest as follows:
+3. Run the following command and check the diff.
 
    ```console
-   $ curl -sLf -o argocd/base/upstream/install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/vX.Y.Z/manifests/install.yaml
+   $ make update-argocd
+   $ git diff
    ```
-
-   Then check the diffs by `git diff`.
 
 4. Update `KUSTOMIZE_VERSION` in `test/Makefile`.
 
@@ -52,27 +49,20 @@ How to maintain neco-apps
 Check [the upgrading section](https://cert-manager.io/docs/installation/upgrading/) in the official website.
 
 ```console
-$ curl -sLf -o cert-manager/base/upstream/cert-manager.yaml https://github.com/jetstack/cert-manager/releases/download/vX.Y.Z/cert-manager.yaml
+$ make update-cert-manager
+$ git diff
 ```
 
-## customer-egress
+## customer-egress (Squid and unbound)
 
-Download [neco/etc/squid.yaml](https://github.com/cybozu-go/neco/blob/release/etc/squid.yml) and replace some fileds:
+customer-egress contains Squid and unbound containers.
+
+Update the manifests as follows:
+
 ```console
-$ cd $GOPATH/src/github.com/cybozu-go/neco-apps/customer-egress/base
-$ curl https://raw.githubusercontent.com/cybozu-go/neco/release/etc/squid.yml -o neco/squid.yaml
-$ sed -e 's/internet-egress/customer-egress/g' -e 's/{{ .squid }}/quay.io\/cybozu\/squid/g' -e 's/{{ index . "cke-unbound" }}/quay.io\/cybozu\/unbound/g' -e '/nodePort: 30128/d' neco/squid.yaml > squid.yaml
+$ make update-customer-egress
+$ git diff
 ```
-
-Update `images.newTag` in `kustomization.yaml`.
-
-## dex
-
-As dex is OIDC used for ArgoCD, this should be upgraded with ArgoCD version up.
-However, if it needs to be upgraded alone for some reason, confirm ArgoCD SSO login through the web browser and cli is still possible after it is staged by the following procedure.
-
-1. access to the [ArgoCD dashboard on stage0](https://argocd.stage0.cybozu-ne.co/login) from your web browser
-2. run `argocd login argocd.stage0.cybozu-ne.co --sso` on your local PC and confirm that the login is successful
 
 ## elastic (ECK)
 
@@ -92,13 +82,12 @@ Read the following document and fix manifests as necessary.
 
 https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/tutorials/coredns.md
 
-Download CRD manifest as follows:
+Update the manifests as follows:
 
 ```console
-$ curl -sLf -o external-dns/base/common.yaml https://github.com/kubernetes-sigs/external-dns/blob/vX.Y.Z/docs/contributing/crd-source/crd-manifest.yaml
+$ make update-external-dns
+$ git diff
 ```
-
-Then check the diffs by `git diff`.
 
 ## kube-metrics-adapter
 
@@ -190,37 +179,34 @@ In upstream, loki and promtail settings are stored in secret resource. The confi
 ## machines-endpoints
 
 `machines-endpoints` are used in `monitoring` and `bmc-reverse-proxy`.
-Update their CronJobs that run `machines-endpoints`.
+Update their CronJobs as follows:
+
+```console
+$ make update-machines-endpoints
+$ git diff
+```
 
 ## metallb
 
 Check [releases](https://github.com/metallb/metallb/releases)
 
-Download manifests and update them as follows:
+Update the manifests as follows
 
 ```console
-$ git clone --depth 1 -b vX.Y.Z https://github.com/metallb/metallb
-$ cd metallb
-$ cp manifests/*.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/metallb/base/upstream
+$ make update-metallb
+$ git diff
 ```
-
-Then edit `metallb/base/kustomization.yaml` to update the image tags.
 
 ## moco
 
 Check [releases](https://github.com/cybozu-go/moco/releases) for changes.
 
-Download the upstream manifest as follows:
+Update the manifest as follows:
 
 ```console
-$ cd $GOPATH/src/github.com/cybozu-go/moco
-$ git clone https://github.com/cybozu-go/moco
-$ cd moco
-$ git checkout vX.Y.Z
-$ cp -r config/* $GOPATH/src/github.com/cybozu-go/neco-apps/moco/base/upstream
+$ make update-moco
+$ git diff
 ```
-
-Update `images.newTag` in `kustomization.yaml`.
 
 ## monitoring
 
@@ -251,63 +237,42 @@ Edit the image tags in `monitoring/overlays/*/mackerel-agent.yaml` files.
 
 Check the manifests in [examples/standard](https://github.com/kubernetes/kube-state-metrics/tree/master/examples/standard) directory.
 
-```console
-$ mkdir -p $HOME/go/src/k8s.io
-$ cd $HOME/go/src/k8s.io
-$ git clone https://github.com/kubernetes/kube-state-metrics
-$ git checkout vX.Y.Z
-$ cd $HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/kube-state-metrics
-$ rm *
-$ cp $HOME/go/src/k8s.io/kube-state-metrics/examples/standard/* .
-```
+Update the manifest as follows:
 
-Then edit `monitoring/base/kustomization.yaml` to update the image tag of `kube-state-metrics`.
+```console
+$ make update-kube-state-metrics
+$ git diff
+```
 
 ### grafana-operator
 
 Check [releases](https://github.com/integr8ly/grafana-operator/releases)
 
-Download the upstream manifest as follows:
+Update the manifest as follows:
 
 ```console
-$ mkdir -p $HOME/go/src/github.com/integr8ly
-$ cd $HOME/go/src/github.com/integr8ly
-$ git clone https://github.com/integr8ly/grafana-operator
-$ cd grafana-operator
-$ git checkout vX.Y.Z
-$ UPSTREAM_DIR=$HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/grafana-operator/upstream/
-$ rm -r $UPSTREAM_DIR/*
-$ cp -r deploy/crds deploy/cluster_roles deploy/roles deploy/operator.yaml $UPSTREAM_DIR
+$ make update-grafana-operator
+$ git diff
 ```
-
-Then edit `monitoring/base/kustomization.yaml` to update the tag for `quay.io/cybozu/grafana-operator`.
 
 ### Grafana
 
-Edit `monitoring/base/grafana-operator/operator.yaml` and update the image tag like this:
+Run the following command.
 
 ```yaml
-args:
-- --grafana-image=quay.io/cybozu/grafana
-- --grafana-image-tag=7.0.4.1
+$ make update-grafana
 ```
 
 ### victoriametrics-operator
 
 Check [releases](https://github.com/VictoriaMetrics/operator/releases)
 
-And then, update upstream-derived manifests.
+Update the manifest as follows:
 
 ```console
-$ git clone https://github.com/VictoriaMetrics/operator
-$ cd operator
-$ git checkout vX.Y.Z
-$ UPSTREAM_DIR=$HOME/go/src/github.com/cybozu-go/neco-apps/monitoring/base/victoriametrics/upstream/
-$ rm -rf $UPSTREAM_DIR/*
-$ cp -r config/crd config/rbac $UPSTREAM_DIR/
+$ make update-victoriametrics-operator
+$ git diff
 ```
-
-Edit `monitoring/base/victoriametrics/operator.yaml` to update the image tag.
 
 ### VictoriaMetrics
 
@@ -330,32 +295,23 @@ Edit the following files:
 
 ## neco-admission
 
-Update version following [this link](https://github.com/cybozu/neco-containers/blob/main/admission/TAG)
-
-Download the upstream manifest as follows:
+Update the manifest as follows:
 
 ```console
-$ git clone https://github.com/cybozu/neco-containers
-$ cd neco-containers
-$ cp admission/config/webhook/manifests.yaml $GOPATH/src/github.com/cybozu-go/neco-apps/neco-admission/base/upstream
+$ make update-neco-admission
+$ git diff
 ```
 
 ## network-policy (Calico)
 
 Check [the release notes](https://docs.projectcalico.org/release-notes/).
 
-Download the upstream manifest as follows (note: do not add a patch version, just `vX.Y`):
+Update the manifest as follows:
 
 ```console
-$ curl -sLf -o network-policy/base/calico/upstream/calico-policy-only.yaml https://docs.projectcalico.org/vX.Y/manifests/calico-policy-only.yaml
+$ make update-calico
+$ git diff
 ```
-
-Remove the resources related to `calico-kube-controllers` from `calico-policy-only.yaml` because we do not need to use `calico/kube-controllers`.
-See: [Kubernetes controllers configuration](https://docs.projectcalico.org/reference/resources/kubecontrollersconfig)
-
-Then, check `git diff network-policy/base/calico/upstream/` to see any changes that need to be addressed by our patches.
-
-Finally, edit `network-policy/base/kustomization.yaml` to update the image tags.
 
 ## prometheus-adapter
 
@@ -368,17 +324,18 @@ Update the Helm chart as follows:
 
 ```console
 $ make update-prometheus-adapter CHART_VERSION=2.12.1
-$ git commit -a argocd-config
+$ git diff
 ```
 
 ## pvc-autoresizer
 
 Check [the CHANGELOG](https://github.com/topolvm/pvc-autoresizer/blob/main/CHANGELOG.md).
 
-Download the upstream tar ball from [releases](https://github.com/topolvm/pvc-autoresizer/releases/latest) and generate upstream manifests as follows:
+Update the manifest as follows:
 
 ```console
-$ kustomize build ./config/default > /path/to/pvc-autoresizer/base/upstream.yaml
+$ make update-pvc-autoresizer
+$ git diff
 ```
 
 ## rook
@@ -458,14 +415,12 @@ Update `spec.cephVersion.image` field in CephCluster CR.
 
 Check the [release notes](https://github.com/bitnami-labs/sealed-secrets/blob/master/RELEASE-NOTES.md).
 
-Update the upstream manifests and check the differences as follows:
+Update the manifest as follows:
 
 ```console
-$ curl -sfL -o sealed-secrets/base/upstream/controller.yaml https://github.com/bitnami-labs/sealed-secrets/releases/download/vX.Y.Z/controller.yaml
+$ make update-sealed-secrets
 $ git diff
 ```
-
-Then edit `sealed-secrets/base/kustomization.yaml` to update the tag for `quay.io/cybozu/sealed-secrets`.
 
 ## teleport
 
@@ -479,25 +434,16 @@ $ cd teleport
 $ git diff vx.y.z...vX.Y.Z examples/chart/teleport
 ```
 
-Update `TELEPORT_VERSION` in `test/Makefile`.
+- Update `newTag` in `teleport/base/kustomizaton.yaml`.
+- Update `TELEPORT_VERSION` in `test/Makefile`.
 
 ## topolvm
 
 Check [releases](https://github.com/cybozu-go/topolvm/releases) for changes.
 
-Download the upstream manifest as follows:
+Update the manifest as follows:
 
 ```console
-$ cd $GOPATH/src/github.com/topolvm
-$ git clone https://github.com/topolvm/topolvm
-$ cd topolvm
-$ git checkout vX.Y.Z
-$ cp -r deploy/manifests/* $GOPATH/src/github.com/cybozu-go/neco-apps/topolvm/base/upstream
+$ make update-topolvm
+$ git diff
 ```
-
-Update `images.newTag` in `kustomization.yaml`.
-
-## unbound
-
-`quay.io/cybozu/unbound` container image is referenced in `customer-egress/base/kustomization.yaml`.
-When unbound image is updated, edit the YAML as well.
