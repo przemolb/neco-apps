@@ -26,6 +26,8 @@ resources:
   - ingress-health/httpproxy.yaml
   - ingress-health/service.yaml
   - victoriametrics
+patchesStrategicMerge:
+  - patch-kube-state-metrics.yaml
 configMapGenerator:
   - name: prometheus-server-conf
     files:

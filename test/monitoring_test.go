@@ -90,8 +90,8 @@ func testKubeStateMetrics() {
 				return err
 			}
 
-			if int(deployment.Status.AvailableReplicas) != 1 {
-				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
+			if int(deployment.Status.AvailableReplicas) != 2 {
+				return fmt.Errorf("AvailableReplicas is not 2: %d", int(deployment.Status.AvailableReplicas))
 			}
 			return nil
 		}).Should(Succeed())
