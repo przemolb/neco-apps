@@ -1,0 +1,9 @@
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  name: v1beta1.external.metrics.k8s.io
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    cert-manager.io/inject-ca-from: kube-metrics-adapter/kube-metrics-adapter-root-cert
+spec:
+  insecureSkipTLSVerify: null
