@@ -832,14 +832,19 @@ func testVictoriaMetricsOperator() {
 	})
 }
 
-func testVMSmallsetClusterComponents() {
-	const vmamCount = 1
-	const vmagentCount = 1
+type vmSetType struct {
+	small        bool
+	name         string
+	vmamCount    int
+	vmagentCount int
+	vmalertCount int
+}
 
+func testVMCommonClusterComponents(setType vmSetType) {
 	It("should be deployed successfully (vmalertmanager)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "statefulset/vmalertmanager-vmalertmanager-smallset", "-o=json")
+				"get", "statefulset/vmalertmanager-vmalertmanager-"+setType.name, "-o=json")
 			if err != nil {
 				return err
 			}
@@ -849,8 +854,8 @@ func testVMSmallsetClusterComponents() {
 				return err
 			}
 
-			if int(sts.Status.ReadyReplicas) != vmamCount {
-				return fmt.Errorf("ReadyReplicas is not %d: %d", vmamCount, int(sts.Status.ReadyReplicas))
+			if int(sts.Status.ReadyReplicas) != setType.vmamCount {
+				return fmt.Errorf("ReadyReplicas is not %d: %d", setType.vmamCount, int(sts.Status.ReadyReplicas))
 			}
 			return nil
 		}).Should(Succeed())
@@ -859,7 +864,7 @@ func testVMSmallsetClusterComponents() {
 	It("should reply successfully (vmalertmanager)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmalertmanager,app.kubernetes.io/instance=vmalertmanager-smallset", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=vmalertmanager,app.kubernetes.io/instance=vmalertmanager-"+setType.name, "-o=json")
 			if err != nil {
 				return err
 			}
@@ -868,7 +873,7 @@ func testVMSmallsetClusterComponents() {
 			if err != nil {
 				return err
 			}
-			if len(podList.Items) != vmamCount {
+			if len(podList.Items) != setType.vmamCount {
 				return errors.New("vmalertmanager pod count mismatch")
 			}
 			for _, pod := range podList.Items {
@@ -884,30 +889,10 @@ func testVMSmallsetClusterComponents() {
 		}).Should(Succeed())
 	})
 
-	It("should be deployed successfully (vmsingle)", func() {
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/vmsingle-vmsingle-smallset", "-o=json")
-			if err != nil {
-				return err
-			}
-			deployment := new(appsv1.Deployment)
-			err = json.Unmarshal(stdout, deployment)
-			if err != nil {
-				return err
-			}
-
-			if int(deployment.Status.AvailableReplicas) != 1 {
-				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
 	It("should be deployed successfully (vmalert)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/vmalert-vmalert-smallset", "-o=json")
+				"get", "deployment/vmalert-vmalert-"+setType.name, "-o=json")
 			if err != nil {
 				return err
 			}
@@ -917,8 +902,8 @@ func testVMSmallsetClusterComponents() {
 				return err
 			}
 
-			if int(deployment.Status.AvailableReplicas) != 1 {
-				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
+			if int(deployment.Status.AvailableReplicas) != setType.vmalertCount {
+				return fmt.Errorf("AvailableReplicas is not %d: %d", setType.vmalertCount, int(deployment.Status.AvailableReplicas))
 			}
 			return nil
 		}).Should(Succeed())
@@ -927,7 +912,7 @@ func testVMSmallsetClusterComponents() {
 	It("should be deployed successfully (vmagent)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/vmagent-vmagent-smallset", "-o=json")
+				"get", "deployment/vmagent-vmagent-"+setType.name, "-o=json")
 			if err != nil {
 				return err
 			}
@@ -937,34 +922,8 @@ func testVMSmallsetClusterComponents() {
 				return err
 			}
 
-			if int(deployment.Status.AvailableReplicas) != vmagentCount {
-				return fmt.Errorf("AvailableReplicas is not %d: %d", vmagentCount, int(deployment.Status.AvailableReplicas))
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
-	It("should reply successfully (vmsingle)", func() {
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmsingle,app.kubernetes.io/instance=vmsingle-smallset", "-o=json")
-			if err != nil {
-				return err
-			}
-			podList := new(corev1.PodList)
-			err = json.Unmarshal(stdout, podList)
-			if err != nil {
-				return err
-			}
-			if len(podList.Items) != 1 {
-				return errors.New("vmsingle pod doesn't exist")
-			}
-			podName := podList.Items[0].Name
-
-			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
-				podName, "curl", "http://localhost:8429/api/v1/labels")
-			if err != nil {
-				return fmt.Errorf("unable to curl :8429/api/v1/labels, stderr: %s, err: %v", stderr, err)
+			if int(deployment.Status.AvailableReplicas) != setType.vmagentCount {
+				return fmt.Errorf("AvailableReplicas is not %d: %d", setType.vmagentCount, int(deployment.Status.AvailableReplicas))
 			}
 			return nil
 		}).Should(Succeed())
@@ -973,7 +932,7 @@ func testVMSmallsetClusterComponents() {
 	It("should reply successfully (vmalert)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmalert,app.kubernetes.io/instance=vmalert-smallset", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=vmalert,app.kubernetes.io/instance=vmalert-"+setType.name, "-o=json")
 			if err != nil {
 				return err
 			}
@@ -982,15 +941,17 @@ func testVMSmallsetClusterComponents() {
 			if err != nil {
 				return err
 			}
-			if len(podList.Items) != 1 {
-				return errors.New("vmalert pod doesn't exist")
+			if len(podList.Items) != setType.vmalertCount {
+				return errors.New("vmalert pod count mismatch")
 			}
-			podName := podList.Items[0].Name
+			for _, pod := range podList.Items {
+				podName := pod.Name
 
-			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
-				podName, "curl", "http://localhost:8080/api/v1/alerts")
-			if err != nil {
-				return fmt.Errorf("unable to curl :8080/api/v1/alerts, stderr: %s, err: %v", stderr, err)
+				_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+					podName, "curl", "http://localhost:8080/api/v1/alerts")
+				if err != nil {
+					return fmt.Errorf("unable to curl :8080/api/v1/alerts, stderr: %s, err: %v", stderr, err)
+				}
 			}
 			return nil
 		}).Should(Succeed())
@@ -999,7 +960,7 @@ func testVMSmallsetClusterComponents() {
 	It("should find endpoint (vmagent)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmagent,app.kubernetes.io/instance=vmagent-smallset", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=vmagent,app.kubernetes.io/instance=vmagent-"+setType.name, "-o=json")
 			if err != nil {
 				return err
 			}
@@ -1008,7 +969,7 @@ func testVMSmallsetClusterComponents() {
 			if err != nil {
 				return err
 			}
-			if len(podList.Items) != vmagentCount {
+			if len(podList.Items) != setType.vmagentCount {
 				return errors.New("vmagent pod count mismatch")
 			}
 			for _, pod := range podList.Items {
@@ -1045,40 +1006,42 @@ func testVMSmallsetClusterComponents() {
 			return nil
 		}).Should(Succeed())
 	})
+
 }
 
-func testVMLargesetClusterComponents() {
-	const vmamCount = 3
-	const vmstorageCount = 3
-	const vmselectCount = 3
-	const vminsertCount = 3
-	const vmagentCount = 3
-	const vmalertCount = 3
+func testVMSmallsetClusterComponents() {
+	testVMCommonClusterComponents(vmSetType{
+		small:        true,
+		name:         "smallset",
+		vmamCount:    1,
+		vmalertCount: 1,
+		vmagentCount: 1,
+	})
 
-	It("should be deployed successfully (vmalertmanager)", func() {
+	It("should be deployed successfully (vmsingle)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "statefulset/vmalertmanager-vmalertmanager-largeset", "-o=json")
+				"get", "deployment/vmsingle-vmsingle-smallset", "-o=json")
 			if err != nil {
 				return err
 			}
-			sts := new(appsv1.StatefulSet)
-			err = json.Unmarshal(stdout, sts)
+			deployment := new(appsv1.Deployment)
+			err = json.Unmarshal(stdout, deployment)
 			if err != nil {
 				return err
 			}
 
-			if int(sts.Status.ReadyReplicas) != vmamCount {
-				return fmt.Errorf("ReadyReplicas is not %d: %d", vmamCount, int(sts.Status.ReadyReplicas))
+			if int(deployment.Status.AvailableReplicas) != 1 {
+				return fmt.Errorf("AvailableReplicas is not 1: %d", int(deployment.Status.AvailableReplicas))
 			}
 			return nil
 		}).Should(Succeed())
 	})
 
-	It("should reply successfully (vmalertmanager)", func() {
+	It("should reply successfully (vmsingle)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmalertmanager,app.kubernetes.io/instance=vmalertmanager-largeset", "-o=json")
+				"get", "pods", "--selector=app.kubernetes.io/name=vmsingle,app.kubernetes.io/instance=vmsingle-smallset", "-o=json")
 			if err != nil {
 				return err
 			}
@@ -1087,20 +1050,32 @@ func testVMLargesetClusterComponents() {
 			if err != nil {
 				return err
 			}
-			if len(podList.Items) != vmamCount {
-				return errors.New("vmalertmanager pod count mismatch")
+			if len(podList.Items) != 1 {
+				return errors.New("vmsingle pod doesn't exist")
 			}
-			for _, pod := range podList.Items {
-				podName := pod.Name
+			podName := podList.Items[0].Name
 
-				_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
-					podName, "curl", "http://localhost:9093/-/healthy")
-				if err != nil {
-					return fmt.Errorf("unable to curl http://%s:9093/-/halthy, stderr: %s, err: %v", podName, stderr, err)
-				}
+			_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+				podName, "curl", "http://localhost:8429/api/v1/labels")
+			if err != nil {
+				return fmt.Errorf("unable to curl :8429/api/v1/labels, stderr: %s, err: %v", stderr, err)
 			}
 			return nil
 		}).Should(Succeed())
+	})
+}
+
+func testVMLargesetClusterComponents() {
+	const vmstorageCount = 3
+	const vmselectCount = 3
+	const vminsertCount = 3
+
+	testVMCommonClusterComponents(vmSetType{
+		small:        false,
+		name:         "largeset",
+		vmamCount:    3,
+		vmalertCount: 3,
+		vmagentCount: 3,
 	})
 
 	It("should be deployed successfully (vmstorage)", func() {
@@ -1163,46 +1138,6 @@ func testVMLargesetClusterComponents() {
 		}).Should(Succeed())
 	})
 
-	It("should be deployed successfully (vmalert)", func() {
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/vmalert-vmalert-largeset", "-o=json")
-			if err != nil {
-				return err
-			}
-			deployment := new(appsv1.Deployment)
-			err = json.Unmarshal(stdout, deployment)
-			if err != nil {
-				return err
-			}
-
-			if int(deployment.Status.AvailableReplicas) != vmalertCount {
-				return fmt.Errorf("AvailableReplicas is not %d: %d", vmalertCount, int(deployment.Status.AvailableReplicas))
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
-	It("should be deployed successfully (vmagent)", func() {
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "deployment/vmagent-vmagent-largeset", "-o=json")
-			if err != nil {
-				return err
-			}
-			deployment := new(appsv1.Deployment)
-			err = json.Unmarshal(stdout, deployment)
-			if err != nil {
-				return err
-			}
-
-			if int(deployment.Status.AvailableReplicas) != vmagentCount {
-				return fmt.Errorf("AvailableReplicas is not %d: %d", vmagentCount, int(deployment.Status.AvailableReplicas))
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
 	It("should reply successfully (vmselect)", func() {
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
@@ -1225,84 +1160,6 @@ func testVMLargesetClusterComponents() {
 					podName, "curl", "http://localhost:8481/select/0/prometheus/api/v1/labels")
 				if err != nil {
 					return fmt.Errorf("unable to curl http://%s:8429/select/0/prometheus/api/v1/labels, stderr: %s, err: %v", podName, stderr, err)
-				}
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
-	It("should reply successfully (vmalert)", func() {
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmalert,app.kubernetes.io/instance=vmalert-largeset", "-o=json")
-			if err != nil {
-				return err
-			}
-			podList := new(corev1.PodList)
-			err = json.Unmarshal(stdout, podList)
-			if err != nil {
-				return err
-			}
-			if len(podList.Items) != vmalertCount {
-				return errors.New("vmalert pod count mismatch")
-			}
-			for _, pod := range podList.Items {
-				podName := pod.Name
-
-				_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
-					podName, "curl", "http://localhost:8080/api/v1/alerts")
-				if err != nil {
-					return fmt.Errorf("unable to curl http://%s:8080/api/v1/alerts, stderr: %s, err: %v", podName, stderr, err)
-				}
-			}
-			return nil
-		}).Should(Succeed())
-	})
-
-	It("should find endpoint (vmagent)", func() {
-		Eventually(func() error {
-			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
-				"get", "pods", "--selector=app.kubernetes.io/name=vmagent,app.kubernetes.io/instance=vmagent-largeset", "-o=json")
-			if err != nil {
-				return err
-			}
-			podList := new(corev1.PodList)
-			err = json.Unmarshal(stdout, podList)
-			if err != nil {
-				return err
-			}
-			if len(podList.Items) != vmagentCount {
-				return errors.New("vmagent pod count mismatch")
-			}
-			for _, pod := range podList.Items {
-				podName := pod.Name
-
-				stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
-					"-c", "vmagent", podName, "--",
-					"curl", "http://localhost:8429/api/v1/targets")
-				if err != nil {
-					return fmt.Errorf("unable to curl http://%s:8429/api/v1/targets, stderr: %s, err: %v", podName, stderr, err)
-				}
-
-				var response struct {
-					TargetsResult promv1.TargetsResult `json:"data"`
-				}
-				err = json.Unmarshal(stdout, &response)
-				if err != nil {
-					return err
-				}
-
-				found := false
-				for _, target := range response.TargetsResult.Active {
-					if value, ok := target.Labels["job"]; ok {
-						if value == "kubernetes-nodes" && target.Health == promv1.HealthGood {
-							found = true
-							break
-						}
-					}
-				}
-				if !found {
-					return errors.New("cannot find target")
 				}
 			}
 			return nil
