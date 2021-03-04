@@ -255,6 +255,8 @@ $ make update-grafana-operator
 $ git diff
 ```
 
+This make target also updates grafana_plugins_init.
+
 ### Grafana
 
 Run the following command.
