@@ -1,0 +1,22 @@
+images:
+- name: pvc-autoresizer
+  newTag: 0.1.3
+  newName: quay.io/topolvm/pvc-autoresizer
+
+# Adds namespace to all resources.
+namespace: pvc-autoresizer
+
+# Value of this field is prepended to the
+# names of all resources, e.g. a deployment named
+# "wordpress" becomes "alices-wordpress".
+# Note that it should also match with the prefix (text before '-') of the namespace
+# field above.
+namePrefix: pvc-autoresizer-
+
+# Labels to add to all resources and selectors.
+commonLabels:
+  app.kubernetes.io/name: pvc-autoresizer
+
+resources:
+- ../rbac
+- ../pod
