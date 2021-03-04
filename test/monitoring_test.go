@@ -1,9 +1,11 @@
 package test
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -19,6 +21,8 @@ import (
 	"github.com/prometheus/common/model"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sYaml "k8s.io/apimachinery/pkg/util/yaml"
 	"sigs.k8s.io/yaml"
 )
 
@@ -840,6 +844,32 @@ type vmSetType struct {
 	vmalertCount int
 }
 
+// shrinked version of VMRule
+type VMRule struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec              struct {
+		Groups []struct {
+			Name  string `json:"name"`
+			Rules []struct {
+				Alert string `json:"alert"`
+			} `json:"rules"`
+		} `json:"groups"`
+	} `json:"spec"`
+}
+
+// shrinked version of result of vmalert /api/v1/groups API
+type VMAlertAPIV1GroupsResult struct {
+	Data struct {
+		Groups []struct {
+			Name          string `json:"name"`
+			AlertingRules []struct {
+				Name string `json:"name"`
+			} `json:"alerting_rules"`
+		} `json:"groups"`
+	} `json:"data"`
+}
+
 func testVMCommonClusterComponents(setType vmSetType) {
 	It("should be deployed successfully (vmalertmanager)", func() {
 		Eventually(func() error {
@@ -930,6 +960,48 @@ func testVMCommonClusterComponents(setType vmSetType) {
 	})
 
 	It("should reply successfully (vmalert)", func() {
+		By("reading VMRules")
+		expected := []string{}
+		err := filepath.Walk("../monitoring/base/victoriametrics/rules", func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			reader := k8sYaml.NewYAMLReader(bufio.NewReader(file))
+			for {
+				data, err := reader.Read()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					return fmt.Errorf("failed to read yaml: %v", err)
+				}
+				var r VMRule
+				yaml.Unmarshal(data, &r)
+				if r.Kind != "VMRule" {
+					continue
+				}
+				if setType.small && r.Labels["smallset"] != "true" {
+					continue
+				}
+				for _, group := range r.Spec.Groups {
+					for _, rule := range group.Rules {
+						expected = append(expected, rule.Alert)
+					}
+				}
+			}
+			return nil
+		})
+		Expect(err).NotTo(HaveOccurred())
+		sort.Strings(expected)
+
+		By("checking vmalerts")
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "pods", "--selector=app.kubernetes.io/name=vmalert,app.kubernetes.io/instance=vmalert-"+setType.name, "-o=json")
@@ -947,10 +1019,28 @@ func testVMCommonClusterComponents(setType vmSetType) {
 			for _, pod := range podList.Items {
 				podName := pod.Name
 
-				_, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
-					podName, "curl", "http://localhost:8080/api/v1/alerts")
+				stdout, stderr, err := ExecAt(boot0, "kubectl", "--namespace=monitoring", "exec",
+					podName, "curl", "http://localhost:8080/api/v1/groups")
 				if err != nil {
-					return fmt.Errorf("unable to curl :8080/api/v1/alerts, stderr: %s, err: %v", stderr, err)
+					return fmt.Errorf("unable to curl :8080/api/v1/groups, stderr: %s, err: %v", stderr, err)
+				}
+				var r VMAlertAPIV1GroupsResult
+				err = json.Unmarshal(stdout, &r)
+				if err != nil {
+					return err
+				}
+				actual := []string{}
+				for _, group := range r.Data.Groups {
+					for _, rule := range group.AlertingRules {
+						if len(rule.Name) != 0 {
+							actual = append(actual, rule.Name)
+						}
+					}
+				}
+				sort.Strings(actual)
+				if !reflect.DeepEqual(actual, expected) {
+					return fmt.Errorf("vmalert does not load all rules actual=%v, expected=%v",
+						actual, expected)
 				}
 			}
 			return nil
@@ -958,6 +1048,63 @@ func testVMCommonClusterComponents(setType vmSetType) {
 	})
 
 	It("should find endpoint (vmagent)", func() {
+		By("reading scraping resources")
+		jobNames := []string{}
+		err := filepath.Walk("../monitoring/base/victoriametrics/rules", func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() {
+				return nil
+			}
+
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			reader := k8sYaml.NewYAMLReader(bufio.NewReader(file))
+			for {
+				data, err := reader.Read()
+				if err == io.EOF {
+					break
+				} else if err != nil {
+					return fmt.Errorf("failed to read yaml: %v", err)
+				}
+				var r VMScrapeOrRule
+				yaml.Unmarshal(data, &r)
+				var relabelConfigs [][]RelabelConfig
+				switch r.Kind {
+				case "VMServiceScrape":
+					for _, ep := range r.Spec.ServiceScrapeEndpoints {
+						relabelConfigs = append(relabelConfigs, ep.RelabelConfigs)
+					}
+				case "VMPodScrape":
+					for _, ep := range r.Spec.PodScrapeEndpoints {
+						relabelConfigs = append(relabelConfigs, ep.RelabelConfigs)
+					}
+				case "VMNodeScrape":
+					relabelConfigs = append(relabelConfigs, r.Spec.NodeScrapeRelabelConfigs)
+				case "VMProbe":
+				default:
+					continue
+				}
+				if setType.small && r.Labels["smallset"] != "true" {
+					continue
+				}
+
+				for _, rcs := range relabelConfigs {
+					for _, rc := range rcs {
+						if rc.Action == "" && rc.TargetLabel == "job" && rc.Replacement != "" && !strings.Contains(rc.Replacement, "/") {
+							jobNames = append(jobNames, rc.Replacement)
+						}
+					}
+				}
+			}
+			return nil
+		})
+		Expect(err).NotTo(HaveOccurred())
+
+		By("checking vmagents")
 		Eventually(func() error {
 			stdout, _, err := ExecAt(boot0, "kubectl", "--namespace=monitoring",
 				"get", "pods", "--selector=app.kubernetes.io/name=vmagent,app.kubernetes.io/instance=vmagent-"+setType.name, "-o=json")
@@ -990,17 +1137,24 @@ func testVMCommonClusterComponents(setType vmSetType) {
 					return err
 				}
 
-				found := false
-				for _, target := range response.TargetsResult.Active {
-					if value, ok := target.Labels["job"]; ok {
-						if value == "kubernetes-nodes" && target.Health == promv1.HealthGood {
-							found = true
-							break
+				const stoppedMachinesInDCTest = 1
+				downedMonitorHW := 0
+				for _, jobName := range jobNames {
+					targets := findTargets(string(jobName), response.TargetsResult.Active)
+					if len(targets) == 0 {
+						return fmt.Errorf("target is not found, job_name: %s", jobName)
+					}
+					for _, target := range targets {
+						if target.Health != promv1.HealthGood {
+							if target.Labels["job"] != "monitor-hw" {
+								return fmt.Errorf("target is not 'up', job_name: %s, health: %s", jobName, target.Health)
+							}
+							downedMonitorHW++
+							if downedMonitorHW > stoppedMachinesInDCTest {
+								return fmt.Errorf("too many monitor-hw jobs are down; health: %s", target.Health)
+							}
 						}
 					}
-				}
-				if !found {
-					return errors.New("cannot find target")
 				}
 			}
 			return nil
@@ -1174,6 +1328,16 @@ func findTarget(job string, targets []promv1.ActiveTarget) *promv1.ActiveTarget 
 		}
 	}
 	return nil
+}
+
+func findTargets(job string, targets []promv1.ActiveTarget) []*promv1.ActiveTarget {
+	ret := []*promv1.ActiveTarget{}
+	for _, t := range targets {
+		if string(t.Labels["job"]) == job {
+			ret = append(ret, &t)
+		}
+	}
+	return ret
 }
 
 func getPrometheusPodName() (string, error) {
