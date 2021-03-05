@@ -4,7 +4,6 @@ namespace: monitoring
 resources:
   - dashboards
   - configmap.yaml
-  - datasources/datasource.yaml
   - datasources/loki.yaml
   - datasources/victoriametrics.yaml
   - grafana.yaml

@@ -295,7 +295,7 @@ spec:
                         "text": "All",
                         "value": "$__all"
                     },
-                    "datasource": "prometheus",
+                    "datasource": "vmcluster-largeset",
                     "definition": "label_values(kube_node_info, node)",
                     "hide": 0,
                     "includeAll": true,

@@ -5,17 +5,12 @@ resources:
   - grafana-operator/httpproxy.yaml
   - mackerel-agent.yaml
 patchesStrategicMerge:
-  - prometheus/statefulset.yaml
   - grafana-operator/grafana.yaml
   - pushgateway/httpproxy.yaml
   - ingress-health/httpproxy.yaml
   - victoriametrics/vmsingle-smallset.yaml
   - victoriametrics/vmcluster-largeset.yaml
 configMapGenerator:
-  - name: alertmanager
-    behavior: merge
-    files:
-      - alertmanager/env.template
   - name: vmalertmanager
     behavior: merge
     files:
