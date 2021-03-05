@@ -19,13 +19,10 @@ import (
 )
 
 func prepareNetworkPolicy() {
-	It("should create test-netpol namespace", func() {
-		ExecSafeAt(boot0, "kubectl", "delete", "namespace", "test-netpol", "--ignore-not-found=true")
+	It("should prepare test pods in test-netpol namespace", func() {
+		By("preparing namespace")
 		createNamespaceIfNotExists("test-netpol")
-		ExecSafeAt(boot0, "kubectl", "annotate", "namespaces", "test-netpol", "admission.cybozu.com/i-am-sure-to-delete=test-netpol")
-	})
 
-	It("should prepare test pods", func() {
 		By("deploying testhttpd pods")
 		deployYAML := `
 apiVersion: apps/v1
