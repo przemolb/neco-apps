@@ -6,9 +6,6 @@ metadata:
 spec:
   retentionPeriod: "400d"
   vmstorage:
-    image:
-      repository: quay.io/cybozu/victoriametrics-vmstorage
-      tag: 1.55.1.1
     replicaCount: 3
     extraArgs:
       dedup.minScrapeInterval: 30s # should be equal to VMAgent's scrapeInterval (default 30s)
@@ -43,9 +40,6 @@ spec:
           periodSeconds: 30
 
   vmselect:
-    image:
-      repository: quay.io/cybozu/victoriametrics-vmselect
-      tag: 1.55.1.1
     replicaCount: 3
     extraArgs:
       replicationFactor: "2"
@@ -74,9 +68,6 @@ spec:
       mountPath: /tmp
 
   vminsert:
-    image:
-      repository: quay.io/cybozu/victoriametrics-vminsert
-      tag: 1.55.1.1
     replicaCount: 3
     extraArgs:
       replicationFactor: "2"
