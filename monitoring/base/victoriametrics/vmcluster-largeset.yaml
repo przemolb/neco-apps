@@ -33,6 +33,14 @@ spec:
             app.kubernetes.io/instance: vmcluster-largeset
             app.kubernetes.io/name: vmstorage
             managed-by: vm-operator
+    containers:
+      - name: vmstorage
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8482
+          failureThreshold: 30
+          periodSeconds: 30
 
   vmselect:
     image:
