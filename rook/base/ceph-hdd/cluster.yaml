@@ -3,8 +3,6 @@ kind: CephCluster
 metadata:
   name: ceph-hdd
   namespace: ceph-hdd
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
 spec:
   dataDirHostPath: /var/lib/rook
   resources:

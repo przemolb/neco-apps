@@ -4,7 +4,8 @@ metadata:
   name: ceph-hdd-object-store
   namespace: ceph-hdd
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    # CephObjectStore depends CephCluster, so that it should be created after CephCluster
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   metadataPool:
     failureDomain: zone
@@ -29,7 +30,8 @@ kind: StorageClass
 metadata:
   name: ceph-hdd-bucket
   annotations:
-    argocd.argoproj.io/sync-wave: "2"
+    # StorageClass is referred by Rook, so that it should be created before Rook
+    argocd.argoproj.io/sync-wave: "-1"
 provisioner: ceph-hdd.ceph.rook.io/bucket
 parameters:
   objectStoreName: ceph-hdd-object-store
