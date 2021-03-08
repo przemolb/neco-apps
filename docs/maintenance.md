@@ -10,6 +10,7 @@ How to maintain neco-apps
 - [ingress (Contour & Envoy)](#ingress-contour--envoy)
 - [logging](#logging)
   - [loki, promtail](#loki-promtail)
+  - [consul](#consul)
 - [machines-endpoints](#machines-endpoints)
 - [metallb](#metallb)
 - [moco](#moco)
@@ -171,6 +172,14 @@ ${LOGGING_DIR}/bin/helm search repo -l grafana | grep grafana/promtail
 # Choose the latest `CHART VERSION` match with target Loki's `APP VERSION` and set value like below.
 PROMTAIL_CHART_VERSION=X.Y.Z
 ${LOGGING_DIR}/bin/helm template logging --namespace=logging grafana/promtail --version=${PROMTAIL_CHART_VERSION} --set rbac.pspEnabled=true > ${LOGGING_DIR}/base/promtail/upstream/promtail.yaml
+```
+### consul
+
+```
+LOGGING_DIR=$GOPATH/src/github.com/cybozu-go/neco-apps/logging
+${LOGGING_DIR}/bin/helm repo add hashicorp https://helm.releases.hashicorp.com
+${LOGGING_DIR}/bin/helm search repo hashicorp/consul
+${LOGGING_DIR}/bin/helm template logging --namespace=logging hashicorp/consul -f ${LOGGING_DIR}/base/consul/values.yaml > ${LOGGING_DIR}/base/consul/upstream/consul.yaml
 ```
 
 Check the difference between the existing manifest and the new manifest, and update the kustomization patch.

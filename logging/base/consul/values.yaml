@@ -1,0 +1,14 @@
+server:
+  storageClass: topolvm-provisioner
+
+client:
+  enabled: false
+
+dns:
+  enabled: false
+
+ui:
+  enabled: false
+
+tests:
+  enabled: false

@@ -2,11 +2,31 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: logging
 resources:
-  - loki/upstream/loki.yaml
-  - loki/configmap.yaml
+  - loki/upstream/apps-v1.Deployment-distributor.yaml
+  - loki/upstream/apps-v1.Deployment-query-frontend.yaml
+  - loki/upstream/apps-v1.Deployment-table-manager.yaml
+  - loki/upstream/apps-v1.StatefulSet-compactor.yaml
+  - loki/upstream/apps-v1.StatefulSet-ingester.yaml
+  - loki/upstream/apps-v1.StatefulSet-memcached-frontend.yaml
+  - loki/upstream/apps-v1.StatefulSet-memcached-index-queries.yaml
+  - loki/upstream/apps-v1.StatefulSet-memcached.yaml
+  - loki/upstream/apps-v1.StatefulSet-querier.yaml
+  - loki/upstream/policy-v1beta1.PodDisruptionBudget-loki-ingester-pdb.yaml
+  - loki/upstream/v1.ConfigMap-loki.yaml
+  - loki/upstream/v1.ConfigMap-overrides.yaml
+  - loki/upstream/v1.Service-distributor.yaml
+  - loki/upstream/v1.Service-ingester.yaml
+  - loki/upstream/v1.Service-memcached-frontend.yaml
+  - loki/upstream/v1.Service-memcached-index-queries.yaml
+  - loki/upstream/v1.Service-memcached.yaml
+  - loki/upstream/v1.Service-querier.yaml
+  - loki/upstream/v1.Service-query-frontend.yaml
+  - loki/upstream/v1.Service-table-manager.yaml
+  - loki/httpproxy.yaml
   - loki/obc.yaml
   - promtail/upstream/promtail.yaml
   - promtail/configmap.yaml
+  - consul/upstream/consul.yaml
 patchesStrategicMerge:
   - loki.yaml
   - promtail.yaml

@@ -1,0 +1,43 @@
+apiVersion: projectcontour.io/v1
+kind: HTTPProxy
+metadata:
+  name: gateway
+  namespace: logging
+  annotations:
+    contour-plus.cybozu.com/exclude: "true"
+spec:
+  virtualhost:
+    fqdn: logging-loki.logging
+  routes:
+    - conditions:
+        - prefix: /api/prom/push
+      services:
+        - name: distributor
+          port: 80
+    - conditions:
+        - prefix: /api/prom/tail
+      enableWebsockets: true
+      services:
+        - name: querier
+          port: 80
+    - conditions:
+        - prefix: /api/prom
+      services:
+        - name: query-frontend
+          port: 80
+    - conditions:
+        - prefix: /loki/api/v1/push
+      services:
+        - name: distributor
+          port: 80
+    - conditions:
+        - prefix: /loki/api/v1/tail
+      enableWebsockets: true
+      services:
+        - name: querier
+          port: 80
+    - conditions:
+        - prefix: /loki/api
+      services:
+        - name: query-frontend
+          port: 80

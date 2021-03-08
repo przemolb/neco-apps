@@ -1,0 +1,17 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: consul-sidekick
+  namespace: logging
+rules:
+- apiGroups:
+  - ""
+  - extensions
+  - apps
+  resources:
+  - pods
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
