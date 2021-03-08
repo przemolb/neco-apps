@@ -13,7 +13,7 @@ spec:
     matchLabels:
       app.kubernetes.io/name: teleport
       app.kubernetes.io/component: proxy
-  replicas: 1
+  replicas: 2
   strategy:
     type: RollingUpdate
   template:

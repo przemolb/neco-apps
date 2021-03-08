@@ -4,9 +4,6 @@ metadata:
   name: vmsingle-smallset
   namespace: monitoring
 spec:
-  image:
-    repository: quay.io/cybozu/victoriametrics-vmsingle
-    tag: 1.55.1.1
   retentionPeriod: "15d"
   extraArgs:
     dedup.minScrapeInterval: 30s # should be equal to VMAgent's scrapeInterval (default 30s)

@@ -4,14 +4,27 @@ rule_files:
 tests:
   - interval: 1m
     input_series:
-      - series: 'up{job="teleport"}'
+      - series: 'up{job="teleport",container="teleport-auth"}'
         values: '0+0x10'
     alert_rule_test:
       - eval_time: 10m
-        alertname: TeleportDown
+        alertname: TeleportAuthDown
         exp_alerts:
           - exp_labels:
               severity: error
             exp_annotations:
+              summary: Teleport auth server has disappeared from Prometheus target discovery.
               runbook: Please consider to find root causes, and solve the problems
-              summary: Teleport has disappeared from Prometheus target discovery.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="teleport",container="teleport-proxy"}'
+        values: '0+0x10'
+    alert_rule_test:
+      - eval_time: 10m
+        alertname: TeleportProxyDown
+        exp_alerts:
+          - exp_labels:
+              severity: error
+            exp_annotations:
+              summary: Teleport proxy servers have disappeared from Prometheus target discovery.
+              runbook: Please consider to find root causes, and solve the problems
