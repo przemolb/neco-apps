@@ -63,6 +63,8 @@ update-grafana-operator:
 	cp /tmp/grafana-operator/deploy/operator.yaml monitoring/base/grafana-operator/upstream
 	rm -rf /tmp/grafana-operator
 	sed -i -E '/newName:.*grafana-operator$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' monitoring/base/kustomization.yaml
+	$(call get-latest-tag,grafana_plugins_init)
+	sed -i -E 's/grafana-plugins-init-container-tag=.*$$/grafana-plugins-init-container-tag=$(latest_tag)/' monitoring/base/grafana-operator/operator.yaml
 
 .PHONY: update-grafana
 update-grafana:
