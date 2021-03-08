@@ -13,7 +13,8 @@ patchesJSON6902:
     kind: Deployment
     name: rook-ceph-tools
     namespace: rook-ceph
+  # Tools pod depends ConfigMap made by Rook, so that it should be created after CephCluster
   patch: |-
     - op: add
       path: /metadata/annotations
-      value: { "argocd.argoproj.io/sync-wave": "2" }
+      value: { "argocd.argoproj.io/sync-wave": "1" }
