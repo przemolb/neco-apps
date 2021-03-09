@@ -15,6 +15,7 @@ resources:
   - pushgateway/deployment.yaml
   - pushgateway/httpproxy.yaml
   - pushgateway/service.yaml
+  - heartbeat.yaml
   - ingress-health/deployment.yaml
   - ingress-health/httpproxy.yaml
   - ingress-health/service.yaml
@@ -30,3 +31,5 @@ images:
   - name: quay.io/integreatly/grafana-operator
     newName: quay.io/cybozu/grafana-operator
     newTag: 3.8.1.1
+  - name: quay.io/cybozu/heartbeat
+    newTag: 1.0.1

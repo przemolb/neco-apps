@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heartbeat
+  namespace: monitoring
+spec:
+  template:
+    spec:
+      containers:
+      - name: heartbeat
+        args: ["stage0"]
