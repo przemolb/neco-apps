@@ -140,10 +140,10 @@ func teleportSSHConnectionTest() {
 		// Use ssh command and run tsh to input password using pty
 		var cmd *exec.Cmd
 		if placematMajorVersion == "1" {
-			cmd = exec.Command("nsenter", "-n", "-t", operationPID, "ssh", "-i", sshKeyFile,
+			cmd = exec.Command("nsenter", "-n", "-t", operationPID, "ssh", "-oStrictHostKeyChecking=no", "-i", sshKeyFile,
 				fmt.Sprintf("cybozu@%s", boot0), "-t", "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu login")
 		} else {
-			cmd = exec.Command("ip", "netns", "exec", "operation", "ssh", "-i", sshKeyFile,
+			cmd = exec.Command("ip", "netns", "exec", "operation", "ssh", "-oStrictHostKeyChecking=no", "-i", sshKeyFile,
 				fmt.Sprintf("cybozu@%s", boot0), "-t", "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu login")
 		}
 		ptmx, err := pty.Start(cmd)
