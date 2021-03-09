@@ -57,17 +57,18 @@ func teleportNodeServiceTest() {
 }
 
 func teleportSSHConnectionTest() {
+	// Run on boot1 because this test changes kubectl config and it causes failures of other tests running in parallel when those execute kubectl on boot0
 	By("adding proxy addr entry to /etc/hosts")
-	stdout, stderr, err := ExecAt(boot0, "kubectl", "-n", "teleport", "get", "service", "teleport-proxy",
+	stdout, stderr, err := ExecAt(boot1, "kubectl", "-n", "teleport", "get", "service", "teleport-proxy",
 		"--output=jsonpath={.status.loadBalancer.ingress[0].ip}")
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 	addr := string(stdout)
 	entry := fmt.Sprintf("%s teleport.gcp0.dev-ne.co", addr)
-	_, stderr, err = ExecAt(boot0, "sudo", "sh", "-c", fmt.Sprintf(`'echo "%s" >> /etc/hosts'`, entry))
+	_, stderr, err = ExecAt(boot1, "sudo", "sh", "-c", fmt.Sprintf(`'echo "%s" >> /etc/hosts'`, entry))
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 	By("creating user")
-	stdout, stderr, err = ExecAt(boot0, "kubectl", "-n", "teleport", "exec", "teleport-auth-0", "tctl", "users", "add", "cybozu", "cybozu,root")
+	stdout, stderr, err = ExecAt(boot1, "kubectl", "-n", "teleport", "exec", "teleport-auth-0", "tctl", "users", "add", "cybozu", "cybozu,root")
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 	tctlOutput := string(stdout)
 	fmt.Println("output:")
@@ -98,9 +99,9 @@ func teleportSSHConnectionTest() {
 
 	By("accessing invite URL")
 	filename := "teleport_cookie.txt"
-	_, stderr, err = ExecAt(boot0, "curl", "--fail", "--insecure", "-c", filename, inviteURL)
+	_, stderr, err = ExecAt(boot1, "curl", "--fail", "--insecure", "-c", filename, inviteURL)
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
-	stdout, stderr, err = ExecAt(boot0, "cat", filename)
+	stdout, stderr, err = ExecAt(boot1, "cat", filename)
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 	cookieFileContents := string(stdout)
 	fmt.Println("cookie file:")
@@ -123,7 +124,7 @@ func teleportSSHConnectionTest() {
 	fmt.Printf("CSRF token: %s\n", csrfToken)
 
 	By("updating password")
-	_, stderr, err = ExecAt(boot0,
+	_, stderr, err = ExecAt(boot1,
 		"curl",
 		"--fail", "--insecure",
 		"-X", "PUT",
@@ -141,10 +142,10 @@ func teleportSSHConnectionTest() {
 		var cmd *exec.Cmd
 		if placematMajorVersion == "1" {
 			cmd = exec.Command("nsenter", "-n", "-t", operationPID, "ssh", "-oStrictHostKeyChecking=no", "-i", sshKeyFile,
-				fmt.Sprintf("cybozu@%s", boot0), "-t", "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu login")
+				fmt.Sprintf("cybozu@%s", boot1), "-t", "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu login")
 		} else {
 			cmd = exec.Command("ip", "netns", "exec", "operation", "ssh", "-oStrictHostKeyChecking=no", "-i", sshKeyFile,
-				fmt.Sprintf("cybozu@%s", boot0), "-t", "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu login")
+				fmt.Sprintf("cybozu@%s", boot1), "-t", "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu login")
 		}
 		ptmx, err := pty.Start(cmd)
 		if err != nil {
@@ -160,13 +161,13 @@ func teleportSSHConnectionTest() {
 	}).Should(Succeed())
 
 	By("getting node resources with kubectl via teleport proxy")
-	_, stderr, err = ExecAt(boot0, "kubectl", "get", "nodes")
+	_, stderr, err = ExecAt(boot1, "kubectl", "get", "nodes")
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 	By("accessing boot servers using tsh command")
 	for _, n := range []string{"boot-0", "boot-1", "boot-2"} {
 		Eventually(func() error {
-			_, stderr, err := ExecAt(boot0, "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu", "ssh", "cybozu@gcp0-"+n, "date")
+			_, stderr, err := ExecAt(boot1, "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu", "ssh", "cybozu@gcp0-"+n, "date")
 			if err != nil {
 				return fmt.Errorf("tsh ssh failed for %s: %s", n, string(stderr))
 			}
@@ -175,19 +176,19 @@ func teleportSSHConnectionTest() {
 	}
 
 	By("logout tsh")
-	_, stderr, err = ExecAt(boot0, "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu", "logout")
+	_, stderr, err = ExecAt(boot1, "tsh", "--insecure", "--proxy=teleport.gcp0.dev-ne.co:443", "--user=cybozu", "logout")
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 	By("clearing kubectl config")
-	_, stderr, err = ExecAt(boot0, "ckecli", "kubernetes", "issue", ">", "~/.kube/config")
+	_, stderr, err = ExecAt(boot1, "ckecli", "kubernetes", "issue", ">", "~/.kube/config")
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 	By("clearing teleport_cookie.txt")
-	_, stderr, err = ExecAt(boot0, "rm", filename)
+	_, stderr, err = ExecAt(boot1, "rm", filename)
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 
 	By("clearing /etc/hosts")
-	_, stderr, err = ExecAt(boot0, "sudo", "sed", "-i", "-e", "/teleport.gcp0.dev-ne.co/d", "/etc/hosts")
+	_, stderr, err = ExecAt(boot1, "sudo", "sed", "-i", "-e", "/teleport.gcp0.dev-ne.co/d", "/etc/hosts")
 	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
 }
 
