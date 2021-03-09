@@ -3,13 +3,8 @@ kind: Kustomization
 resources:
   - ../../base
 patchesStrategicMerge:
-  - prometheus/statefulset.yaml
   - victoriametrics/vmsingle-smallset.yaml
 configMapGenerator:
-  - name: alertmanager
-    behavior: merge
-    files:
-      - alertmanager/env.template
   - name: vmalertmanager
     behavior: merge
     files:

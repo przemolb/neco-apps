@@ -3476,8 +3476,8 @@ spec:
         "list": [
           {
             "current": {
-              "text": "Prometheus",
-              "value": "Prometheus"
+              "text": "vmcluster-largeset",
+              "value": "vmcluster-largeset"
             },
             "hide": 0,
             "includeAll": false,
