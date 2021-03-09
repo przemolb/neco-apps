@@ -4,13 +4,6 @@ metadata:
   name: vmalertmanager-smallset
   namespace: monitoring
 spec:
-  image:
-    tag: v0.21.0
-  containers:
-    - name: alertmanager
-      image: quay.io/cybozu/alertmanager:0.21.0.2
-    - name: config-reloader
-      image: quay.io/cybozu/configmap-reload:0.5.0.1
   replicaCount: 1
   configSecret: vmalertmanager-config
   volumeMounts:
