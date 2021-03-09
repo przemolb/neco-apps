@@ -67,7 +67,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sabakan_machine_status{status=\"healthy\", instance=\"10.69.0.3\"})",
+              "expr": "sum(sabakan_machine_status{status=\"healthy\", instance=\"10.69.0.3:10081\"})",
               "refId": "A"
             }
           ],
@@ -155,7 +155,7 @@ spec:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "sum(sabakan_machine_status{status!=\"healthy\", instance=\"10.69.0.3\"}) by (status)",
+              "expr": "sum(sabakan_machine_status{status!=\"healthy\", instance=\"10.69.0.3:10081\"}) by (status)",
               "refId": "A"
             }
           ],
@@ -268,7 +268,7 @@ spec:
           "tableColumn": "",
           "targets": [
             {
-              "expr": "100 * sum(max(sabakan_machine_status{status=\"healthy\"}) by (address, serial)) / sum(sabakan_machine_status{instance=\"10.69.0.3\"})",
+              "expr": "100 * sum(max(sabakan_machine_status{status=\"healthy\"}) by (address, serial)) / sum(sabakan_machine_status{instance=\"10.69.0.3:10081\"})",
               "refId": "A"
             }
           ],
@@ -423,7 +423,7 @@ spec:
           ],
           "targets": [
             {
-              "expr": "avg(sabakan_machine_status{instance=\"10.69.0.3\", status=\"unhealthy\"})by(address, role, rack, serial) > 0",
+              "expr": "avg(sabakan_machine_status{instance=\"10.69.0.3:10081\", status=\"unhealthy\"})by(address, role, rack, serial) > 0",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -489,7 +489,7 @@ spec:
           ],
           "targets": [
             {
-              "expr": "avg(sabakan_machine_status{instance=\"10.69.0.3\", status=\"unreachable\"})by(address, role, rack, serial) > 0",
+              "expr": "avg(sabakan_machine_status{instance=\"10.69.0.3:10081\", status=\"unreachable\"})by(address, role, rack, serial) > 0",
               "interval": "",
               "legendFormat": "",
               "refId": "A"
@@ -704,7 +704,7 @@ spec:
               "text": "All",
               "value": "$__all"
             },
-            "datasource": "prometheus",
+            "datasource": "vmcluster-largeset",
             "definition": "label_values(sabakan_assets_bytes_total, instance)",
             "hide": 0,
             "includeAll": true,

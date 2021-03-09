@@ -1,3 +1,0 @@
-{{/* print summary, followed by runbook if any */}}
-{{ define "slack.neco.text" }}{{ range .Alerts }}{{ .Annotations.summary }}{{ .Annotations.runbook }}
-{{ end }}{{ end }}

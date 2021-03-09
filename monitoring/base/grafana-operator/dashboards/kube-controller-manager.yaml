@@ -88,7 +88,6 @@ spec:
             "tableColumn": "",
             "targets": [
               {
-                "datasource": "prometheus",
                 "expr": "sum(up{job=\"kube-controller-manager\"})",
                 "format": "time_series",
                 "intervalFactor": 2,
@@ -154,7 +153,6 @@ spec:
             "steppedLine": false,
             "targets": [
               {
-                "datasource": "prometheus",
                 "expr": "sum(rate(rest_client_requests_total{job=\"kube-controller-manager\", instance=~\"10\\\\.69\\\\.0\\\\.201|10\\\\.69\\\\.0\\\\.21|10\\\\.69\\\\.1\\\\.149\",code=~\"2..\"}[5m]))",
                 "format": "time_series",
                 "intervalFactor": 2,
@@ -162,7 +160,6 @@ spec:
                 "refId": "A"
               },
               {
-                "datasource": "prometheus",
                 "expr": "sum(rate(rest_client_requests_total{job=\"kube-controller-manager\", instance=~\"10\\\\.69\\\\.0\\\\.201|10\\\\.69\\\\.0\\\\.21|10\\\\.69\\\\.1\\\\.149\",code=~\"3..\"}[5m]))",
                 "format": "time_series",
                 "intervalFactor": 2,
@@ -170,7 +167,6 @@ spec:
                 "refId": "B"
               },
               {
-                "datasource": "prometheus",
                 "expr": "sum(rate(rest_client_requests_total{job=\"kube-controller-manager\", instance=~\"10\\\\.69\\\\.0\\\\.201|10\\\\.69\\\\.0\\\\.21|10\\\\.69\\\\.1\\\\.149\",code=~\"4..\"}[5m]))",
                 "format": "time_series",
                 "intervalFactor": 2,
@@ -178,7 +174,6 @@ spec:
                 "refId": "C"
               },
               {
-                "datasource": "prometheus",
                 "expr": "sum(rate(rest_client_requests_total{job=\"kube-controller-manager\", instance=~\"10\\\\.69\\\\.0\\\\.201|10\\\\.69\\\\.0\\\\.21|10\\\\.69\\\\.1\\\\.149\",code=~\"5..\"}[5m]))",
                 "format": "time_series",
                 "intervalFactor": 2,

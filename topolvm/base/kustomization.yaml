@@ -26,5 +26,5 @@ configMapGenerator:
       - ./upstream/overlays/daemonset-scheduler/scheduler-options.yaml
 
 images:
-  - name: quay.io/topolvm/topolvm
-    newTag: 0.7.0
+  - name: quay.io/topolvm/topolvm-with-sidecar
+    newTag: 0.8.0
