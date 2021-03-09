@@ -15,7 +15,8 @@ export PLACEMAT_MAJOR_VERSION
 go mod download
 if [ "$PLACEMAT_MAJOR_VERSION" = "1" ]; then
     EXTERNAL_PID=$(pmctl pod show external | jq .pid)
-    export EXTERNAL_PID
+    OPERATION_PID=$(pmctl pod show operation | jq .pid)
+    export EXTERNAL_PID OPERATION_PID
 
     $SUDO $SUDO_OPTION nsenter -t $(pmctl pod show operation | jq .pid) -n env PATH=$PATH SUITE=$SUITE $GINKGO
 else

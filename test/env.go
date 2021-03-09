@@ -16,6 +16,7 @@ var (
 	testID               = os.Getenv("TEST_ID")
 	commitID             = os.Getenv("COMMIT_ID")
 	externalPID          = os.Getenv("EXTERNAL_PID")
+	operationPID         = os.Getenv("OPERATION_PID")
 	numGrafanaDashboard  = 0
 	testSuite            = os.Getenv("SUITE")
 	placematMajorVersion = os.Getenv("PLACEMAT_MAJOR_VERSION")
