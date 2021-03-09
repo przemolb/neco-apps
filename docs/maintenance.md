@@ -278,22 +278,12 @@ $ git diff
 
 ### VictoriaMetrics
 
-Edit the following files:
+Update the manifest as follows:
 
-- `monitoring/base/victoriametrics/alertmanager.yaml`
-  - Update `alertmanager` and `configmap-reload` image tags.
-- `monitoring/base/victoriametrics/vmagent-largeset.yaml`
-  - Update `victoriametrics-vmagent` and `prometheus-config-reloader` image tags.
-- `monitoring/base/victoriametrics/vmagent-smallset.yaml`
-  - Update `victoriametrics-vmagent` and `prometheus-config-reloader` image tags.
-- `monitoring/base/victoriametrics/vmalert-largeset.yaml`
-  - Update `victoriametrics-vmalert` and `configmap-reload` image tags.
-- `monitoring/base/victoriametrics/vmalert-smallset.yaml`
-  - Update `victoriametrics-vmalert` and `configmap-reload` image tags.
-- `monitoring/base/victoriametrics/vmcluster-largeset.yaml`
-  - Update `victoriametrics-vmstorage`, `victoriametrics-vmselect`, and `victoriametrics-vminsert` image tags.
-- `monitoring/base/victoriametrics/vmsingle-smallset.yaml`
-  - Update `victoriametrics-vmsingle` image tag.
+```console
+$ make update-victoriametrics
+$ git diff
+```
 
 ## neco-admission
 

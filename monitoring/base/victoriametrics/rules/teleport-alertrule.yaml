@@ -5,14 +5,23 @@ metadata:
   namespace: monitoring
 spec:
   groups:
-    - name: teleport
-      rules:
-        - alert: TeleportDown
-          expr: |
-            absent(up{job="teleport"} == 1)
-          labels:
-            severity: error
-          for: 10m
-          annotations:
-            summary: Teleport has disappeared from Prometheus target discovery.
-            runbook: Please consider to find root causes, and solve the problems
+  - name: teleport
+    rules:
+    - alert: TeleportAuthDown
+      expr: |
+        absent(up{job="teleport",container="teleport-auth"} == 1)
+      labels:
+        severity: error
+      for: 10m
+      annotations:
+        summary: Teleport auth server has disappeared from Prometheus target discovery.
+        runbook: Please consider to find root causes, and solve the problems
+    - alert: TeleportProxyDown
+      expr: |
+        absent(up{job="teleport",container="teleport-proxy"} == 1)
+      labels:
+        severity: error
+      for: 10m
+      annotations:
+        summary: Teleport proxy servers have disappeared from Prometheus target discovery.
+        runbook: Please consider to find root causes, and solve the problems
