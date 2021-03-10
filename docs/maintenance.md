@@ -15,10 +15,10 @@ How to maintain neco-apps
 - [moco](#moco)
 - [monitoring](#monitoring)
   - [pushgateway, promtool](#pushgateway-promtool)
-  - [mackerel-agent](#mackerel-agent)
   - [kube-state-metrics](#kube-state-metrics)
   - [grafana-operator](#grafana-operator)
   - [Grafana](#grafana)
+  - [heartbeat](#heartbeat)
   - [victoriametrics-operator](#victoriametrics-operator)
   - [VictoriaMetrics, Alertmanager](#victoriametrics-alertmanager)
 - [neco-admission](#neco-admission)
@@ -227,12 +227,6 @@ Then edit `monitoring/base/kustomization.yaml` to update the image tags.
 
 Update `PROMTOOL_VERSION` in `test/Makefile`.
 
-### mackerel-agent
-
-mackerel-agent runs only on the real data centers (stage, prod).
-
-Edit the image tags in `monitoring/overlays/*/mackerel-agent.yaml` files.
-
 ### kube-state-metrics
 
 Check the manifests in [examples/standard](https://github.com/kubernetes/kube-state-metrics/tree/master/examples/standard) directory.
@@ -263,6 +257,15 @@ Run the following command.
 
 ```yaml
 $ make update-grafana
+```
+
+### heartbeat
+
+Update the manifest as follows:
+
+```console
+$ make update-heartbeat
+$ git diff
 ```
 
 ### victoriametrics-operator

@@ -3,10 +3,10 @@ kind: Kustomization
 resources:
   - ../../base
   - grafana-operator/httpproxy.yaml
-  - mackerel-agent.yaml
 patchesStrategicMerge:
   - grafana-operator/grafana.yaml
   - pushgateway/httpproxy.yaml
+  - heartbeat.yaml
   - ingress-health/httpproxy.yaml
   - victoriametrics/vmsingle-smallset.yaml
   - victoriametrics/vmcluster-largeset.yaml
