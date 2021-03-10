@@ -20,7 +20,7 @@ spec:
       access: proxy
       url: http://vmselect-vmcluster-largeset.monitoring.svc:8481/select/0/prometheus
       version: 1
-      isDefault: false
+      isDefault: true
       editable: false
       jsonData:
         tlsSkipVerify: true
