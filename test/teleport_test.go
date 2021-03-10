@@ -58,6 +58,12 @@ func teleportNodeServiceTest() {
 
 func teleportSSHConnectionTest() {
 	// Run on boot1 because this test changes kubectl config and it causes failures of other tests running in parallel when those execute kubectl on boot0
+	By("prepare .kube/config on boot1")
+	_, stderr, err := ExecAt(boot1, "mkdir", "-p", "~/.kube")
+	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+	_, stderr, err = ExecAt(boot1, "ckecli", "kubernetes", "issue", ">", "~/.kube/config")
+	Expect(err).ShouldNot(HaveOccurred(), "stderr=%s", stderr)
+
 	By("adding proxy addr entry to /etc/hosts")
 	stdout, stderr, err := ExecAt(boot1, "kubectl", "-n", "teleport", "get", "service", "teleport-proxy",
 		"--output=jsonpath={.status.loadBalancer.ingress[0].ip}")
