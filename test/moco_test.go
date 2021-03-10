@@ -31,7 +31,7 @@ spec:
         image: quay.io/cybozu/moco-mysql:8.0.18
         resources:
           requests:
-            memory: "512Mi"
+            memory: "1Gi"
         livenessProbe:
           exec:
             command: ["/moco-bin/moco-agent", "ping"]
