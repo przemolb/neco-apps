@@ -2,7 +2,7 @@ monitoring
 ==========
 
 This directory contains manifests and configuration files for monitoring.
-We are using VictoriaMetrics, Grafana, and mackerel-agent.
+We are using VictoriaMetrics, Grafana, and our own heartbeat client for Opsgenie.
 
 Alert rules
 -----------
