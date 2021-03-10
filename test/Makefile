@@ -16,7 +16,7 @@ SUDO = sudo
 WGET=wget --retry-connrefused --no-verbose
 NUM_DASHBOARD = $(shell KUSTOMIZE_ENABLE_ALPHA_COMMANDS=true ./bin/kustomize cfg count ../monitoring/base/grafana-operator/dashboards | \
 	grep GrafanaDashboard | cut -d' ' -f2)
-export BOOT0 BOOT1 BOOT2 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID NUM_DASHBOARD
+export BOOT0 BOOT1 BOOT2 GINKGO SSH_PRIVKEY TEST_ID COMMIT_ID NUM_DASHBOARD SUDO
 
 # Follow Argo CD installed kustomize version
 # https://github.com/cybozu/neco-containers/blob/main/argocd/Dockerfile#L22

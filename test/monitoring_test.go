@@ -192,7 +192,11 @@ func testPushgateway() {
 			return nil
 		}).Should(Succeed())
 		Eventually(func() error {
-			return exec.Command("sudo", "nsenter", "-n", "-t", externalPID, "curl", "--resolve", forestPushgatewayFQDN+":80:"+forestIP, forestPushgatewayFQDN+"/-/healthy", "-m", "5").Run()
+			if placematMajorVersion == "1" {
+				return exec.Command("nsenter", "-n", "-t", externalPID, "curl", "--resolve", forestPushgatewayFQDN+":80:"+forestIP, forestPushgatewayFQDN+"/-/healthy", "-m", "5").Run()
+			} else {
+				return exec.Command("ip", "netns", "exec", "external", "curl", "--resolve", forestPushgatewayFQDN+":80:"+forestIP, forestPushgatewayFQDN+"/-/healthy", "-m", "5").Run()
+			}
 		}).Should(Succeed())
 	})
 }
