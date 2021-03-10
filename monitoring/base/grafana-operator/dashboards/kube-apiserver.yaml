@@ -943,8 +943,8 @@ spec:
                 {
                     "current": {
                         "selected": false,
-                        "text": "prometheus",
-                        "value": "prometheus"
+                        "text": "vmcluster-largeset",
+                        "value": "vmcluster-largeset"
                     },
                     "hide": 0,
                     "includeAll": false,

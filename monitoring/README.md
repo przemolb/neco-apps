@@ -2,7 +2,7 @@ monitoring
 ==========
 
 This directory contains manifests and configuration files for monitoring.
-We are using Prometheus, Grafana, VictoriaMetrics, and mackerel-agent.
+We are using VictoriaMetrics, Grafana, and mackerel-agent.
 
 Alert rules
 -----------
@@ -13,17 +13,18 @@ YAML files for alert rules and tests are placed as follows:
 neco-apps
 ├── monitoring
 |   ├── base
-|   │   ├── prometheus
-|   │   |   ├── alert_rules # alert rules for each ArgoCD app and particular components (e.g. k8s node)
-|   |   |   │   ├── argocd.yaml
+|   │   ├── victoriametrics
+|   │   |   ├── rules # scraping/alerting rules for each ArgoCD app and particular components (e.g. k8s node)
+|   |   |   │   ├── argocd-alertrule.yaml
+|   |   |   │   ├── argocd-scrape.yaml
 |   |   |   │   ├── ...
-|   |   |   │   └── vault.yaml
-|   |   |   ├── record_rules.yaml # record rules used in `alert_rules`
+|   |   |   │   ├── argocd-alertrule.yaml
+|   |   |   │   └── vault-scrape.yaml
 |   │   |   └── ...
 |   │   └── ...
 |   └── overlays
 └── test
-    ├── alert_test # test for each application
+    ├── vmalert_test # test for each application
     │   ├── argocd.yaml
     │   ├── ...
     │   └── vault.yaml
@@ -38,10 +39,7 @@ Run the unit test with the following command:
 $ cd $GOPATH/src/github.com/cybozu-go/neco-apps
 
 # Run all tests
-$ promtool test rules ./test/alert_test/*.yaml
-
-# Run a single test
-$ promtool test rules ./test/alert_test/argocd.yaml
+$ make test-alert-rules
 ```
 
 Severity Levels
@@ -102,4 +100,4 @@ At the moment, the list of `critical` alerts are as follows:
 Notice
 ------
 
-[Some alert rules](./alert_rules/kubernetes.yaml) come from [coreos/kube-prometheus project](https://github.com/coreos/kube-prometheus).
+[Some alert rules](./victoriametrics/rules/kubernetes-alertrule.yaml) come from [coreos/kube-prometheus project](https://github.com/coreos/kube-prometheus).

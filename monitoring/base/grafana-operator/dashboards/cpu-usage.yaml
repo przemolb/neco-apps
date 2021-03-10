@@ -214,7 +214,7 @@ spec:
                         "text": "argocd",
                         "value": "argocd"
                     },
-                    "datasource": "prometheus",
+                    "datasource": "vmcluster-largeset",
                     "definition": "label_values(kube_namespace_created,namespace)",
                     "hide": 0,
                     "includeAll": false,

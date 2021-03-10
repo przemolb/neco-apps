@@ -30,13 +30,6 @@ data:
   providers.yaml: |
     apiVersion: 1
     datasources:
-    - name: 'prometheus'
-      type: prometheus
-      access: proxy
-      orgId: 1
-      url: http://prometheus.monitoring.svc:9090
-      isDefault: true
-      editable: false
     - name: 'vmsingle-smallset'
       type: prometheus
       access: proxy
@@ -49,7 +42,7 @@ data:
       access: proxy
       orgId: 1
       url: http://vmselect-vmcluster-largeset.monitoring.svc:8481/select/0/prometheus
-      isDefault: false
+      isDefault: true
       editable: false
     - name: loki
       type: loki

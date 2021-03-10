@@ -6,7 +6,7 @@ spec:
   name: coil.json
   datasources:
     - inputName: "DS_PROMETHEUS"
-      datasourceName: "prometheus"
+      datasourceName: "vmcluster-largeset"
   json: >
     {
       "__inputs": [

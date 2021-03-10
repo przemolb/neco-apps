@@ -6,7 +6,6 @@ resources:
 patchesStrategicMerge:
   - deployment.yaml
   - statefulset.yaml
-  - apps/alertmanager.yaml
   - apps/vmalertmanager-largeset.yaml
   - apps/vmalertmanager-smallset.yaml
 images:

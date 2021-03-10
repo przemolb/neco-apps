@@ -44,11 +44,7 @@ validation:
 	env SSH_PRIVKEY= go test -v -count 1 -run 'TestValidation' .
 
 .PHONY: test-alert-rules
-test-alert-rules: test-promalert-rules test-vmalert-rules
-
-.PHONY: test-promalert-rules
-test-promalert-rules:
-	$(PROMTOOL) test rules alert_test/*.yaml
+test-alert-rules: test-vmalert-rules
 
 VMRULESDIR := ../monitoring/base/victoriametrics/rules
 .PHONY: test-vmalert-rules
