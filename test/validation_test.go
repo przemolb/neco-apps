@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,7 +12,6 @@ import (
 	"sort"
 	"strings"
 	"testing"
-	"text/template"
 
 	"github.com/google/go-cmp/cmp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -384,84 +382,6 @@ func doCheckKustomizedYaml(t *testing.T, checkFunc func(*testing.T, []byte)) {
 	}
 }
 
-// These struct types are copied from the following link:
-// https://github.com/prometheus/prometheus/blob/master/pkg/rulefmt/rulefmt.go
-
-type alertRuleGroups struct {
-	Groups []alertRuleGroup `json:"groups"`
-}
-
-type alertRuleGroup struct {
-	Name   string      `json:"name"`
-	Alerts []alertRule `json:"rules"`
-}
-
-type alertRule struct {
-	Record      string            `json:"record,omitempty"`
-	Alert       string            `json:"alert,omitempty"`
-	Expr        string            `json:"expr"`
-	Labels      map[string]string `json:"labels,omitempty"`
-	Annotations map[string]string `json:"annotations"`
-}
-
-type recordRuleGroups struct {
-	Groups []recordRuleGroup `json:"groups"`
-}
-
-type recordRuleGroup struct {
-	Name    string       `json:"name"`
-	Records []recordRule `json:"rules"`
-}
-
-type recordRule struct {
-	Record string `json:"record,omitempty"`
-}
-
-func testAlertRules(t *testing.T) {
-	var groups alertRuleGroups
-
-	str, err := ioutil.ReadFile("../monitoring/base/alertmanager/neco.template")
-	if err != nil {
-		t.Fatal(err)
-	}
-	tmpl := template.Must(template.New("alert").Parse(string(str))).Option("missingkey=error")
-
-	err = filepath.Walk("../monitoring/base/prometheus/alert_rules", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return nil
-		}
-
-		str, err := ioutil.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		err = yaml.Unmarshal(str, &groups)
-		if err != nil {
-			return fmt.Errorf("failed to unmarshal %s, err: %v", path, err)
-		}
-
-		for _, g := range groups.Groups {
-			t.Run(g.Name, func(t *testing.T) {
-				t.Parallel()
-				var buf bytes.Buffer
-				err := tmpl.ExecuteTemplate(&buf, "slack.neco.text", g)
-				if err != nil {
-					t.Error(err)
-				}
-			})
-		}
-
-		return nil
-	})
-	if err != nil {
-		t.Error(err)
-	}
-}
-
 type RelabelConfig struct {
 	Action      string `json:"action"`
 	TargetLabel string `json:"targetLabel"`
@@ -794,7 +714,6 @@ func TestValidation(t *testing.T) {
 	t.Run("ApplicationTargetRevision", testApplicationResources)
 	t.Run("CRDStatus", testCRDStatus)
 	t.Run("CertificateUsages", testCertificateUsages)
-	t.Run("AlertRules", testAlertRules)
 	t.Run("NamespaceLabels", testNamespaceResources)
 	t.Run("VictoriaMetricsCustomResources", testVMCustomResources)
 }

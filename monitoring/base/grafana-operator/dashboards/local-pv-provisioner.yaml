@@ -219,7 +219,7 @@ spec:
                         "text": "All",
                         "value": "$__all"
                     },
-                    "datasource": "prometheus",
+                    "datasource": "vmcluster-largeset",
                     "definition": "label_values(local_pv_provisioner_available_devices, node)",
                     "hide": 0,
                     "includeAll": true,

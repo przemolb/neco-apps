@@ -14,13 +14,13 @@ How to maintain neco-apps
 - [metallb](#metallb)
 - [moco](#moco)
 - [monitoring](#monitoring)
-  - [prometheus, alertmanager, pushgateway](#prometheus-alertmanager-pushgateway)
+  - [pushgateway, promtool](#pushgateway-promtool)
   - [mackerel-agent](#mackerel-agent)
   - [kube-state-metrics](#kube-state-metrics)
   - [grafana-operator](#grafana-operator)
   - [Grafana](#grafana)
   - [victoriametrics-operator](#victoriametrics-operator)
-  - [VictoriaMetrics](#victoriametrics)
+  - [VictoriaMetrics, Alertmanager](#victoriametrics-alertmanager)
 - [neco-admission](#neco-admission)
 - [network-policy (Calico)](#network-policy-calico)
 - [prometheus-adapter](#prometheus-adapter)
@@ -210,9 +210,9 @@ $ git diff
 
 ## monitoring
 
-### prometheus, alertmanager, pushgateway
+### pushgateway, promtool
 
-There is no official kubernetes manifests for prometheus, alertmanager, and grafana.
+There is no official kubernetes manifests for pushgateway.
 So, check changes in release notes on github and helm charts like bellow.
 
 ```
@@ -276,7 +276,7 @@ $ make update-victoriametrics-operator
 $ git diff
 ```
 
-### VictoriaMetrics
+### VictoriaMetrics, Alertmanager
 
 Update the manifest as follows:
 
