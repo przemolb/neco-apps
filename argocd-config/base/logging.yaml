@@ -12,7 +12,7 @@ spec:
   source:
     repoURL: https://github.com/cybozu-go/neco-apps.git
     targetRevision: release
-    path: logging/base
+    path: base
   destination:
     server: https://kubernetes.default.svc
     namespace: logging

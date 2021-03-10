@@ -4,10 +4,10 @@ metadata:
   name: gateway
   namespace: logging
   annotations:
-    contour-plus.cybozu.com/exclude: "true"
+    kubernetes.io/ingress.class: "bastion"
 spec:
   virtualhost:
-    fqdn: logging-loki.logging
+    fqdn: loki.logging.stage0.cybozu-ne.co
   routes:
     - conditions:
         - prefix: /api/prom/push

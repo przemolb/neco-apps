@@ -1,0 +1,104 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+patchesJson6902:
+- target:
+    group: apps
+    version: v1
+    kind: StatefulSet
+    name: compactor
+    namespace: logging
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 100m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 500Mi
+- target:
+    group: apps
+    version: v1
+    kind: StatefulSet
+    name: memcached
+    namespace: logging
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/args/0
+      value: "-m 400"
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 100m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 500Mi
+    - op: add
+      path: /spec/template/spec/securityContext
+      value:
+        runAsUser: 10000
+- target:
+    group: apps
+    version: v1
+    kind: StatefulSet
+    name: memcached-frontend
+    namespace: logging
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/args/0
+      value: "-m 400"
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 100m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 500Mi
+    - op: add
+      path: /spec/template/spec/securityContext
+      value:
+        runAsUser: 10000
+- target:
+    group: apps
+    version: v1
+    kind: StatefulSet
+    name: memcached-index-queries
+    namespace: logging
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/args/0
+      value: "-m 400"
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 100m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 500Mi
+    - op: add
+      path: /spec/template/spec/securityContext
+      value:
+        runAsUser: 10000
+- target:
+    group: apps
+    version: v1
+    kind: StatefulSet
+    name: querier
+    namespace: logging
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 100m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 500Mi
+- target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: query-frontend
+    namespace: logging
+  patch: |-
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/cpu
+      value: 100m
+    - op: replace
+      path: /spec/template/spec/containers/0/resources/requests/memory
+      value: 300Mi
