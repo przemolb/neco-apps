@@ -168,7 +168,11 @@ func testMetalLB() {
 
 		By("access service from external")
 		Eventually(func() error {
-			return exec.Command("sudo", "nsenter", "-n", "-t", externalPID, "curl", targetIP, "-m", "5").Run()
+			if placematMajorVersion == "1" {
+				return exec.Command("nsenter", "-n", "-t", externalPID, "curl", targetIP, "-m", "5").Run()
+			} else {
+				return exec.Command("ip", "netns", "exec", "external", "curl", targetIP, "-m", "5").Run()
+			}
 		}).Should(Succeed())
 	})
 }
