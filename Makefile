@@ -72,6 +72,11 @@ update-grafana:
 	sed -i -E 's/grafana-image-tag=.*$$/grafana-image-tag=$(latest_tag)/' monitoring/base/grafana-operator/operator.yaml
 	sed -i -E 's,quay.io/cybozu/grafana:.*$$,quay.io/cybozu/grafana:$(latest_tag),' sandbox/overlays/gcp/grafana/statefulset.yaml
 
+.PHONY: update-heartbeat
+update-heartbeat:
+	$(call get-latest-tag,heartbeat)
+	sed -i -E '/name:.*heartbeat$$/!b;n;s/newTag:.*$$/newTag: $(latest_tag)/' monitoring/base/kustomization.yaml
+
 .PHONY: update-kube-metrics-adapter
 update-kube-metrics-adapter:
 	$(call get-latest-tag,kube-metrics-adapter)

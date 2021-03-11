@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: heartbeat
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: heartbeat
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: heartbeat
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: heartbeat
+    spec:
+      containers:
+      - name: heartbeat
+        image: quay.io/cybozu/heartbeat:latest
+        args: ["dctest"]
+        resources:
+          requests:
+            cpu: 10m
+            memory: 20Mi
+        env:
+        - name: OPSGENIE_APIKEY
+          valueFrom:
+            secretKeyRef:
+              name: heartbeat
+              key: OPSGENIE_APIKEY
+        - name: HTTP_PROXY
+          value: http://squid.internet-egress.svc:3128
+        - name: HTTPS_PROXY
+          value: http://squid.internet-egress.svc:3128
