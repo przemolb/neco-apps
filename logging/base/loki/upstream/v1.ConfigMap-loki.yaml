@@ -48,7 +48,11 @@ data:
                         http_client_timeout: 20s
                     store: consul
                 replication_factor: 3
-        max_transfer_retries: 60
+        max_transfer_retries: 0
+        wal:
+            dir: /loki/wal
+            enabled: true
+            replay_memory_ceiling: 9GB
     ingester_client:
         grpc_client_config:
             max_recv_msg_size: 6.7108864e+07

@@ -14,6 +14,8 @@ loki {
 
     boltdb_shipper_shared_store: 's3',
 
+    wal_enabled: true,
+
     ingester_pvc_class: 'ceph-ssd-block',
     querier_pvc_class: 'ceph-ssd-block',
     compactor_pvc_class: 'ceph-ssd-block',
@@ -58,7 +60,7 @@ loki {
   },
 
   _images+:: {
-    loki: 'quay.io/cybozu/loki:2.1.0.1'
+    loki: 'quay.io/llamerada_jp/debug:loki-master-20210311'
   },
 
   compactor_args+:: {
